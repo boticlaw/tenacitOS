@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 export const dynamic = "force-dynamic";
@@ -55,10 +55,27 @@ function getAgentDisplayInfo(agentId: string, agentConfig: any): { emoji: string
   };
 }
 
+function resolveAgentWorkspace(agent: any, openclawDir: string): string {
+  if (typeof agent?.workspace === "string" && agent.workspace.length > 0) {
+    return agent.workspace;
+  }
+
+  // Newer configs may omit workspace for the primary agent.
+  if (agent?.id === "main" || agent?.id === "pepon") {
+    return join(openclawDir, "workspace");
+  }
+
+  const candidate = join(openclawDir, `workspace-${agent?.id || ""}`);
+  if (existsSync(candidate)) return candidate;
+
+  return join(openclawDir, "workspace");
+}
+
 export async function GET() {
   try {
     // Read openclaw config
-    const configPath = (process.env.OPENCLAW_DIR || "/root/.openclaw") + "/openclaw.json";
+    const openclawDir = process.env.OPENCLAW_DIR || "/root/.openclaw";
+    const configPath = openclawDir + "/openclaw.json";
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
 
     // Get agents from config
@@ -71,7 +88,8 @@ export async function GET() {
       const botToken = telegramAccount?.botToken;
 
       // Check if agent has recent activity
-      const memoryPath = join(agent.workspace, "memory");
+      const workspace = resolveAgentWorkspace(agent, openclawDir);
+      const memoryPath = join(workspace, "memory");
       let lastActivity = undefined;
       let status: "online" | "offline" = "offline";
 
@@ -122,7 +140,7 @@ export async function GET() {
         color: agentInfo.color,
         model:
           agent.model?.primary || config.agents.defaults.model.primary,
-        workspace: agent.workspace,
+        workspace,
         dmPolicy:
           telegramAccount?.dmPolicy ||
           config.channels?.telegram?.dmPolicy ||
