@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +55,26 @@ function getAgentDisplayInfo(agentId: string, agentConfig: any): { emoji: string
   };
 }
 
+function getLatestMtimeIsoFromDir(dirPath: string, fileFilter: (name: string) => boolean): string | undefined {
+  if (!existsSync(dirPath)) return undefined;
+
+  let latest = 0;
+  const files = readdirSync(dirPath);
+  for (const name of files) {
+    if (!fileFilter(name)) continue;
+    try {
+      const fullPath = join(dirPath, name);
+      const stat = statSync(fullPath);
+      const mtimeMs = stat.mtime.getTime();
+      if (mtimeMs > latest) latest = mtimeMs;
+    } catch {
+      // ignore transient file errors
+    }
+  }
+
+  return latest > 0 ? new Date(latest).toISOString() : undefined;
+}
+
 function resolveAgentWorkspace(agent: any, openclawDir: string): string {
   if (typeof agent?.workspace === "string" && agent.workspace.length > 0) {
     return agent.workspace;
@@ -71,6 +91,21 @@ function resolveAgentWorkspace(agent: any, openclawDir: string): string {
   return join(openclawDir, "workspace");
 }
 
+function getAgentLastActivity(agentId: string, workspace?: string, openclawDir?: string): string | undefined {
+  // 1) Prefer sessions activity (actual chat traffic, near real-time)
+  const sessionsDir = join(openclawDir || "/root/.openclaw", "agents", agentId, "sessions");
+  const latestSessionActivity = getLatestMtimeIsoFromDir(
+    sessionsDir,
+    (name) => name.endsWith(".jsonl") || name.endsWith(".jsonl.lock") || name === "sessions.json"
+  );
+  if (latestSessionActivity) return latestSessionActivity;
+
+  // 2) Fallback to memory activity (if sessions data is unavailable)
+  if (!workspace) return undefined;
+  const memoryDir = join(workspace, "memory");
+  return getLatestMtimeIsoFromDir(memoryDir, (name) => /^\d{4}-\d{2}-\d{2}\.md$/.test(name));
+}
+
 export async function GET() {
   try {
     // Read openclaw config
@@ -83,37 +118,22 @@ export async function GET() {
       const agentInfo = getAgentDisplayInfo(agent.id, agent);
 
       // Get telegram account info
-      const telegramAccount =
-        config.channels?.telegram?.accounts?.[agent.id];
+      const telegramAccount = config.channels?.telegram?.accounts?.[agent.id];
       const botToken = telegramAccount?.botToken;
 
       // Check if agent has recent activity
       const workspace = resolveAgentWorkspace(agent, openclawDir);
-      const memoryPath = join(workspace, "memory");
-      let lastActivity = undefined;
-      let status: "online" | "offline" = "offline";
-
-      try {
-        const today = new Date().toISOString().split("T")[0];
-        const memoryFile = join(memoryPath, `${today}.md`);
-        const stat = require("fs").statSync(memoryFile);
-        lastActivity = stat.mtime.toISOString();
-        // Consider online if activity within last 5 minutes
-        status =
-          Date.now() - stat.mtime.getTime() < 5 * 60 * 1000
-            ? "online"
-            : "offline";
-      } catch (e) {
-        // No recent activity
-      }
+      const lastActivity = getAgentLastActivity(agent.id, workspace, openclawDir);
+      const status: "online" | "offline" =
+        lastActivity && Date.now() - new Date(lastActivity).getTime() < 5 * 60 * 1000
+          ? "online"
+          : "offline";
 
       // Get details of allowed subagents
       const allowAgents = agent.subagents?.allowAgents || [];
       const allowAgentsDetails = allowAgents.map((subagentId: string) => {
         // Find subagent in config
-        const subagentConfig = config.agents.list.find(
-          (a: any) => a.id === subagentId
-        );
+        const subagentConfig = config.agents.list.find((a: any) => a.id === subagentId);
         if (subagentConfig) {
           const subagentInfo = getAgentDisplayInfo(subagentId, subagentConfig);
           return {
@@ -138,13 +158,9 @@ export async function GET() {
         name: agent.name || agentInfo.name,
         emoji: agentInfo.emoji,
         color: agentInfo.color,
-        model:
-          agent.model?.primary || config.agents.defaults.model.primary,
+        model: agent.model?.primary || config.agents.defaults.model.primary,
         workspace,
-        dmPolicy:
-          telegramAccount?.dmPolicy ||
-          config.channels?.telegram?.dmPolicy ||
-          "pairing",
+        dmPolicy: telegramAccount?.dmPolicy || config.channels?.telegram?.dmPolicy || "pairing",
         allowAgents,
         allowAgentsDetails,
         botToken: botToken ? "configured" : undefined,
@@ -157,9 +173,6 @@ export async function GET() {
     return NextResponse.json({ agents });
   } catch (error) {
     console.error("Error reading agents:", error);
-    return NextResponse.json(
-      { error: "Failed to load agents" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to load agents" }, { status: 500 });
   }
 }
