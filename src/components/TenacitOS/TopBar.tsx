@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, Bell, User, Command } from "lucide-react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
+import { BRANDING } from "@/config/branding";
 
 export function TopBar() {
   const [showSearch, setShowSearch] = useState(false);
@@ -139,7 +140,7 @@ export function TopBar() {
                   color: "var(--text-primary)",
                 }}
               >
-                C
+                {BRANDING.ownerUsername[0].toUpperCase()}
               </span>
             </div>
             {/* Name */}
@@ -151,7 +152,7 @@ export function TopBar() {
                 color: "var(--text-secondary)",
               }}
             >
-              Carlos
+              {BRANDING.ownerUsername}
             </span>
           </div>
         </div>
