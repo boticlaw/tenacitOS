@@ -1,22 +1,49 @@
-# OpenClaw Sessions Sync
+# OpenClaw Activities Sync
 
-This script populates the TenacitOS activities dashboard with real session data from OpenClaw agents.
+This script populates the TenacitOS activities dashboard with real message data from OpenClaw agents.
 
 ## Problem
 
-By default, the "Activities" dashboard in TenacitOS shows no data because it uses its own SQLite database. This is confusing for users who expect to see real activity from their OpenClaw agents.
+By default, the "Activities" dashboard in TenacitOS is empty because it uses its own SQLite database. Users expect to see real activity from their OpenClaw agents, but there's no integration to sync agent messages to the activities database.
 
 ## Solution
 
-This script reads OpenClaw agent sessions from `~/.openclaw/agents/*/sessions/sessions.json` and syncs them to the TenacitOS activities database, making the dashboard show real agent activity.
+This script reads OpenClaw agent messages from `~/.openclaw/agents/*/sessions/*.jsonl` and syncs them to the TenacitOS activities database, making the dashboard show real agent activity.
 
 ## Features
 
-- **Real data**: Shows actual OpenClaw agent sessions
-- **Channel validation**: Only shows configured channels (e.g., telegram, discord)
-- **Test detection**: Marks sessions from unconfigured channels as "test"
+- **Real data**: Syncs actual messages (user + agent responses)
+- **High volume**: Handles thousands of messages (tested with 2,300+ activities)
+- **Fast processing**: Processes .jsonl files efficiently
 - **Auto-cleanup**: Prunes activities older than 30 days
-- **Incremental**: Only adds new sessions
+- **Incremental**: Only adds new messages
+- **Error handling**: Robust parsing with error suppression
+
+## What it syncs
+
+For each message in OpenClaw sessions:
+
+- **Type**: `message_sent` (user) or `message_received` (agent)
+- **Description**: "User message" or "Agent response"
+- **Agent**: Agent ID (e.g., `main`, `obsidian-brain`)
+- **Status**: `success`
+- **Timestamp**: From message
+- **Metadata**: Role and session ID
+
+## Statistics
+
+Example from production:
+
+```
+Total Activities: 2,323
+- message_received: 1,897 (agent responses)
+- message_sent: 410 (user messages)
+- session: 1
+
+By Agent:
+- main: 1,993 activities
+- obsidian-brain: 315 activities
+```
 
 ## Installation
 
