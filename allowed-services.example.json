@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TenacitOS Allowed Services Configuration",
+  "description": "Additional services to allow in TenacitOS dashboard (beyond auto-detected ones)",
+  "type": "object",
+  "properties": {
+    "systemd": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Additional systemd services to allow (e.g., nginx, apache, mysql)",
+      "examples": [
+        ["nginx", "mysql", "redis-server"]
+      ]
+    },
+    "pm2": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Additional PM2 processes to allow (beyond auto-detected)",
+      "examples": [
+        ["my-app", "worker-1"]
+      ]
+    }
+  }
+}

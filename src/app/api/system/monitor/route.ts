@@ -6,12 +6,10 @@ import os from "os";
 const execAsync = promisify(exec);
 
 // Services monitored per backend
-const SYSTEMD_SERVICES = ["mission-control"];
-const PM2_SERVICES = ["classvault", "content-vault", "postiz-simple", "brain"];
-// creatoros not deployed yet — shown as "not_deployed"
-const PLACEHOLDER_SERVICES = [
-  { name: "creatoros", description: "Creatoros Platform", status: "not_deployed" },
-];
+// Auto-detect OpenClaw-related services
+const SYSTEMD_SERVICES = ["openclaw-gateway", "tenacitos"];
+const PM2_SERVICES: string[] = []; // No PM2 services by default
+const PLACEHOLDER_SERVICES: Array<{ name: string; description: string; status: string }> = []; // No placeholders
 
 interface ServiceEntry {
   name: string;
@@ -156,65 +154,67 @@ export async function GET() {
       }
     }
 
-    // 2. PM2 services — single call, parse JSON
-    try {
-      const { stdout: pm2Json } = await execAsync("pm2 jlist 2>/dev/null");
-      const pm2List = JSON.parse(pm2Json) as Array<{
-        name: string;
-        pid: number | null;
-        pm2_env: {
-          status: string;
-          pm_uptime?: number;
-          restart_time?: number;
-          monit?: { cpu: number; memory: number };
-        };
-      }>;
+    // 2. PM2 services — single call, parse JSON (only if PM2 services exist)
+    if (PM2_SERVICES.length > 0) {
+      try {
+        const { stdout: pm2Json } = await execAsync("pm2 jlist 2>/dev/null");
+        const pm2List = JSON.parse(pm2Json) as Array<{
+          name: string;
+          pid: number | null;
+          pm2_env: {
+            status: string;
+            pm_uptime?: number;
+            restart_time?: number;
+            monit?: { cpu: number; memory: number };
+          };
+        }>;
 
-      const pm2Map: Record<string, (typeof pm2List)[0]> = {};
-      for (const proc of pm2List) {
-        pm2Map[proc.name] = proc;
-      }
+        const pm2Map: Record<string, (typeof pm2List)[0]> = {};
+        for (const proc of pm2List) {
+          pm2Map[proc.name] = proc;
+        }
 
-      for (const name of PM2_SERVICES) {
-        const proc = pm2Map[name];
-        if (!proc) {
+        for (const name of PM2_SERVICES) {
+          const proc = pm2Map[name];
+          if (!proc) {
+            services.push({
+              name,
+              status: "unknown",
+              description: SERVICE_DESCRIPTIONS[name] ?? name,
+              backend: "pm2",
+            });
+            continue;
+          }
+
+          const rawStatus = proc.pm2_env?.status ?? "unknown";
+          const uptime =
+            rawStatus === "online" && proc.pm2_env?.pm_uptime
+              ? Date.now() - proc.pm2_env.pm_uptime
+              : null;
+
+          services.push({
+            name,
+            status: normalizePm2Status(rawStatus),
+            description: SERVICE_DESCRIPTIONS[name] ?? name,
+            backend: "pm2",
+            uptime,
+            restarts: proc.pm2_env?.restart_time ?? 0,
+            pid: proc.pid,
+            cpu: proc.pm2_env?.monit?.cpu ?? null,
+            mem: proc.pm2_env?.monit?.memory ?? null,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to query PM2:", err);
+        // Fallback: mark all PM2 services as unknown
+        for (const name of PM2_SERVICES) {
           services.push({
             name,
             status: "unknown",
             description: SERVICE_DESCRIPTIONS[name] ?? name,
             backend: "pm2",
           });
-          continue;
         }
-
-        const rawStatus = proc.pm2_env?.status ?? "unknown";
-        const uptime =
-          rawStatus === "online" && proc.pm2_env?.pm_uptime
-            ? Date.now() - proc.pm2_env.pm_uptime
-            : null;
-
-        services.push({
-          name,
-          status: normalizePm2Status(rawStatus),
-          description: SERVICE_DESCRIPTIONS[name] ?? name,
-          backend: "pm2",
-          uptime,
-          restarts: proc.pm2_env?.restart_time ?? 0,
-          pid: proc.pid,
-          cpu: proc.pm2_env?.monit?.cpu ?? null,
-          mem: proc.pm2_env?.monit?.memory ?? null,
-        });
-      }
-    } catch (err) {
-      console.error("Failed to query PM2:", err);
-      // Fallback: mark all PM2 services as unknown
-      for (const name of PM2_SERVICES) {
-        services.push({
-          name,
-          status: "unknown",
-          description: SERVICE_DESCRIPTIONS[name] ?? name,
-          backend: "pm2",
-        });
       }
     }
 

@@ -4,18 +4,119 @@
  * Body: { name, backend, action }  action: restart | stop | start | logs
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-const ALLOWED_SERVICES_PM2 = ['classvault', 'content-vault', 'postiz-simple', 'brain'];
-const ALLOWED_SERVICES_SYSTEMD = ['mission-control', 'openclaw-gateway', 'nginx'];
 const ALLOWED_DOCKER_IDS_PATTERN = /^[a-f0-9]{6,64}$|^[a-zA-Z0-9_-]+$/;
 
+// Load additional services from environment or config file
+function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
+  const systemd: string[] = [];
+  const pm2: string[] = [];
+  
+  // 1. From environment variable (comma-separated)
+  // TENACITOS_SYSTEMD_SERVICES=nginx,apache
+  const envSystemd = process.env.TENACITOS_SYSTEMD_SERVICES;
+  if (envSystemd) {
+    systemd.push(...envSystemd.split(',').map(s => s.trim()).filter(Boolean));
+  }
+  
+  const envPm2 = process.env.TENACITOS_PM2_SERVICES;
+  if (envPm2) {
+    pm2.push(...envPm2.split(',').map(s => s.trim()).filter(Boolean));
+  }
+  
+  // 2. From config file (if exists)
+  // Look in mission-control directory (where package.json is)
+  const fs = require('fs');
+  const path = require('path');
+  
+  // Try multiple locations for the config file
+  const configLocations = [
+    path.join(process.cwd(), 'allowed-services.json'),           // Current working directory
+    path.join(__dirname, '..', '..', '..', 'allowed-services.json'), // Relative to this file
+    '/root/.openclaw/workspace/mission-control/allowed-services.json' // Absolute path as fallback
+  ];
+  
+  for (const configFile of configLocations) {
+    try {
+      if (fs.existsSync(configFile)) {
+        const config = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
+        if (config.systemd && Array.isArray(config.systemd)) {
+          systemd.push(...config.systemd);
+        }
+        if (config.pm2 && Array.isArray(config.pm2)) {
+          pm2.push(...config.pm2);
+        }
+        break; // Stop after first valid config found
+      }
+    } catch {
+      // Config file invalid, try next location
+    }
+  }
+  
+  return { systemd, pm2 };
+}
+
+// Auto-detect OpenClaw-related services
+function getAllowedServices(): { systemd: string[]; pm2: string[] } {
+  // Get all running systemd services
+  const systemdServices: string[] = [];
+  
+  try {
+    const { stdout } = require('child_process').execSync(
+      'systemctl list-units --type=service --state=running --no-pager -o json 2>/dev/null',
+      { encoding: 'utf-8' }
+    );
+    const services = JSON.parse(stdout);
+    
+    // Filter OpenClaw-related services
+    for (const svc of services) {
+      const name = svc.unit.replace('.service', '');
+      // Auto-allow if contains openclaw, tenacitos, or mission-control
+      if (name.includes('openclaw') || 
+          name.includes('tenacitos') || 
+          name.includes('mission-control')) {
+        systemdServices.push(name);
+      }
+    }
+  } catch {
+    // Fallback to known services
+    systemdServices.push('openclaw-gateway', 'tenacitos');
+  }
+  
+  // Check if PM2 is installed and has processes
+  const pm2Services: string[] = [];
+  try {
+    require('child_process').execSync('which pm2', { encoding: 'utf-8' });
+    const { stdout } = require('child_process').execSync(
+      'pm2 jlist 2>/dev/null',
+      { encoding: 'utf-8' }
+    );
+    const pm2List = JSON.parse(stdout);
+    for (const proc of pm2List) {
+      pm2Services.push(proc.name);
+    }
+  } catch {
+    // PM2 not installed or no processes
+  }
+  
+  // Load additional services from config
+  const additional = loadAdditionalServices();
+  
+  return {
+    systemd: [...new Set([...systemdServices, ...additional.systemd])],
+    pm2: [...new Set([...pm2Services, ...additional.pm2])]
+  };
+}
+
 async function pm2Action(name: string, action: string): Promise<string> {
-  if (!ALLOWED_SERVICES_PM2.includes(name)) {
-    throw new Error(`Service "${name}" not in allowlist`);
+  const { pm2: allowedServices } = getAllowedServices();
+  
+  if (!allowedServices.includes(name)) {
+    throw new Error(`Service "${name}" not in allowlist. Allowed: ${allowedServices.join(', ') || 'none'}`);
   }
   if (!['restart', 'stop', 'start', 'logs'].includes(action)) {
     throw new Error(`Invalid action "${action}"`);
@@ -39,8 +140,10 @@ async function pm2Action(name: string, action: string): Promise<string> {
 }
 
 async function systemdAction(name: string, action: string): Promise<string> {
-  if (!ALLOWED_SERVICES_SYSTEMD.includes(name)) {
-    throw new Error(`Service "${name}" not in allowlist`);
+  const { systemd: allowedServices } = getAllowedServices();
+  
+  if (!allowedServices.includes(name)) {
+    throw new Error(`Service "${name}" not in allowlist. Allowed: ${allowedServices.join(', ') || 'none'}`);
   }
   if (!['restart', 'stop', 'start', 'logs'].includes(action)) {
     throw new Error(`Invalid action "${action}"`);
