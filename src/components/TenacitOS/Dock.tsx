@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   Monitor,
@@ -15,6 +15,7 @@ import {
   DollarSign,
   Settings,
   History,
+  LogOut,
 } from "lucide-react";
 
 const dockItems = [
@@ -34,6 +35,13 @@ const dockItems = [
 
 export function Dock() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <aside
@@ -88,7 +96,6 @@ export function Dock() {
               }
             }}
           >
-            {/* Icon */}
             <Icon
               style={{
                 width: "22px",
@@ -98,7 +105,6 @@ export function Dock() {
               }}
             />
 
-            {/* Label */}
             <span
               style={{
                 fontFamily: "var(--font-body)",
@@ -115,7 +121,6 @@ export function Dock() {
               {item.label.split(" ")[0]}
             </span>
 
-            {/* Tooltip - shown on hover via CSS */}
             <span
               className="absolute left-[72px] top-1/2 -translate-y-1/2 px-3 py-2 rounded-lg text-sm whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
               style={{
@@ -131,6 +136,49 @@ export function Dock() {
           </Link>
         );
       })}
+
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="group relative"
+        aria-label="Logout"
+        title="Logout"
+        data-testid="logout-button"
+        style={{
+          marginTop: "auto",
+          width: "56px",
+          height: "56px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "8px",
+          backgroundColor: "transparent",
+          color: "var(--text-secondary)",
+          transition: "all 150ms ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "var(--surface-hover)";
+          e.currentTarget.style.color = "var(--error)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "transparent";
+          e.currentTarget.style.color = "var(--text-secondary)";
+        }}
+      >
+        <LogOut style={{ width: "22px", height: "22px" }} />
+        <span
+          className="absolute left-[72px] top-1/2 -translate-y-1/2 px-3 py-2 rounded-lg text-sm whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50"
+          style={{
+            backgroundColor: "var(--surface-elevated)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+            fontSize: "12px",
+            fontWeight: 500,
+          }}
+        >
+          Logout
+        </span>
+      </button>
     </aside>
   );
 }
