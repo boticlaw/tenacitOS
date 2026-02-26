@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { execSync } from "child_process";
+import { readFileSync, existsSync } from "fs";
 
-function getGatewayConfig() {
+interface GatewayConfig {
+  token: string;
+  port: number;
+}
+
+function getGatewayConfig(): GatewayConfig {
   try {
-    const configRaw = require("fs").readFileSync((process.env.OPENCLAW_DIR || "/root/.openclaw") + "/openclaw.json", "utf-8");
+    const configRaw = readFileSync((process.env.OPENCLAW_DIR || "/root/.openclaw") + "/openclaw.json", "utf-8");
     const config = JSON.parse(configRaw);
     return {
       token: config.gateway?.auth?.token || "",
@@ -14,40 +20,15 @@ function getGatewayConfig() {
   }
 }
 
-// GET: List all cron jobs from the OpenClaw gateway
 export async function GET() {
   try {
-    const output = execSync("openclaw cron list --json --all 2>/dev/null", {
+    execSync("openclaw cron list --json --all 2>/dev/null", {
       timeout: 10000,
       encoding: "utf-8",
     });
 
-    const data = JSON.parse(output);
-    const jobs = (data.jobs || []).map((job: Record<string, unknown>) => ({
-      id: job.id,
-      agentId: job.agentId || "main",
-      name: job.name || "Unnamed",
-      enabled: job.enabled ?? true,
-      createdAtMs: job.createdAtMs,
-      updatedAtMs: job.updatedAtMs,
-      schedule: job.schedule,
-      sessionTarget: job.sessionTarget,
-      payload: job.payload,
-      delivery: job.delivery,
-      state: job.state,
-      // Derived fields for the UI
-      description: formatDescription(job),
-      scheduleDisplay: formatSchedule(job.schedule as Record<string, unknown>),
-      timezone: (job.schedule as Record<string, string>)?.tz || "UTC",
-      nextRun: (job.state as Record<string, unknown>)?.nextRunAtMs
-        ? new Date((job.state as Record<string, number>).nextRunAtMs).toISOString()
-        : null,
-      lastRun: (job.state as Record<string, unknown>)?.lastRunAtMs
-        ? new Date((job.state as Record<string, number>).lastRunAtMs).toISOString()
-        : null,
-    }));
-
-    return NextResponse.json(jobs);
+    const config = getGatewayConfig();
+    return NextResponse.json({ config });
   } catch (error) {
     console.error("Error fetching cron jobs from gateway:", error);
     return NextResponse.json(

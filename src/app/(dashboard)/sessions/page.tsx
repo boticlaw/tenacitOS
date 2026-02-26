@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   MessageSquare,
   Clock,
@@ -207,27 +207,55 @@ function SessionDetail({
   onClose: () => void;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchState, setFetchState] = useState<"loading" | "error" | "success">("loading");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const prevSessionIdRef = useRef<string | null>(null);
+
+  const hasNoSession = !session.sessionId;
 
   useEffect(() => {
     if (!session.sessionId) {
-      setLoading(false);
-      setError("No session file available");
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    fetch(`/api/sessions?id=${session.sessionId}`)
+    if (prevSessionIdRef.current === session.sessionId) {
+      return;
+    }
+    prevSessionIdRef.current = session.sessionId;
+
+    const controller = new AbortController();
+    
+    const timeoutId = setTimeout(() => {
+      setFetchState("loading");
+      setErrorMessage(null);
+    }, 0);
+    
+    fetch(`/api/sessions?id=${session.sessionId}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
         setMessages(data.messages || []);
-        if (data.error) setError(data.error);
+        if (data.error) {
+          setFetchState("error");
+          setErrorMessage(data.error);
+        } else {
+          setFetchState("success");
+        }
       })
-      .catch(() => setError("Failed to load messages"))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setFetchState("error");
+          setErrorMessage("Failed to load messages");
+        }
+      });
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [session.sessionId]);
+
+  const loading = hasNoSession ? false : fetchState === "loading";
+  const error = hasNoSession ? "No session file available" : errorMessage;
 
   const userCount = messages.filter((m) => m.type === "user").length;
   const assistantCount = messages.filter((m) => m.type === "assistant").length;

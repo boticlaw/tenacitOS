@@ -4,6 +4,14 @@ import { join } from "path";
 
 export const dynamic = "force-dynamic";
 
+interface AgentConfig {
+  id: string;
+  name?: string;
+  workspace: string;
+  model?: { primary?: string };
+  subagents?: { allowAgents?: string[] };
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -11,17 +19,14 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // Read openclaw config
     const configPath = (process.env.OPENCLAW_DIR || "/root/.openclaw") + "/openclaw.json";
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
 
-    // Find agent
-    const agent = config.agents.list.find((a: any) => a.id === id);
+    const agent = config.agents.list.find((a: AgentConfig) => a.id === id);
     if (!agent) {
       return NextResponse.json({ error: "Agent not found" }, { status: 404 });
     }
 
-    // Get memory files
     const memoryPath = join(agent.workspace, "memory");
     let recentFiles: Array<{ date: string; size: number; modified: string }> =
       [];
@@ -41,15 +46,16 @@ export async function GET(
         })
         .sort((a, b) => b.date.localeCompare(a.date))
         .slice(0, 7);
-    } catch (e) {
+    } catch {
       // Memory directory doesn't exist
     }
 
-    // Get session info (from OpenClaw API if available)
-    // For now, we return mock data
-    const sessions: Array<any> = [];
+    interface SessionInfo {
+      id: string;
+      status: string;
+    }
+    const sessions: SessionInfo[] = [];
 
-    // Get telegram account info
     const telegramAccount = config.channels?.telegram?.accounts?.[id];
 
     return NextResponse.json({

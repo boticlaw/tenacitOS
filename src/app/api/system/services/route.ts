@@ -4,20 +4,24 @@
  * Body: { name, backend, action }  action: restart | stop | start | logs
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { exec, execSync } from 'child_process';
+import { exec, execSync as execSyncCb } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
 import { promisify } from 'util';
+import { join } from 'path';
 
 const execAsync = promisify(exec);
 
 const ALLOWED_DOCKER_IDS_PATTERN = /^[a-f0-9]{6,64}$|^[a-zA-Z0-9_-]+$/;
 
-// Load additional services from environment or config file
+interface ServicesConfig {
+  systemd?: string[];
+  pm2?: string[];
+}
+
 function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
   const systemd: string[] = [];
   const pm2: string[] = [];
   
-  // 1. From environment variable (comma-separated)
-  // SUPERBOTIJO_SYSTEMD_SERVICES=nginx,apache
   const envSystemd = process.env.SUPERBOTIJO_SYSTEMD_SERVICES;
   if (envSystemd) {
     systemd.push(...envSystemd.split(',').map(s => s.trim()).filter(Boolean));
@@ -28,29 +32,23 @@ function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
     pm2.push(...envPm2.split(',').map(s => s.trim()).filter(Boolean));
   }
   
-  // 2. From config file (if exists)
-  // Look in superbotijo directory (where package.json is)
-  const fs = require('fs');
-  const path = require('path');
-  
-  // Try multiple locations for the config file
   const configLocations = [
-    path.join(process.cwd(), 'allowed-services.json'),           // Current working directory
-    path.join(__dirname, '..', '..', '..', 'allowed-services.json'), // Relative to this file
-    '/root/.openclaw/workspace/superbotijo/allowed-services.json' // Absolute path as fallback
+    join(process.cwd(), 'allowed-services.json'),
+    join(__dirname, '..', '..', '..', 'allowed-services.json'),
+    '/root/.openclaw/workspace/superbotijo/allowed-services.json'
   ];
   
   for (const configFile of configLocations) {
     try {
-      if (fs.existsSync(configFile)) {
-        const config = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
+      if (existsSync(configFile)) {
+        const config: ServicesConfig = JSON.parse(readFileSync(configFile, 'utf-8'));
         if (config.systemd && Array.isArray(config.systemd)) {
           systemd.push(...config.systemd);
         }
         if (config.pm2 && Array.isArray(config.pm2)) {
           pm2.push(...config.pm2);
         }
-        break; // Stop after first valid config found
+        break;
       }
     } catch {
       // Config file invalid, try next location
@@ -60,22 +58,26 @@ function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
   return { systemd, pm2 };
 }
 
-// Auto-detect OpenClaw-related services
+interface SystemdService {
+  unit: string;
+}
+
+interface Pm2Process {
+  name: string;
+}
+
 function getAllowedServices(): { systemd: string[]; pm2: string[] } {
-  // Get all running systemd services
   const systemdServices: string[] = [];
   
   try {
-    const { stdout } = require('child_process').execSync(
+    const stdout = execSyncCb(
       'systemctl list-units --type=service --state=running --no-pager -o json 2>/dev/null',
       { encoding: 'utf-8' }
     );
-    const services = JSON.parse(stdout);
+    const services: SystemdService[] = JSON.parse(stdout);
     
-    // Filter OpenClaw-related services
     for (const svc of services) {
       const name = svc.unit.replace('.service', '');
-      // Auto-allow if contains openclaw, superbotijo, or superbotijo
       if (name.includes('openclaw') || 
           name.includes('superbotijo') || 
           name.includes('superbotijo')) {
@@ -83,19 +85,17 @@ function getAllowedServices(): { systemd: string[]; pm2: string[] } {
       }
     }
   } catch {
-    // Fallback to known services
     systemdServices.push('openclaw-gateway', 'superbotijo');
   }
   
-  // Check if PM2 is installed and has processes
   const pm2Services: string[] = [];
   try {
-    require('child_process').execSync('which pm2', { encoding: 'utf-8' });
-    const { stdout } = require('child_process').execSync(
+    execSyncCb('which pm2', { encoding: 'utf-8' });
+    const stdout = execSyncCb(
       'pm2 jlist 2>/dev/null',
       { encoding: 'utf-8' }
     );
-    const pm2List = JSON.parse(stdout);
+    const pm2List: Pm2Process[] = JSON.parse(stdout);
     for (const proc of pm2List) {
       pm2Services.push(proc.name);
     }
@@ -103,7 +103,6 @@ function getAllowedServices(): { systemd: string[]; pm2: string[] } {
     // PM2 not installed or no processes
   }
   
-  // Load additional services from config
   const additional = loadAdditionalServices();
   
   return {

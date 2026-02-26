@@ -37,7 +37,7 @@ export async function GET() {
 
     // Systemd Services (count active ones)
     let activeServices = 0;
-    let totalServices = SYSTEMD_SERVICES.length;
+    const totalServices = SYSTEMD_SERVICES.length;
     try {
       for (const name of SYSTEMD_SERVICES) {
         const { stdout } = await execAsync(`systemctl is-active ${name} 2>/dev/null || true`);

@@ -4,7 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Sky, Environment } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import { Vector3 } from 'three';
-import type { AgentState } from './agentsConfig';
+import type { AgentState, AgentStatus } from './agentsConfig';
 import AgentDesk from './AgentDesk';
 import Floor from './Floor';
 import Walls from './Walls';
@@ -23,10 +23,21 @@ interface Agent {
   name: string;
   emoji: string;
   color: string;
-  model: string;
-  workspace: string;
-  status: 'online' | 'offline';
-  activeSessions: number;
+  model?: string;
+  workspace?: string;
+  dmPolicy?: string;
+  allowAgents?: string[];
+  botToken?: string;
+  status?: string;
+  lastActivity?: string;
+  activeSessions?: number;
+}
+
+interface AgentStatusResponse {
+  id: string;
+  status: string;
+  currentTask?: string;
+  activeSessions?: number;
   lastActivity?: string;
 }
 
@@ -66,7 +77,7 @@ export default function Office3D() {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [interactionModal, setInteractionModal] = useState<string | null>(null);
   const [controlMode, setControlMode] = useState<'orbit' | 'fps'>('orbit');
-  const [avatarPositions, setAvatarPositions] = useState<Map<string, any>>(new Map());
+  const [avatarPositions, setAvatarPositions] = useState<Map<string, Vector3>>(new Map());
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [agentStates, setAgentStates] = useState<Record<string, AgentState>>({});
   const [loading, setLoading] = useState(true);
@@ -122,12 +133,16 @@ export default function Office3D() {
         
         if (data.agents) {
           const states: Record<string, AgentState> = {};
-          data.agents.forEach((agent: any) => {
+          data.agents.forEach((agent: AgentStatusResponse) => {
+            const validStatuses: AgentStatus[] = ['idle', 'working', 'thinking', 'error', 'online', 'offline'];
+            const agentStatus: AgentStatus = validStatuses.includes(agent.status as AgentStatus) 
+              ? (agent.status as AgentStatus) 
+              : 'offline';
             states[agent.id] = {
               id: agent.id,
-              status: agent.status,
+              status: agentStatus,
               currentTask: agent.currentTask || 
-                (agent.activeSessions > 0 ? `${agent.activeSessions} active sessions` : undefined),
+                (agent.activeSessions && agent.activeSessions > 0 ? `${agent.activeSessions} active sessions` : undefined),
               model: 'unknown',
               tokensPerHour: 0,
               tasksInQueue: agent.activeSessions || 0,
@@ -172,7 +187,7 @@ export default function Office3D() {
     setInteractionModal(null);
   };
 
-  const handleAvatarPositionUpdate = (id: string, position: any) => {
+  const handleAvatarPositionUpdate = (id: string, position: Vector3) => {
     setAvatarPositions(prev => new Map(prev).set(id, position));
   };
 

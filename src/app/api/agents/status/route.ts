@@ -4,7 +4,6 @@ import { join } from "path";
 
 export const dynamic = "force-dynamic";
 
-// Shared types with main agents endpoint
 interface AgentStatus {
   id: string;
   status: 'working' | 'idle' | 'online' | 'offline';
@@ -13,7 +12,11 @@ interface AgentStatus {
   currentTask?: string;
 }
 
-// Simple in-memory cache
+interface AgentConfig {
+  id: string;
+  workspace?: string;
+}
+
 interface CacheEntry {
   data: { agents: AgentStatus[]; timestamp: number };
   timestamp: number;
@@ -188,7 +191,7 @@ export async function GET() {
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
     
     // Compute statuses for all agents
-    const statuses: AgentStatus[] = config.agents.list.map((agent: any) => {
+    const statuses: AgentStatus[] = config.agents.list.map((agent: AgentConfig) => {
       const activeSessions = countActiveSessions(agent.id, openclawDir);
       const lastActivity = getLatestActivity(agent.id, openclawDir);
       const status = determineAgentStatus(lastActivity, activeSessions);

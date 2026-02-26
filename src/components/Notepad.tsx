@@ -1,51 +1,72 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { StickyNote, Save, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { StickyNote, Trash2 } from "lucide-react";
 
 const STORAGE_KEY = "superbotijo-notepad";
+
+function loadInitialState(): { text: string; lastSaved: Date | null } {
+  if (typeof window === "undefined") {
+    return { text: "", lastSaved: null };
+  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
+      return {
+        text: data.text || "",
+        lastSaved: data.ts ? new Date(data.ts) : null,
+      };
+    }
+  } catch {}
+  return { text: "", lastSaved: null };
+}
 
 export function Notepad() {
   const [text, setText] = useState("");
   const [saved, setSaved] = useState(true);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [initialized, setInitialized] = useState(false);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        setText(data.text || "");
-        setLastSaved(data.ts ? new Date(data.ts) : null);
-      }
-    } catch {}
-  }, []);
-
-  // Auto-save after 2 seconds of no typing
-  useEffect(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    setSaved(false);
-    saveTimerRef.current = setTimeout(() => {
-      save();
-    }, 2000);
-    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [text]);
-
-  const save = () => {
+  const save = useCallback(() => {
     const now = new Date();
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ text, ts: now.toISOString() }));
     setSaved(true);
     setLastSaved(now);
-  };
+  }, [text]);
 
-  const clear = () => {
+  const clear = useCallback(() => {
     setText("");
     localStorage.removeItem(STORAGE_KEY);
     setSaved(true);
     setLastSaved(null);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (initialized) return;
+    
+    const timeoutId = setTimeout(() => {
+      setInitialized(true);
+      const initialState = loadInitialState();
+      if (initialState.text) {
+        setText(initialState.text);
+        setLastSaved(initialState.lastSaved);
+      }
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
+  }, [initialized]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    setTimeout(() => setSaved(false), 0);
+    saveTimerRef.current = setTimeout(() => {
+      save();
+    }, 2000);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [text, save, initialized]);
 
   return (
     <div style={{

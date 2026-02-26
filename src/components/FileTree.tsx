@@ -11,6 +11,7 @@ import {
   User,
   Ghost,
   BookOpen,
+  LucideIcon,
 } from "lucide-react";
 
 export interface FileNode {
@@ -26,14 +27,14 @@ interface FileTreeProps {
   onSelect: (path: string) => void;
 }
 
-const getFileIcon = (name: string) => {
-  const lower = name.toLowerCase();
-  if (lower === "memory.md") return Brain;
-  if (lower === "soul.md") return Ghost;
-  if (lower === "user.md") return User;
-  if (lower === "agents.md") return BookOpen;
-  return FileText;
+const FILE_ICONS: Record<string, LucideIcon> = {
+  "memory.md": Brain,
+  "soul.md": Ghost,
+  "user.md": User,
+  "agents.md": BookOpen,
 };
+
+const DEFAULT_FILE_ICON = FileText;
 
 function TreeNode({
   node,
@@ -58,11 +59,11 @@ function TreeNode({
     }
   };
 
-  const Icon = isFolder
+  const Icon: LucideIcon = isFolder
     ? isExpanded
       ? FolderOpen
       : Folder
-    : getFileIcon(node.name);
+    : FILE_ICONS[node.name.toLowerCase()] || DEFAULT_FILE_ICON;
 
   return (
     <div>

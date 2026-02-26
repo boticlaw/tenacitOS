@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Cpu, HardDrive, MemoryStick, Shield, ShieldCheck, Clock } from "lucide-react";
+import { Cpu, HardDrive, MemoryStick, ShieldCheck, Clock, LucideIcon } from "lucide-react";
 import { useI18n } from "@/i18n/provider";
 
 interface SystemStats {
@@ -15,46 +15,16 @@ interface SystemStats {
   uptime: string;
 }
 
-export function StatusBar() {
-  const { t } = useI18n();
-  const [stats, setStats] = useState<SystemStats>({
-    cpu: 0,
-    ram: { used: 0, total: 4 },
-    disk: { used: 0, total: 100 },
-    vpnActive: false,
-    firewallActive: true,
-    activeServices: 0,
-    totalServices: 4,
-    uptime: "0d 0h",
-  });
+interface StatusMetricProps {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  barPercent?: number;
+  color?: string;
+}
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("/api/system/stats");
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch system stats:", error);
-      }
-    };
-
-    fetchStats();
-    const interval = setInterval(fetchStats, 10000); // Update every 10s
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const cpuColor = stats.cpu < 60 ? "var(--positive)" : stats.cpu < 85 ? "var(--warning)" : "var(--negative)";
-  const ramPercent = (stats.ram.used / stats.ram.total) * 100;
-  const ramColor = ramPercent < 60 ? "var(--positive)" : ramPercent < 85 ? "var(--warning)" : "var(--negative)";
-  const diskPercent = (stats.disk.used / stats.disk.total) * 100;
-  const diskColor = diskPercent < 60 ? "var(--positive)" : diskPercent < 85 ? "var(--warning)" : "var(--negative)";
-
-  // StatusMetric component
-  const StatusMetric = ({ icon: Icon, label, value, barPercent, color }: any) => (
+function StatusMetric({ icon: Icon, label, value, barPercent, color }: StatusMetricProps) {
+  return (
     <div className="flex items-center gap-1.5" style={{ height: "24px" }}>
       <Icon style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />
       <span
@@ -100,6 +70,45 @@ export function StatusBar() {
       )}
     </div>
   );
+}
+
+export function StatusBar() {
+  const { t } = useI18n();
+  const [stats, setStats] = useState<SystemStats>({
+    cpu: 0,
+    ram: { used: 0, total: 4 },
+    disk: { used: 0, total: 100 },
+    vpnActive: false,
+    firewallActive: true,
+    activeServices: 0,
+    totalServices: 4,
+    uptime: "0d 0h",
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/system/stats");
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch system stats:", error);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const cpuColor = stats.cpu < 60 ? "var(--positive)" : stats.cpu < 85 ? "var(--warning)" : "var(--negative)";
+  const ramPercent = (stats.ram.used / stats.ram.total) * 100;
+  const ramColor = ramPercent < 60 ? "var(--positive)" : ramPercent < 85 ? "var(--warning)" : "var(--negative)";
+  const diskPercent = (stats.disk.used / stats.disk.total) * 100;
+  const diskColor = diskPercent < 60 ? "var(--positive)" : diskPercent < 85 ? "var(--warning)" : "var(--negative)";
 
   return (
     <div

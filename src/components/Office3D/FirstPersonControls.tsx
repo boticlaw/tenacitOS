@@ -9,9 +9,24 @@ interface FirstPersonControlsProps {
   moveSpeed?: number;
 }
 
+const BOUNDARIES = {
+  minX: -9,
+  maxX: 9,
+  minY: 1,
+  maxY: 8,
+  minZ: -8,
+  maxZ: 8,
+};
+
+function clampPosition(position: THREE.Vector3): void {
+  position.x = Math.max(BOUNDARIES.minX, Math.min(BOUNDARIES.maxX, position.x));
+  position.y = Math.max(BOUNDARIES.minY, Math.min(BOUNDARIES.maxY, position.y));
+  position.z = Math.max(BOUNDARIES.minZ, Math.min(BOUNDARIES.maxZ, position.z));
+}
+
 export default function FirstPersonControls({ moveSpeed = 5 }: FirstPersonControlsProps) {
   const { camera } = useThree();
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<React.ComponentRef<typeof PointerLockControls> | null>(null);
   
   const moveState = useRef({
     forward: false,
@@ -23,7 +38,6 @@ export default function FirstPersonControls({ moveSpeed = 5 }: FirstPersonContro
   });
 
   const velocity = useRef(new THREE.Vector3());
-  const direction = useRef(new THREE.Vector3());
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -105,10 +119,9 @@ export default function FirstPersonControls({ moveSpeed = 5 }: FirstPersonContro
     if (moveState.current.up) velocity.current.y += speed;
     if (moveState.current.down) velocity.current.y -= speed;
 
-    // Apply movement relative to camera direction
     const cameraDirection = new THREE.Vector3();
     camera.getWorldDirection(cameraDirection);
-    cameraDirection.y = 0; // Keep movement horizontal
+    cameraDirection.y = 0;
     cameraDirection.normalize();
 
     const cameraRight = new THREE.Vector3();
@@ -121,10 +134,7 @@ export default function FirstPersonControls({ moveSpeed = 5 }: FirstPersonContro
 
     camera.position.add(movement);
 
-    // Boundaries (keep camera inside office)
-    camera.position.x = Math.max(-9, Math.min(9, camera.position.x));
-    camera.position.y = Math.max(1, Math.min(8, camera.position.y));
-    camera.position.z = Math.max(-8, Math.min(8, camera.position.z));
+    clampPosition(camera.position);
   });
 
   return <PointerLockControls ref={controlsRef} />;

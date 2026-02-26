@@ -3,7 +3,7 @@
 import { useGLTF } from '@react-three/drei';
 import { Sphere } from '@react-three/drei';
 import type { AgentConfig } from './agentsConfig';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 interface AvatarModelProps {
   agent: AgentConfig;
@@ -12,43 +12,50 @@ interface AvatarModelProps {
 
 export default function AvatarModel({ agent, position }: AvatarModelProps) {
   const modelPath = `/models/${agent.id}.glb`;
-  const [exists, setExists] = useState<boolean>(false);
+  const [exists, setExists] = useState<boolean | null>(null);
 
-  // Check if file exists before trying to load
   useEffect(() => {
     fetch(modelPath, { method: 'HEAD' })
       .then(res => setExists(res.ok))
       .catch(() => setExists(false));
   }, [modelPath]);
 
-  // If model doesn't exist, return fallback sphere
-  if (!exists) {
-    return (
-      <Sphere
-        args={[0.3, 16, 16]}
-        position={position}
-        castShadow
-      >
-        <meshStandardMaterial
-          color={agent.color}
-          emissive={agent.color}
-          emissiveIntensity={0.3}
-        />
-      </Sphere>
-    );
+  const fallback = useMemo(() => (
+    <Sphere
+      args={[0.3, 16, 16]}
+      position={position}
+      castShadow
+    >
+      <meshStandardMaterial
+        color={agent.color}
+        emissive={agent.color}
+        emissiveIntensity={0.3}
+      />
+    </Sphere>
+  ), [position, agent.color]);
+
+  const { scene } = useGLTF(modelPath);
+
+  if (exists === false) {
+    return fallback;
   }
 
-  // Load and display the GLB model
-  const { scene } = useGLTF(modelPath);
-  
   return (
     <primitive
       object={scene.clone()}
       position={position}
-      scale={0.8} // Ready Player Me avatars are ~1.8m tall, scale to fit desk
-      rotation={[0, Math.PI, 0]} // Face forward
+      scale={0.8}
+      rotation={[0, Math.PI, 0]}
       castShadow
       receiveShadow
     />
   );
 }
+
+useGLTF.preload('/models/main.glb');
+useGLTF.preload('/models/academic.glb');
+useGLTF.preload('/models/studio.glb');
+useGLTF.preload('/models/linkedin.glb');
+useGLTF.preload('/models/social.glb');
+useGLTF.preload('/models/infra.glb');
+useGLTF.preload('/models/devclaw.glb');

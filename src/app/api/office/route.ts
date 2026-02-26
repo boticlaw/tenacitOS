@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
-import { readFileSync, statSync, readdirSync } from "fs";
+import { readFileSync, statSync } from "fs";
 import { join } from "path";
 
 export const dynamic = "force-dynamic";
+
+interface AgentConfigEntry {
+  id: string;
+  name?: string;
+  workspace?: string;
+}
 
 const AGENT_CONFIG = {
   main: { emoji: "🫙", color: "#ff6b35", name: "SuperBotijo", role: "Boss" },
@@ -189,7 +195,7 @@ export async function GET() {
     // Try gateway first, fallback to file-based
     const gatewayStatus = await getAgentStatusFromGateway();
 
-    const agents = config.agents.list.map((agent: any) => {
+    const agents = config.agents.list.map((agent: AgentConfigEntry) => {
       const agentInfo = AGENT_CONFIG[agent.id as keyof typeof AGENT_CONFIG] || {
         emoji: "🤖",
         color: "#666",
@@ -199,9 +205,12 @@ export async function GET() {
 
       // Get status from gateway, or fallback to files
       let status = gatewayStatus[agent.id];
-      if (!status) {
+      if (!status && agent.workspace) {
         status = getAgentStatusFromFiles(agent.id, agent.workspace);
       }
+
+      // Default status if not found
+      const finalStatus = status || { isActive: false, currentTask: "Offline", lastSeen: 0 };
 
       // Map freelance -> devclaw for canvas compatibility
       const canvasId = agent.id === "freelance" ? "devclaw" : agent.id;
@@ -212,8 +221,8 @@ export async function GET() {
         emoji: agentInfo.emoji,
         color: agentInfo.color,
         role: agentInfo.role,
-        currentTask: status.currentTask,
-        isActive: status.isActive,
+        currentTask: finalStatus.currentTask,
+        isActive: finalStatus.isActive,
       };
     });
 

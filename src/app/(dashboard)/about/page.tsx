@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Terminal,
   Calendar,
@@ -58,7 +58,16 @@ const philosophies = [
 
 export default function AboutPage() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [uptime, setUptime] = useState<string>("");
+
+  const uptime = useMemo(() => {
+    if (!BRANDING.birthDate) return "";
+    const birthDate = new Date(BRANDING.birthDate);
+    const now = new Date();
+    const days = Math.floor(
+      (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return `${days}d`;
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -77,16 +86,6 @@ export default function AboutPage() {
         cronJobs: tasks.length || 0,
       });
     });
-
-    // Calculate uptime from NEXT_PUBLIC_BIRTH_DATE if set
-    if (BRANDING.birthDate) {
-      const birthDate = new Date(BRANDING.birthDate);
-      const now = new Date();
-      const days = Math.floor(
-        (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      setUptime(`${days}d`);
-    }
   }, []);
 
   const agentName = BRANDING.agentName;

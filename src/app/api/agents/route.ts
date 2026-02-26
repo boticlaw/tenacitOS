@@ -25,9 +25,15 @@ interface Agent {
   activeSessions: number;
 }
 
-// Fallback config used when an agent doesn't define its own ui config in openclaw.json.
-// The main agent reads name/emoji from env vars; all others fall back to generic defaults.
-// Override via each agent's openclaw.json → ui.emoji / ui.color / name fields.
+interface AgentConfig {
+  id: string;
+  name?: string;
+  workspace?: string;
+  model?: { primary?: string };
+  subagents?: { allowAgents?: string[] };
+  ui?: { emoji?: string; color?: string };
+}
+
 const DEFAULT_AGENT_CONFIG: Record<string, { emoji: string; color: string; name?: string }> = {
   main: {
     emoji: process.env.NEXT_PUBLIC_AGENT_EMOJI || "🤖",
@@ -36,16 +42,11 @@ const DEFAULT_AGENT_CONFIG: Record<string, { emoji: string; color: string; name?
   },
 };
 
-/**
- * Get agent display info (emoji, color, name) from openclaw.json or defaults
- */
-function getAgentDisplayInfo(agentId: string, agentConfig: any): { emoji: string; color: string; name: string } {
-  // First try to get from agent's own config in openclaw.json
+function getAgentDisplayInfo(agentId: string, agentConfig: AgentConfig | null): { emoji: string; color: string; name: string } {
   const configEmoji = agentConfig?.ui?.emoji;
   const configColor = agentConfig?.ui?.color;
   const configName = agentConfig?.name;
 
-  // Then try defaults
   const defaults = DEFAULT_AGENT_CONFIG[agentId];
 
   return {
@@ -75,12 +76,11 @@ function getLatestMtimeIsoFromDir(dirPath: string, fileFilter: (name: string) =>
   return latest > 0 ? new Date(latest).toISOString() : undefined;
 }
 
-function resolveAgentWorkspace(agent: any, openclawDir: string): string {
+function resolveAgentWorkspace(agent: AgentConfig, openclawDir: string): string {
   if (typeof agent?.workspace === "string" && agent.workspace.length > 0) {
     return agent.workspace;
   }
 
-  // Newer configs may omit workspace for the primary agent.
   if (agent?.id === "main" || agent?.id === "pepon") {
     return join(openclawDir, "workspace");
   }
@@ -108,20 +108,16 @@ function getAgentLastActivity(agentId: string, workspace?: string, openclawDir?:
 
 export async function GET() {
   try {
-    // Read openclaw config
     const openclawDir = process.env.OPENCLAW_DIR || "/root/.openclaw";
     const configPath = openclawDir + "/openclaw.json";
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
 
-    // Get agents from config
-    const agents: Agent[] = config.agents.list.map((agent: any) => {
+    const agents: Agent[] = config.agents.list.map((agent: AgentConfig) => {
       const agentInfo = getAgentDisplayInfo(agent.id, agent);
 
-      // Get telegram account info
       const telegramAccount = config.channels?.telegram?.accounts?.[agent.id];
       const botToken = telegramAccount?.botToken;
 
-      // Check if agent has recent activity
       const workspace = resolveAgentWorkspace(agent, openclawDir);
       const lastActivity = getAgentLastActivity(agent.id, workspace, openclawDir);
       const status: "online" | "offline" =
@@ -129,11 +125,9 @@ export async function GET() {
           ? "online"
           : "offline";
 
-      // Get details of allowed subagents
       const allowAgents = agent.subagents?.allowAgents || [];
       const allowAgentsDetails = allowAgents.map((subagentId: string) => {
-        // Find subagent in config
-        const subagentConfig = config.agents.list.find((a: any) => a.id === subagentId);
+        const subagentConfig = config.agents.list.find((a: AgentConfig) => a.id === subagentId);
         if (subagentConfig) {
           const subagentInfo = getAgentDisplayInfo(subagentId, subagentConfig);
           return {
@@ -143,7 +137,6 @@ export async function GET() {
             color: subagentInfo.color,
           };
         }
-        // Fallback if subagent not found in config
         const fallbackInfo = getAgentDisplayInfo(subagentId, null);
         return {
           id: subagentId,
@@ -166,7 +159,7 @@ export async function GET() {
         botToken: botToken ? "configured" : undefined,
         status,
         lastActivity,
-        activeSessions: 0, // TODO: get from sessions API
+        activeSessions: 0,
       };
     });
 

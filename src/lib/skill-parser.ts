@@ -181,8 +181,12 @@ function buildAgentSkillMap(): Map<string, string[]> {
   // Read from openclaw.json if possible
   let agentList: Array<{ id: string; workspace: string }> = [];
   try {
+    interface OpenClawAgent {
+      id: string;
+      workspace?: string;
+    }
     const openclawConfig = JSON.parse(fs.readFileSync(path.join(openclawDir, 'openclaw.json'), 'utf-8'));
-    agentList = (openclawConfig?.agents?.list || []).map((a: any) => ({
+    agentList = (openclawConfig?.agents?.list || []).map((a: OpenClawAgent) => ({
       id: a.id,
       workspace: a.workspace || path.join(openclawDir, 'workspace'),
     }));

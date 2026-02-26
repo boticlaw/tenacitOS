@@ -127,18 +127,16 @@ function renderMarkdown(text: string): string {
 
 export function FilePreview({ workspace, path, name, onClose }: FilePreviewProps) {
   const [content, setContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
   const ext = getFileExtension(name);
   const isImage = isImageFile(ext);
   const isMd = isMarkdown(ext);
   const isCode = isCodeFile(ext);
+  const [loading, setLoading] = useState(!isImage);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (isImage) {
-      setLoading(false);
       return;
     }
 
