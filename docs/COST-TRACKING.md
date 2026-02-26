@@ -1,6 +1,6 @@
 # Cost Tracking System
 
-Mission Control now tracks real usage costs by reading OpenClaw session data and calculating costs based on actual token usage.
+SuperBotijo now tracks real usage costs by reading OpenClaw session data and calculating costs based on actual token usage.
 
 ## How It Works
 

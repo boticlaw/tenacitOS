@@ -61,7 +61,7 @@ export async function GET() {
     checkSystemdService('mission-control'),
     checkSystemdService('openclaw-gateway'),
   ]);
-  checks.push({ ...missionControl, name: 'Mission Control' });
+  checks.push({ ...missionControl, name: 'SuperBotijo' });
   checks.push({ ...gateway, name: 'OpenClaw Gateway' });
 
   // PM2 services

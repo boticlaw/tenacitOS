@@ -74,7 +74,7 @@ export default function DashboardPage() {
             letterSpacing: '-1.5px'
           }}
         >
-          🦞 Mission Control
+          🦞 SuperBotijo
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
           Overview of Tenacitas agent activity

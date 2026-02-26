@@ -63,7 +63,7 @@ function LoginForm() {
               letterSpacing: '-0.5px'
             }}
           >
-            Mission Control
+            SuperBotijo
           </h1>
         </div>
         <p 

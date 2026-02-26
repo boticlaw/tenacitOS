@@ -1,4 +1,4 @@
-# SuperBotijo — OpenClaw Mission Control
+# SuperBotijo — OpenClaw SuperBotijo
 
 A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI agent instances. Built with Next.js, React 19, and Tailwind CSS v4.
 
@@ -106,7 +106,7 @@ AUTH_SECRET=your-random-32-char-secret-here
 # OPENCLAW_DIR=/root/.openclaw
 
 # --- Branding (customize for your instance) ---
-NEXT_PUBLIC_AGENT_NAME=Mission Control
+NEXT_PUBLIC_AGENT_NAME=SuperBotijo
 NEXT_PUBLIC_AGENT_EMOJI=🤖
 NEXT_PUBLIC_AGENT_DESCRIPTION=Your AI co-pilot, powered by OpenClaw
 NEXT_PUBLIC_AGENT_LOCATION=             # e.g. "Madrid, Spain"
@@ -117,7 +117,7 @@ NEXT_PUBLIC_OWNER_USERNAME=your-username
 NEXT_PUBLIC_OWNER_EMAIL=your-email@example.com
 NEXT_PUBLIC_TWITTER_HANDLE=@username
 NEXT_PUBLIC_COMPANY_NAME=MISSION CONTROL, INC.
-NEXT_PUBLIC_APP_TITLE=Mission Control
+NEXT_PUBLIC_APP_TITLE=SuperBotijo
 ```
 
 > **Tip:** `OPENCLAW_DIR` defaults to `/root/.openclaw`. If your OpenClaw is installed elsewhere, set this variable.
@@ -176,7 +176,7 @@ Create `/etc/systemd/system/mission-control.service`:
 
 ```ini
 [Unit]
-Description=SuperBotijo — OpenClaw Mission Control
+Description=SuperBotijo — OpenClaw SuperBotijo
 After=network.target
 
 [Service]

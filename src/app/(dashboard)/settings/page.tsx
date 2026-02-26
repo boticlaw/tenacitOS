@@ -131,7 +131,7 @@ export default function SettingsPage() {
         }}
       >
         <div className="flex items-center justify-between text-sm" style={{ color: "var(--text-muted)" }}>
-          <span>Mission Control v1.0.0</span>
+          <span>SuperBotijo v1.0.0</span>
           <span>OpenClaw Agent Dashboard</span>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# 🦞 Mission Control - Roadmap
+# 🦞 SuperBotijo - Roadmap
 
 ## Fase 1: Fundamentos (Semana 1)
 > Mejorar lo que ya existe y añadir datos reales
