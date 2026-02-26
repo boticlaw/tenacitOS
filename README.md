@@ -1,4 +1,4 @@
-# SuperBotijo — OpenClaw SuperBotijo
+# SuperBotijo — OpenClaw Dashboard
 
 A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI agent instances. Built with Next.js, React 19, and Tailwind CSS v4.
 

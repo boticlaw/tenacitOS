@@ -1,7 +1,7 @@
 {
   "name": "superbotijo",
   "version": "1.0.0",
-  "description": "SuperBotijo - OpenClaw SuperBotijo Dashboard",
+  "description": "SuperBotijo - OpenClaw Dashboard",
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
