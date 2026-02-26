@@ -1,0 +1,136 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "refresh": "Actualizar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "workspaces": "Espacios de trabajo",
+    "listView": "Vista de lista",
+    "gridView": "Vista de cuadrícula"
+  },
+  "language": {
+    "label": "Idioma",
+    "english": "English",
+    "spanish": "Español"
+  },
+  "login": {
+    "subtitle": "Ingresa tu contraseña para acceder",
+    "passwordPlaceholder": "Contraseña",
+    "incorrectPassword": "Contraseña incorrecta",
+    "connectionError": "Error de conexión",
+    "verifying": "Verificando...",
+    "signIn": "Iniciar sesión"
+  },
+  "dock": {
+    "dashboard": "Panel",
+    "systemMonitor": "Monitor del sistema",
+    "files": "Archivos",
+    "memory": "Memoria",
+    "agents": "Agentes",
+    "activity": "Actividad",
+    "cronJobs": "Tareas cron",
+    "sessions": "Sesiones",
+    "skills": "Skills",
+    "costsAnalytics": "Costos y analíticas",
+    "settings": "Configuración"
+  },
+  "topbar": {
+    "search": "Buscar... ⌘K",
+    "logout": "Cerrar sesión"
+  },
+  "statusBar": {
+    "services": "SVC",
+    "uptime": "Actividad"
+  },
+  "dashboard": {
+    "overview": "Resumen de la actividad de agentes",
+    "totalActivities": "Actividades totales",
+    "today": "Hoy",
+    "successful": "Exitosas",
+    "errors": "Errores",
+    "multiAgentSystem": "Sistema multiagente",
+    "viewAll": "Ver todo →",
+    "connected": "Conectado",
+    "recentActivity": "Actividad reciente",
+    "quickLinks": "Accesos rápidos",
+    "cronJobs": "Tareas cron",
+    "quickActions": "Acciones rápidas",
+    "system": "Sistema",
+    "liveLogs": "Logs en vivo"
+  },
+  "fleet": {
+    "title": "Flota",
+    "loading": "Cargando flota...",
+    "loadError": "No se pudieron cargar los datos de flota.",
+    "overview": "Resumen de agentes entre instancias",
+    "instances": "instancias",
+    "totalAgents": "agentes totales",
+    "sessions": "sesiones",
+    "updatedSeconds": "Actualizado hace {count}s",
+    "updatedMinutes": "Actualizado hace {count}m",
+    "never": "Nunca",
+    "justNow": "Ahora mismo",
+    "minutesAgo": "hace {count}m",
+    "hoursAgo": "hace {count}h",
+    "daysAgo": "hace {count}d"
+  },
+  "agents": {
+    "title": "Agentes",
+    "loading": "Cargando agentes...",
+    "overview": "Resumen del sistema multiagente • {count} agentes configurados",
+    "cards": "Tarjetas",
+    "organigrama": "Organigrama",
+    "hierarchy": "Jerarquía de agentes",
+    "hierarchySubtitle": "Visualización de permisos de comunicación entre agentes",
+    "never": "Nunca",
+    "justNow": "Ahora mismo",
+    "minutesAgo": "hace {count}m",
+    "hoursAgo": "hace {count}h",
+    "daysAgo": "hace {count}d",
+    "telegramConnected": "Bot de Telegram conectado"
+  },
+  "cron": {
+    "title": "Tareas cron",
+    "subtitle": "Tareas programadas de OpenClaw Gateway",
+    "cards": "Tarjetas",
+    "timeline": "Cronograma",
+    "totalJobs": "Tareas totales",
+    "active": "Activas",
+    "paused": "Pausadas"
+  },
+  "files": {
+    "title": "Explorador de archivos",
+    "subtitle": "Explora los espacios de trabajo y archivos de los agentes"
+  },
+  "memory": {
+    "title": "Explorador de memoria",
+    "subtitle": "Ver y editar archivos de memoria de los agentes",
+    "discardPrompt": "Tienes cambios sin guardar. ¿Deseas descartarlos?",
+    "loadFilesError": "No se pudieron cargar los archivos",
+    "loadTreeError": "No se pudo cargar el árbol de archivos",
+    "loadFileError": "No se pudo cargar el archivo",
+    "saveFileError": "No se pudo guardar el archivo"
+  },
+  "settings": {
+    "title": "Configuración",
+    "subtitle": "Estado del sistema, integraciones y configuración",
+    "lastUpdated": "Última actualización",
+    "footerLeft": "TenacitOS v1.0.0",
+    "footerRight": "Panel de agentes OpenClaw"
+  },
+  "system": {
+    "title": "Monitor del sistema",
+    "subtitle": "Monitoreo en tiempo real de recursos y servicios del servidor",
+    "live": "En vivo",
+    "hardware": "Hardware",
+    "services": "Servicios",
+    "loading": "Cargando datos del sistema...",
+    "failed": "No se pudieron cargar los datos del sistema",
+    "actionFailed": "Acción fallida",
+    "actionSuccessful": "exitosa",
+    "error": "Error"
+  },
+  "sessions": {
+    "title": "Sesiones"
+  }
+}
