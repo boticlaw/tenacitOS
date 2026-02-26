@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Cpu, HardDrive, MemoryStick, Shield, ShieldCheck, Clock } from "lucide-react";
+import { useI18n } from "@/i18n/provider";
 
 interface SystemStats {
   cpu: number;
@@ -15,6 +16,7 @@ interface SystemStats {
 }
 
 export function StatusBar() {
+  const { t } = useI18n();
   const [stats, setStats] = useState<SystemStats>({
     cpu: 0,
     ram: { used: 0, total: 4 },
@@ -199,7 +201,7 @@ export function StatusBar() {
             color: "var(--text-muted)",
           }}
         >
-          SVC: {stats.activeServices}/{stats.totalServices}
+          {t("statusBar.services")}: {stats.activeServices}/{stats.totalServices}
         </span>
       </div>
 
@@ -217,7 +219,7 @@ export function StatusBar() {
             color: "var(--text-muted)",
           }}
         >
-          Uptime: {stats.uptime}
+          {t("statusBar.uptime")}: {stats.uptime}
         </span>
       </div>
     </div>

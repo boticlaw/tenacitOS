@@ -1,0 +1,136 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "refresh": "Refresh",
+    "save": "Save",
+    "cancel": "Cancel",
+    "workspaces": "Workspaces",
+    "listView": "List view",
+    "gridView": "Grid view"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "spanish": "Español"
+  },
+  "login": {
+    "subtitle": "Enter your password to access",
+    "passwordPlaceholder": "Password",
+    "incorrectPassword": "Incorrect password",
+    "connectionError": "Connection error",
+    "verifying": "Verifying...",
+    "signIn": "Sign In"
+  },
+  "dock": {
+    "dashboard": "Dashboard",
+    "systemMonitor": "System Monitor",
+    "files": "Files",
+    "memory": "Memory",
+    "agents": "Agents",
+    "activity": "Activity",
+    "cronJobs": "Cron Jobs",
+    "sessions": "Sessions",
+    "skills": "Skills",
+    "costsAnalytics": "Costs & Analytics",
+    "settings": "Settings"
+  },
+  "topbar": {
+    "search": "Search... ⌘K",
+    "logout": "Logout"
+  },
+  "statusBar": {
+    "services": "SVC",
+    "uptime": "Uptime"
+  },
+  "dashboard": {
+    "overview": "Overview of agent activity",
+    "totalActivities": "Total Activities",
+    "today": "Today",
+    "successful": "Successful",
+    "errors": "Errors",
+    "multiAgentSystem": "Multi-Agent System",
+    "viewAll": "View all →",
+    "connected": "Connected",
+    "recentActivity": "Recent Activity",
+    "quickLinks": "Quick Links",
+    "cronJobs": "Cron Jobs",
+    "quickActions": "Quick Actions",
+    "system": "System",
+    "liveLogs": "Live Logs"
+  },
+  "fleet": {
+    "title": "Fleet",
+    "loading": "Loading fleet...",
+    "loadError": "Could not load fleet data.",
+    "overview": "Cross-instance agent overview",
+    "instances": "instances",
+    "totalAgents": "total agents",
+    "sessions": "sessions",
+    "updatedSeconds": "Updated {count}s ago",
+    "updatedMinutes": "Updated {count}m ago",
+    "never": "Never",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago"
+  },
+  "agents": {
+    "title": "Agents",
+    "loading": "Loading agents...",
+    "overview": "Multi-agent system overview • {count} agents configured",
+    "cards": "Agent Cards",
+    "organigrama": "Organigrama",
+    "hierarchy": "Agent Hierarchy",
+    "hierarchySubtitle": "Visualization of agent communication allowances",
+    "never": "Never",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago",
+    "telegramConnected": "Telegram Bot Connected"
+  },
+  "cron": {
+    "title": "Cron Jobs",
+    "subtitle": "Scheduled tasks from OpenClaw Gateway",
+    "cards": "Cards",
+    "timeline": "Timeline",
+    "totalJobs": "Total Jobs",
+    "active": "Active",
+    "paused": "Paused"
+  },
+  "files": {
+    "title": "File Browser",
+    "subtitle": "Browse agent workspaces and files"
+  },
+  "memory": {
+    "title": "Memory Browser",
+    "subtitle": "View and edit agent memory files",
+    "discardPrompt": "You have unsaved changes. Discard them?",
+    "loadFilesError": "Failed to load files",
+    "loadTreeError": "Failed to load file tree",
+    "loadFileError": "Failed to load file",
+    "saveFileError": "Failed to save file"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "System status, integrations, and configuration",
+    "lastUpdated": "Last updated",
+    "footerLeft": "TenacitOS v1.0.0",
+    "footerRight": "OpenClaw Agent Dashboard"
+  },
+  "system": {
+    "title": "System Monitor",
+    "subtitle": "Real-time monitoring of server resources and services",
+    "live": "Live",
+    "hardware": "Hardware",
+    "services": "Services",
+    "loading": "Loading system data...",
+    "failed": "Failed to load system data",
+    "actionFailed": "Action failed",
+    "actionSuccessful": "successful",
+    "error": "Error"
+  },
+  "sessions": {
+    "title": "Sessions"
+  }
+}

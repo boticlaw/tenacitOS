@@ -1,23 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Bell, User, Command } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { BRANDING } from "@/config/branding";
+import { useI18n } from "@/i18n/provider";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function TopBar() {
   const [showSearch, setShowSearch] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const router = useRouter();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const { t } = useI18n();
+  const displayName = BRANDING.ownerUsername || "Admin";
+  const initial = displayName.charAt(0).toUpperCase();
 
-  // Keyboard shortcuts
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Command/Ctrl + K to open search
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setShowSearch(true);
       }
-      // Escape to close search
       if (e.key === "Escape" && showSearch) {
         setShowSearch(false);
       }
@@ -27,6 +38,22 @@ export function TopBar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [showSearch]);
 
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!showUserMenu) {
+        return;
+      }
+
+      const target = event.target as Node;
+      if (!userMenuRef.current || !userMenuRef.current.contains(target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => window.removeEventListener("mousedown", handleOutsideClick);
+  }, [showUserMenu]);
+
   return (
     <>
       <div
@@ -34,7 +61,7 @@ export function TopBar() {
         style={{
           position: "fixed",
           top: 0,
-          left: "68px", // Width of dock
+          left: "68px",
           right: 0,
           height: "48px",
           backgroundColor: "var(--surface)",
@@ -46,9 +73,8 @@ export function TopBar() {
           zIndex: 45,
         }}
       >
-        {/* Left: Logo & Title */}
         <div className="flex items-center gap-3">
-          <span style={{ fontSize: "20px" }}>🦞</span>
+          <span style={{ fontSize: "20px" }}>{BRANDING.agentEmoji}</span>
           <h1
             style={{
               fontFamily: "var(--font-heading)",
@@ -58,33 +84,11 @@ export function TopBar() {
               letterSpacing: "-0.5px",
             }}
           >
-            TenacitOS
+            {BRANDING.appTitle}
           </h1>
-          {/* Version Badge */}
-          <div
-            style={{
-              backgroundColor: "var(--accent-soft)",
-              borderRadius: "4px",
-              padding: "2px 8px",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "9px",
-                fontWeight: 700,
-                color: "var(--accent)",
-                letterSpacing: "1px",
-              }}
-            >
-              v1.0
-            </span>
-          </div>
         </div>
 
-        {/* Right: Search + Notifications + User */}
         <div className="flex items-center gap-3">
-          {/* Search Box */}
           <button
             onClick={() => setShowSearch(true)}
             className="flex items-center gap-2 transition-all"
@@ -111,54 +115,82 @@ export function TopBar() {
                 color: "var(--text-muted)",
               }}
             >
-              Search... ⌘K
+              {t("topbar.search")}
             </span>
           </button>
 
-          {/* Notifications Dropdown */}
+          <LanguageSwitcher />
+
           <NotificationDropdown />
 
-          {/* User Area */}
-          <div className="flex items-center gap-2">
-            {/* Avatar */}
-            <div
-              style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "14px",
-                backgroundColor: "var(--accent)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+          <div ref={userMenuRef} className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2"
+              data-testid="user-menu-button"
             >
-              <span
+              <div
                 style={{
-                  fontFamily: "var(--font-heading)",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  color: "var(--text-primary)",
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "14px",
+                  backgroundColor: "var(--accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                {BRANDING.ownerUsername[0].toUpperCase()}
+                <span
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {initial}
+                </span>
+              </div>
+              <span
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: "var(--text-secondary)",
+                }}
+              >
+                {displayName}
               </span>
-            </div>
-            {/* Name */}
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "12px",
-                fontWeight: 500,
-                color: "var(--text-secondary)",
-              }}
-            >
-              {BRANDING.ownerUsername}
-            </span>
+            </button>
+
+            {showUserMenu && (
+              <div
+                className="absolute right-0 top-full mt-1 z-50"
+                style={{
+                  backgroundColor: "var(--surface-elevated)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "6px",
+                  minWidth: "120px",
+                  padding: "4px 0",
+                }}
+              >
+                <button
+                  onClick={handleLogout}
+                  data-testid="logout-button"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--surface)]"
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  {t("topbar.logout")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Global Search Modal */}
       {showSearch && (
         <div
           className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]"
