@@ -128,7 +128,7 @@
   - NEW: `src/app/api/sessions/route.ts`
   - NEW: `src/app/(dashboard)/sessions/page.tsx`
   - MODIFIED: `src/components/Sidebar.tsx` (añadida entrada Sessions)
-  - MODIFIED: `src/components/TenacitOS/Dock.tsx` (añadida entrada Sessions)
+  - MODIFIED: `src/components/SuperBotijo/Dock.tsx` (añadida entrada Sessions)
 
 ### 5.4 Notifications System ✅ (nuevo — 2026-02-20)
 - [x] **API de notificaciones** → `GET/POST/PATCH/DELETE /api/notifications`
@@ -144,7 +144,7 @@
 - **Archivos:**
   - NEW: `src/app/api/notifications/route.ts`
   - NEW: `src/components/NotificationDropdown.tsx`
-  - MODIFIED: `src/components/TenacitOS/TopBar.tsx`
+  - MODIFIED: `src/components/SuperBotijo/TopBar.tsx`
   - MODIFIED: `src/app/api/cron/run/route.ts` (integración)
 
 ---

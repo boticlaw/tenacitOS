@@ -17,13 +17,13 @@ function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
   const pm2: string[] = [];
   
   // 1. From environment variable (comma-separated)
-  // TENACITOS_SYSTEMD_SERVICES=nginx,apache
-  const envSystemd = process.env.TENACITOS_SYSTEMD_SERVICES;
+  // SUPERBOTIJO_SYSTEMD_SERVICES=nginx,apache
+  const envSystemd = process.env.SUPERBOTIJO_SYSTEMD_SERVICES;
   if (envSystemd) {
     systemd.push(...envSystemd.split(',').map(s => s.trim()).filter(Boolean));
   }
   
-  const envPm2 = process.env.TENACITOS_PM2_SERVICES;
+  const envPm2 = process.env.SUPERBOTIJO_PM2_SERVICES;
   if (envPm2) {
     pm2.push(...envPm2.split(',').map(s => s.trim()).filter(Boolean));
   }
@@ -77,14 +77,14 @@ function getAllowedServices(): { systemd: string[]; pm2: string[] } {
       const name = svc.unit.replace('.service', '');
       // Auto-allow if contains openclaw, superbotijo, or mission-control
       if (name.includes('openclaw') || 
-          name.includes('tenacitos') || 
+          name.includes('superbotijo') || 
           name.includes('mission-control')) {
         systemdServices.push(name);
       }
     }
   } catch {
     // Fallback to known services
-    systemdServices.push('openclaw-gateway', 'tenacitos');
+    systemdServices.push('openclaw-gateway', 'superbotijo');
   }
   
   // Check if PM2 is installed and has processes

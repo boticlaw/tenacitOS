@@ -11,7 +11,7 @@ import {
   FileText,
   X,
 } from "lucide-react";
-import { SectionHeader, MetricCard } from "@/components/TenacitOS";
+import { SectionHeader, MetricCard } from "@/components/SuperBotijo";
 
 interface Skill {
   id: string;

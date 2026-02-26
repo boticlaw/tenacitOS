@@ -1,6 +1,6 @@
 "use client";
 
-import { Dock, TopBar, StatusBar } from "@/components/TenacitOS";
+import { Dock, TopBar, StatusBar } from "@/components/SuperBotijo";
 import { I18nProvider } from "@/i18n/provider";
 
 export default function DashboardLayout({

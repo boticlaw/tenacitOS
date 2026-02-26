@@ -31,7 +31,7 @@ const JOB_COLORS = [
   "#CE93D8", // lavender
   "#F48FB1", // pink
   "#80DEEA", // teal
-  "#FFCC02", // yellow (TenacitOS accent)
+  "#FFCC02", // yellow (SuperBotijo accent)
   "#A5D6A7", // mint
   "#FF8A65", // deep orange
 ];

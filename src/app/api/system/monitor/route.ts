@@ -7,7 +7,7 @@ const execAsync = promisify(exec);
 
 // Services monitored per backend
 // Auto-detect OpenClaw-related services
-const SYSTEMD_SERVICES = ["openclaw-gateway", "tenacitos"];
+const SYSTEMD_SERVICES = ["openclaw-gateway", "superbotijo"];
 const PM2_SERVICES: string[] = []; // No PM2 services by default
 const PLACEHOLDER_SERVICES: Array<{ name: string; description: string; status: string }> = []; // No placeholders
 

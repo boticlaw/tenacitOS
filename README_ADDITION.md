@@ -2,7 +2,7 @@
 
 ## Activity Sync
 
-The Activities dashboard shows real-time agent activity. By default, it's empty because TenacitOS uses its own database. To populate it with real OpenClaw message data:
+The Activities dashboard shows real-time agent activity. By default, it's empty because SuperBotijo uses its own database. To populate it with real OpenClaw message data:
 
 ```bash
 # Install dependencies
@@ -12,9 +12,9 @@ sudo apt-get install sqlite3 jq
 ./scripts/sync-openclaw-activities.sh
 
 # Set up auto-sync every 5 minutes
-sudo cp scripts/sync-openclaw-activities.sh /opt/tenacitos/
-sudo tee /etc/cron.d/tenacitos-sync-activities <<'EOF'
-*/5 * * * * root /opt/tenacitos/sync-openclaw-activities.sh >> /var/log/tenacitos-sync.log 2>&1
+sudo cp scripts/sync-openclaw-activities.sh /opt/superbotijo/
+sudo tee /etc/cron.d/superbotijo-sync-activities <<'EOF'
+*/5 * * * * root /opt/superbotijo/sync-openclaw-activities.sh >> /var/log/superbotijo-sync.log 2>&1
 EOF
 ```
 
@@ -24,13 +24,13 @@ See [docs/activities-sync.md](./docs/activities-sync.md) for details.
 
 ## Service Configuration
 
-TenacitOS automatically detects OpenClaw-related services. No configuration needed for most users.
+SuperBotijo automatically detects OpenClaw-related services. No configuration needed for most users.
 
 ### Auto-detected services
 
 Services containing these keywords are automatically allowed:
 - `openclaw` (e.g., openclaw-gateway)
-- `tenacitos` (e.g., tenacitos)
+- `superbotijo` (e.g., superbotijo)
 - `mission-control`
 
 ### Additional services (optional)

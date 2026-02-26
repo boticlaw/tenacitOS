@@ -63,9 +63,9 @@ cd /root/.openclaw/workspace/mission-control
 ### 3. Set up cron job
 
 ```bash
-sudo tee /etc/cron.d/tenacitos-sync-activities <<'EOF'
+sudo tee /etc/cron.d/superbotijo-sync-activities <<'EOF'
 # Sync OpenClaw sessions to SuperBotijo activities every 5 minutes
-*/5 * * * * root /opt/tenacitos/sync-openclaw-sessions.sh >> /var/log/tenacitos-sync.log 2>&1
+*/5 * * * * root /opt/superbotijo/sync-openclaw-sessions.sh >> /var/log/superbotijo-sync.log 2>&1
 EOF
 ```
 

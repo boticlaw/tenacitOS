@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "TenacitOS Allowed Services Configuration",
-  "description": "Additional services to allow in TenacitOS dashboard (beyond auto-detected ones)",
+  "title": "SuperBotijo Allowed Services Configuration",
+  "description": "Additional services to allow in SuperBotijo dashboard (beyond auto-detected ones)",
   "type": "object",
   "properties": {
     "systemd": {
