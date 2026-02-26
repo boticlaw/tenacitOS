@@ -74,7 +74,7 @@ export const AGENTS: AgentConfig[] = [
   },
 ];
 
-export type AgentStatus = "idle" | "working" | "thinking" | "error";
+export type AgentStatus = "idle" | "working" | "thinking" | "error" | "online" | "offline";
 
 export interface AgentState {
   id: string;
@@ -84,4 +84,5 @@ export interface AgentState {
   tokensPerHour?: number;
   tasksInQueue?: number;
   uptime?: number; // days
+  lastActivity?: string; // ISO timestamp
 }

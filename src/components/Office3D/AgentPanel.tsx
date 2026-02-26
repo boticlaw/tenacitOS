@@ -13,9 +13,11 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
   const getStatusColor = () => {
     switch (state.status) {
       case 'working': return 'text-green-500';
+      case 'online': return 'text-green-400';
       case 'thinking': return 'text-blue-500 animate-pulse';
       case 'error': return 'text-red-500';
-      case 'idle':
+      case 'idle': return 'text-yellow-500';
+      case 'offline':
       default: return 'text-gray-500';
     }
   };
@@ -23,11 +25,31 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
   const getStatusBgColor = () => {
     switch (state.status) {
       case 'working': return 'bg-green-500/20';
+      case 'online': return 'bg-green-400/20';
       case 'thinking': return 'bg-blue-500/20';
       case 'error': return 'bg-red-500/20';
-      case 'idle':
+      case 'idle': return 'bg-yellow-500/20';
+      case 'offline':
       default: return 'bg-gray-500/20';
     }
+  };
+
+  const formatLastActivity = (timestamp?: string): string => {
+    if (!timestamp) return 'Never';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString();
   };
 
   return (
@@ -50,12 +72,20 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
       </div>
 
       {/* Status badge */}
-      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 ${getStatusBgColor()}`}>
+      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4 ${getStatusBgColor()}`}>
         <div className={`w-2 h-2 rounded-full ${state.status === 'thinking' ? 'animate-pulse' : ''}`} style={{ backgroundColor: agent.color }}></div>
         <span className={`text-sm font-medium ${getStatusColor()}`}>
           {state.status.toUpperCase()}
         </span>
       </div>
+
+      {/* Last Activity */}
+      {state.lastActivity && (
+        <div className="mb-6 text-sm">
+          <span className="text-gray-400">Last activity: </span>
+          <span className="text-white font-medium">{formatLastActivity(state.lastActivity)}</span>
+        </div>
+      )}
 
       {/* Current task */}
       {state.currentTask && (

@@ -6,12 +6,10 @@ import os from "os";
 const execAsync = promisify(exec);
 
 // Services monitored per backend
-const SYSTEMD_SERVICES = ["mission-control"];
-const PM2_SERVICES = ["classvault", "content-vault", "postiz-simple", "brain"];
-// creatoros not deployed yet — shown as "not_deployed"
-const PLACEHOLDER_SERVICES = [
-  { name: "creatoros", description: "Creatoros Platform", status: "not_deployed" },
-];
+// Auto-detect OpenClaw-related services
+const SYSTEMD_SERVICES = ["openclaw-gateway", "tenacitos"];
+const PM2_SERVICES: string[] = []; // No PM2 services by default
+const PLACEHOLDER_SERVICES: Array<{ name: string; description: string; status: string }> = []; // No placeholders
 
 interface ServiceEntry {
   name: string;
@@ -156,65 +154,67 @@ export async function GET() {
       }
     }
 
-    // 2. PM2 services — single call, parse JSON
-    try {
-      const { stdout: pm2Json } = await execAsync("pm2 jlist 2>/dev/null");
-      const pm2List = JSON.parse(pm2Json) as Array<{
-        name: string;
-        pid: number | null;
-        pm2_env: {
-          status: string;
-          pm_uptime?: number;
-          restart_time?: number;
-          monit?: { cpu: number; memory: number };
-        };
-      }>;
+    // 2. PM2 services — single call, parse JSON (only if PM2 services exist)
+    if (PM2_SERVICES.length > 0) {
+      try {
+        const { stdout: pm2Json } = await execAsync("pm2 jlist 2>/dev/null");
+        const pm2List = JSON.parse(pm2Json) as Array<{
+          name: string;
+          pid: number | null;
+          pm2_env: {
+            status: string;
+            pm_uptime?: number;
+            restart_time?: number;
+            monit?: { cpu: number; memory: number };
+          };
+        }>;
 
-      const pm2Map: Record<string, (typeof pm2List)[0]> = {};
-      for (const proc of pm2List) {
-        pm2Map[proc.name] = proc;
-      }
+        const pm2Map: Record<string, (typeof pm2List)[0]> = {};
+        for (const proc of pm2List) {
+          pm2Map[proc.name] = proc;
+        }
 
-      for (const name of PM2_SERVICES) {
-        const proc = pm2Map[name];
-        if (!proc) {
+        for (const name of PM2_SERVICES) {
+          const proc = pm2Map[name];
+          if (!proc) {
+            services.push({
+              name,
+              status: "unknown",
+              description: SERVICE_DESCRIPTIONS[name] ?? name,
+              backend: "pm2",
+            });
+            continue;
+          }
+
+          const rawStatus = proc.pm2_env?.status ?? "unknown";
+          const uptime =
+            rawStatus === "online" && proc.pm2_env?.pm_uptime
+              ? Date.now() - proc.pm2_env.pm_uptime
+              : null;
+
+          services.push({
+            name,
+            status: normalizePm2Status(rawStatus),
+            description: SERVICE_DESCRIPTIONS[name] ?? name,
+            backend: "pm2",
+            uptime,
+            restarts: proc.pm2_env?.restart_time ?? 0,
+            pid: proc.pid,
+            cpu: proc.pm2_env?.monit?.cpu ?? null,
+            mem: proc.pm2_env?.monit?.memory ?? null,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to query PM2:", err);
+        // Fallback: mark all PM2 services as unknown
+        for (const name of PM2_SERVICES) {
           services.push({
             name,
             status: "unknown",
             description: SERVICE_DESCRIPTIONS[name] ?? name,
             backend: "pm2",
           });
-          continue;
         }
-
-        const rawStatus = proc.pm2_env?.status ?? "unknown";
-        const uptime =
-          rawStatus === "online" && proc.pm2_env?.pm_uptime
-            ? Date.now() - proc.pm2_env.pm_uptime
-            : null;
-
-        services.push({
-          name,
-          status: normalizePm2Status(rawStatus),
-          description: SERVICE_DESCRIPTIONS[name] ?? name,
-          backend: "pm2",
-          uptime,
-          restarts: proc.pm2_env?.restart_time ?? 0,
-          pid: proc.pid,
-          cpu: proc.pm2_env?.monit?.cpu ?? null,
-          mem: proc.pm2_env?.monit?.memory ?? null,
-        });
-      }
-    } catch (err) {
-      console.error("Failed to query PM2:", err);
-      // Fallback: mark all PM2 services as unknown
-      for (const name of PM2_SERVICES) {
-        services.push({
-          name,
-          status: "unknown",
-          description: SERVICE_DESCRIPTIONS[name] ?? name,
-          backend: "pm2",
-        });
       }
     }
 
@@ -225,42 +225,49 @@ export async function GET() {
 
     // ── Tailscale VPN ─────────────────────────────────────────────────────────
     let tailscaleActive = false;
-    let tailscaleIp = "100.122.105.85";
+    let tailscaleIp = "";
     const tailscaleDevices: TailscaleDevice[] = [];
+    
+    // Check if Tailscale is installed first
     try {
-      const { stdout: tsStatus } = await execAsync("tailscale status 2>/dev/null || true");
-      const lines = tsStatus.trim().split("\n").filter(Boolean);
-      if (lines.length > 0) {
-        tailscaleActive = true;
-        for (const line of lines) {
-          if (line.startsWith("#")) continue;
-          const parts = line.trim().split(/\s+/);
-          if (parts.length >= 3) {
-            tailscaleDevices.push({
-              ip: parts[0],
-              hostname: parts[1],
-              os: parts[3] || "",
-              online: line.includes("active"),
-            });
+      await execAsync("which tailscale");
+      
+      // Tailscale is installed, get real status
+      try {
+        const { stdout: tsStatus } = await execAsync("tailscale status 2>/dev/null || true");
+        const lines = tsStatus.trim().split("\n").filter(Boolean);
+        
+        if (lines.length > 0 && !tsStatus.includes("not running")) {
+          tailscaleActive = true;
+          for (const line of lines) {
+            if (line.startsWith("#")) continue;
+            const parts = line.trim().split(/\s+/);
+            if (parts.length >= 3) {
+              tailscaleDevices.push({
+                ip: parts[0],
+                hostname: parts[1],
+                os: parts[3] || "",
+                online: line.includes("active") || line.includes("online"),
+              });
+            }
+          }
+          if (tailscaleDevices.length > 0) {
+            tailscaleIp = tailscaleDevices[0].ip;
           }
         }
-        if (tailscaleDevices.length > 0) {
-          tailscaleIp = tailscaleDevices[0].ip || tailscaleIp;
-        }
+      } catch (error) {
+        console.error("Failed to get Tailscale status:", error);
       }
-    } catch (error) {
-      console.error("Failed to get Tailscale status:", error);
+    } catch {
+      // Tailscale not installed
+      tailscaleActive = false;
+      tailscaleIp = "";
     }
 
     // ── Firewall (UFW) ────────────────────────────────────────────────────────
     let firewallActive = false;
     const firewallRulesList: FirewallRule[] = [];
-    const staticFirewallRules: FirewallRule[] = [
-      { port: "80/tcp", action: "ALLOW", from: "Anywhere", comment: "Public HTTP" },
-      { port: "443/tcp", action: "ALLOW", from: "Anywhere", comment: "Public HTTPS" },
-      { port: "3000", action: "ALLOW", from: "Tailscale (100.64.0.0/10)", comment: "Mission Control via Tailscale" },
-      { port: "22", action: "ALLOW", from: "Tailscale (100.64.0.0/10)", comment: "SSH via Tailscale only" },
-    ];
+    
     try {
       const { stdout: ufwStatus } = await execAsync("ufw status numbered 2>/dev/null || true");
       if (ufwStatus.includes("Status: active")) {
@@ -305,19 +312,12 @@ export async function GET() {
       tailscale: {
         active: tailscaleActive,
         ip: tailscaleIp,
-        devices:
-          tailscaleDevices.length > 0
-            ? tailscaleDevices
-            : [
-                { ip: "100.122.105.85", hostname: "srv1328267", os: "linux", online: true },
-                { ip: "100.106.86.52", hostname: "iphone182", os: "iOS", online: true },
-                { ip: "100.72.14.113", hostname: "macbook-pro-de-carlos", os: "macOS", online: true },
-              ],
+        devices: tailscaleDevices,
       },
       firewall: {
-        active: firewallActive || true,
-        rules: firewallRulesList.length > 0 ? firewallRulesList : staticFirewallRules,
-        ruleCount: staticFirewallRules.length,
+        active: firewallActive,
+        rules: firewallRulesList,
+        ruleCount: firewallRulesList.length,
       },
       timestamp: new Date().toISOString(),
     });

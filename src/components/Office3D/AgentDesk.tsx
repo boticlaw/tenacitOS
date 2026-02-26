@@ -33,11 +33,15 @@ export default function AgentDesk({ agent, state, onClick, isSelected }: AgentDe
     switch (state.status) {
       case 'working':
         return '#22c55e'; // green-500
+      case 'online':
+        return '#4ade80'; // green-400
       case 'thinking':
         return '#3b82f6'; // blue-500
       case 'error':
         return '#ef4444'; // red-500
       case 'idle':
+        return '#eab308'; // yellow-500
+      case 'offline':
       default:
         return '#6b7280'; // gray-500
     }
@@ -47,11 +51,15 @@ export default function AgentDesk({ agent, state, onClick, isSelected }: AgentDe
     switch (state.status) {
       case 'working':
         return '#15803d'; // darker green
+      case 'online':
+        return '#166534'; // darker green-400
       case 'thinking':
         return '#1e40af'; // darker blue
       case 'error':
         return '#991b1b'; // darker red
       case 'idle':
+        return '#a16207'; // darker yellow
+      case 'offline':
       default:
         return '#374151'; // darker gray
     }
@@ -88,7 +96,12 @@ export default function AgentDesk({ agent, state, onClick, isSelected }: AgentDe
         <meshStandardMaterial
           color={getStatusColor()}
           emissive={getMonitorEmissive()}
-          emissiveIntensity={state.status === 'idle' ? 0.1 : 0.5}
+          emissiveIntensity={
+            state.status === 'offline' ? 0.05 :
+            state.status === 'idle' ? 0.15 :
+            state.status === 'online' ? 0.3 :
+            0.5 // working, thinking, error
+          }
         />
       </Box>
 

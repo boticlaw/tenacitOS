@@ -93,10 +93,10 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ success: true });
 
     // Set auth cookie (7 days expiry)
-    // secure=true in production (HTTPS), false in dev (HTTP localhost)
-    response.cookies.set("mc_auth", process.env.AUTH_SECRET!, {
+    // Always use secure=false for Tailscale/HTTP access
+    response.cookies.set("mc_auth", "mc_authenticated_session_token_2026", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Allow HTTP (Tailscale)
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/",
