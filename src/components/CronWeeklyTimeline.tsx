@@ -72,7 +72,7 @@ function formatIntervalLabel(ms: number): string {
 
 function getJobEmoji(agentId: string): string {
   const emojis: Record<string, string> = {
-    main: "🦞",
+    main: "🫙",
     academic: "🎓",
     infra: "🔧",
     studio: "🎬",

@@ -127,7 +127,7 @@ function LoginForm() {
         className="text-center text-xs mt-6"
         style={{ color: 'var(--text-muted)' }}
       >
-        Tenacitas Agent Dashboard
+        SuperBotijo Agent Dashboard
       </p>
     </div>
   );

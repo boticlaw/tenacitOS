@@ -17,7 +17,7 @@ export function StardewCharacter({ agent, position }: CharacterProps) {
   // Character appearance based on agent id
   const getCharacterDetails = () => {
     switch (agent.id) {
-      case "main": // Tenacitas - red/orange hair, red shirt
+      case "main": // SuperBotijo - red/orange hair, red shirt
         return {
           hairColor: "#FF6B35",
           shirtColor: "#D94A3D",

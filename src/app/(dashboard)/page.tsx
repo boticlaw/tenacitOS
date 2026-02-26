@@ -66,18 +66,25 @@ export default function DashboardPage() {
     <div className="p-4 md:p-8">
       {/* Header */}
       <div className="mb-4 md:mb-6">
-        <h1 
-          className="text-2xl md:text-3xl font-bold mb-1"
-          style={{ 
-            fontFamily: 'var(--font-heading)',
-            color: 'var(--text-primary)',
-            letterSpacing: '-1.5px'
-          }}
-        >
-          🦞 SuperBotijo
-        </h1>
+        <div className="flex items-center gap-3 mb-1">
+          <img 
+            src="/logo.png" 
+            alt="SuperBotijo" 
+            style={{ width: "40px", height: "40px", objectFit: "contain" }}
+          />
+          <h1 
+            className="text-2xl md:text-3xl font-bold"
+            style={{ 
+              fontFamily: 'var(--font-heading)',
+              color: 'var(--text-primary)',
+              letterSpacing: '-1.5px'
+            }}
+          >
+            SuperBotijo
+          </h1>
+        </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-          Overview of Tenacitas agent activity
+          Overview of agent activity
         </p>
       </div>
 

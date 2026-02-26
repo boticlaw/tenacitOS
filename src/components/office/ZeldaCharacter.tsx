@@ -19,7 +19,7 @@ interface ZeldaCharacterProps {
 const AgentSprites: Record<string, React.ReactElement> = {
   main: (
     <svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-      {/* Tenacitas - Rojo/naranja con pinzas de langosta */}
+      {/* SuperBotijo - Rojo/naranja con pinzas de langosta */}
       {/* Body */}
       <rect x="20" y="26" width="24" height="24" fill="#ff6b35" />
       <rect x="22" y="28" width="20" height="20" fill="#ff8855" />

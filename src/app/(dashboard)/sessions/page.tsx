@@ -597,7 +597,7 @@ type FilterType = "all" | "main" | "cron" | "subagent" | "direct";
 
 const FILTER_TABS: Array<{ id: FilterType; label: string; emoji: string }> = [
   { id: "all", label: "All", emoji: "📋" },
-  { id: "main", label: "Main", emoji: "🦞" },
+  { id: "main", label: "Main", emoji: "🫙" },
   { id: "cron", label: "Cron", emoji: "🕐" },
   { id: "subagent", label: "Sub-agents", emoji: "🤖" },
   { id: "direct", label: "Chats", emoji: "💬" },

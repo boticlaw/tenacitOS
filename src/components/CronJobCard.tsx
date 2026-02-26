@@ -51,7 +51,7 @@ interface CronJobCardProps {
 }
 
 const AGENT_EMOJI: Record<string, string> = {
-  main: "🦞",
+  main: "🫙",
   academic: "🎓",
   infra: "🔧",
   studio: "🎬",
