@@ -50,11 +50,11 @@ function LoginForm() {
       {/* Header */}
       <div className="text-center mb-6 flex flex-col items-center gap-2">
         <div className="flex items-center gap-2.5">
-          <Terminal 
-            className="w-7 h-7" 
-            style={{ color: 'var(--accent)' }} 
+          <img 
+            src="/logo.png" 
+            alt="SuperBotijo" 
+            style={{ width: "40px", height: "40px", objectFit: "contain" }}
           />
-          <span className="text-2xl">🦞</span>
           <h1 
             className="text-xl font-bold"
             style={{ 

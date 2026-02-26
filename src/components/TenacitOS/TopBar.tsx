@@ -74,7 +74,11 @@ export function TopBar() {
         }}
       >
         <div className="flex items-center gap-3">
-          <span style={{ fontSize: "20px" }}>{BRANDING.agentEmoji}</span>
+          <img 
+            src="/logo-small.png" 
+            alt="SuperBotijo" 
+            style={{ width: "28px", height: "28px", objectFit: "contain" }}
+          />
           <h1
             style={{
               fontFamily: "var(--font-heading)",
