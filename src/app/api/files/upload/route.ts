@@ -7,7 +7,7 @@ const OPENCLAW_DIR = process.env.OPENCLAW_DIR || '/root/.openclaw';
 
 const WORKSPACE_MAP: Record<string, string> = {
   workspace: path.join(OPENCLAW_DIR, 'workspace'),
-  'mission-control': path.join(OPENCLAW_DIR, 'workspace', 'mission-control'),
+  'superbotijo': path.join(OPENCLAW_DIR, 'workspace', 'superbotijo'),
 };
 
 function resolvePath(workspace: string, filePath: string): string | null {

@@ -5,11 +5,11 @@
 import { NextRequest } from 'next/server';
 import { spawn } from 'child_process';
 
-const ALLOWED_SERVICES = ['mission-control', 'classvault', 'content-vault', 'postiz-simple', 'brain', 'openclaw-gateway'];
+const ALLOWED_SERVICES = ['superbotijo', 'classvault', 'content-vault', 'postiz-simple', 'brain', 'openclaw-gateway'];
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const service = searchParams.get('service') || 'mission-control';
+  const service = searchParams.get('service') || 'superbotijo';
   const backend = searchParams.get('backend') || 'systemd';
 
   if (!ALLOWED_SERVICES.includes(service)) {

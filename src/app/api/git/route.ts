@@ -124,7 +124,7 @@ export async function GET() {
   }
 }
 
-const ALLOWED_REPOS = [WORKSPACE + '/mission-control', WORKSPACE];
+const ALLOWED_REPOS = [WORKSPACE + '/superbotijo', WORKSPACE];
 
 export async function POST(request: NextRequest) {
   try {

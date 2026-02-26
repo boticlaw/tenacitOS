@@ -31,7 +31,7 @@ SuperBotijo automatically detects OpenClaw-related services. No configuration ne
 Services containing these keywords are automatically allowed:
 - `openclaw` (e.g., openclaw-gateway)
 - `superbotijo` (e.g., superbotijo)
-- `mission-control`
+- `superbotijo`
 
 ### Additional services (optional)
 
@@ -46,7 +46,7 @@ SUPERBOTIJO_PM2_SERVICES=my-app,worker-1
 
 **Option 2: Config file**
 
-Create `allowed-services.json` in the mission-control directory:
+Create `allowed-services.json` in the superbotijo directory:
 
 ```json
 {

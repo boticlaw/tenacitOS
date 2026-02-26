@@ -81,7 +81,7 @@ async function runAction(action: string): Promise<ActionResult> {
 
       case 'heartbeat': {
         // Check all critical services
-        const services = ['mission-control'];
+        const services = ['superbotijo'];
         const pm2services = ['classvault', 'content-vault', 'brain'];
         const results: string[] = [];
 
@@ -116,7 +116,7 @@ async function runAction(action: string): Promise<ActionResult> {
       }
 
       case 'npm-audit': {
-        const { stdout, stderr } = await execAsync(`cd "${WORKSPACE}/mission-control" && npm audit --json 2>/dev/null | node -e "const d=require('fs').readFileSync('/dev/stdin','utf-8');const j=JSON.parse(d);console.log('Vulnerabilities: '+JSON.stringify(j.metadata?.vulnerabilities||{}))" 2>&1`).catch((e) => ({ stdout: '', stderr: e.message }));
+        const { stdout, stderr } = await execAsync(`cd "${WORKSPACE}/superbotijo" && npm audit --json 2>/dev/null | node -e "const d=require('fs').readFileSync('/dev/stdin','utf-8');const j=JSON.parse(d);console.log('Vulnerabilities: '+JSON.stringify(j.metadata?.vulnerabilities||{}))" 2>&1`).catch((e) => ({ stdout: '', stderr: e.message }));
         output = stdout || stderr || 'Audit completed';
         break;
       }

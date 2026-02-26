@@ -12,7 +12,7 @@ const OPENCLAW_DIR = process.env.OPENCLAW_DIR || '/root/.openclaw';
 
 const WORKSPACE_MAP: Record<string, string> = {
   workspace: path.join(OPENCLAW_DIR, 'workspace'),
-  'mission-control': path.join(OPENCLAW_DIR, 'workspace', 'mission-control'),
+  'superbotijo': path.join(OPENCLAW_DIR, 'workspace', 'superbotijo'),
 };
 
 export async function POST(request: NextRequest) {

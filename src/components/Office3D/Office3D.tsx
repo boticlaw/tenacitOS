@@ -363,7 +363,7 @@ export default function Office3D() {
                     </ul>
                   </div>
                   <p className="text-sm text-gray-500 italic">
-                    Full roadmap available at workspace/mission-control/ROADMAP.md
+                    Full roadmap available at workspace/superbotijo/ROADMAP.md
                   </p>
                 </>
               )}

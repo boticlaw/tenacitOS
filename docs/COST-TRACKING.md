@@ -29,7 +29,7 @@ Pricing is defined in `src/lib/pricing.ts`.
 To collect usage data manually:
 
 ```bash
-cd /root/.openclaw/workspace/mission-control
+cd /root/.openclaw/workspace/superbotijo
 npx tsx scripts/collect-usage.ts
 ```
 
@@ -43,7 +43,7 @@ This will:
 To set up hourly automatic collection:
 
 ```bash
-cd /root/.openclaw/workspace/mission-control
+cd /root/.openclaw/workspace/superbotijo
 ./scripts/setup-cron.sh
 ```
 
@@ -56,7 +56,7 @@ crontab -l
 
 **View logs:**
 ```bash
-tail -f /var/log/mission-control-usage.log
+tail -f /var/log/superbotijo-usage.log
 ```
 
 **Remove cron job:**
@@ -164,7 +164,7 @@ Returns cost summary, breakdowns, and trends.
 **Unknown model warnings:**
 - Update `src/lib/pricing.ts` with new model pricing
 - Rebuild: `npm run build`
-- Restart: `systemctl restart mission-control`
+- Restart: `systemctl restart superbotijo`
 
 **Costs seem wrong:**
 - Verify pricing in `src/lib/pricing.ts`

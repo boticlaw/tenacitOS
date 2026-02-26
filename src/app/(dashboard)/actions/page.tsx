@@ -65,7 +65,7 @@ const ACTIONS: QuickAction[] = [
   {
     id: "npm-audit",
     label: "NPM Security Audit",
-    description: "Check for vulnerabilities in mission-control dependencies",
+    description: "Check for vulnerabilities in superbotijo dependencies",
     icon: Shield,
     color: "#4ADE80",
   },

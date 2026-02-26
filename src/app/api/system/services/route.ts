@@ -29,7 +29,7 @@ function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
   }
   
   // 2. From config file (if exists)
-  // Look in mission-control directory (where package.json is)
+  // Look in superbotijo directory (where package.json is)
   const fs = require('fs');
   const path = require('path');
   
@@ -37,7 +37,7 @@ function loadAdditionalServices(): { systemd: string[]; pm2: string[] } {
   const configLocations = [
     path.join(process.cwd(), 'allowed-services.json'),           // Current working directory
     path.join(__dirname, '..', '..', '..', 'allowed-services.json'), // Relative to this file
-    '/root/.openclaw/workspace/mission-control/allowed-services.json' // Absolute path as fallback
+    '/root/.openclaw/workspace/superbotijo/allowed-services.json' // Absolute path as fallback
   ];
   
   for (const configFile of configLocations) {
@@ -75,10 +75,10 @@ function getAllowedServices(): { systemd: string[]; pm2: string[] } {
     // Filter OpenClaw-related services
     for (const svc of services) {
       const name = svc.unit.replace('.service', '');
-      // Auto-allow if contains openclaw, superbotijo, or mission-control
+      // Auto-allow if contains openclaw, superbotijo, or superbotijo
       if (name.includes('openclaw') || 
           name.includes('superbotijo') || 
-          name.includes('mission-control')) {
+          name.includes('superbotijo')) {
         systemdServices.push(name);
       }
     }

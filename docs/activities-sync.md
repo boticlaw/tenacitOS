@@ -56,7 +56,7 @@ sudo apt-get install sqlite3 jq  # Ubuntu/Debian
 ### 2. Run the script manually to test
 
 ```bash
-cd /root/.openclaw/workspace/mission-control
+cd /root/.openclaw/workspace/superbotijo
 ./scripts/sync-openclaw-sessions.sh
 ```
 
@@ -74,7 +74,7 @@ EOF
 Environment variables (optional):
 
 - `OPENCLAW_DIR`: Path to OpenClaw installation (default: `/root/.openclaw`)
-- `SUPERBOTIJO_DB`: Path to SuperBotijo database (default: `$OPENCLAW_DIR/workspace/mission-control/data/activities.db`)
+- `SUPERBOTIJO_DB`: Path to SuperBotijo database (default: `$OPENCLAW_DIR/workspace/superbotijo/data/activities.db`)
 
 ## What it syncs
 
@@ -111,7 +111,7 @@ This prevents showing impossible channels in the dashboard.
 
 3. Check database:
    ```bash
-   sqlite3 ~/.openclaw/workspace/mission-control/data/activities.db \
+   sqlite3 ~/.openclaw/workspace/superbotijo/data/activities.db \
      "SELECT COUNT(*) FROM activities WHERE type='session';"
    ```
 

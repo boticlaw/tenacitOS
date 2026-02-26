@@ -58,7 +58,7 @@ export async function GET() {
 
   // Internal services
   const [missionControl, gateway] = await Promise.all([
-    checkSystemdService('mission-control'),
+    checkSystemdService('superbotijo'),
     checkSystemdService('openclaw-gateway'),
   ]);
   checks.push({ ...missionControl, name: 'SuperBotijo' });

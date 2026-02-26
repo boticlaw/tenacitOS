@@ -5,7 +5,7 @@ import os from "os";
 
 const execAsync = promisify(exec);
 
-const SYSTEMD_SERVICES = ["mission-control", "content-vault", "classvault", "creatoros"];
+const SYSTEMD_SERVICES = ["superbotijo", "content-vault", "classvault", "creatoros"];
 
 export async function GET() {
   try {

@@ -67,7 +67,7 @@ SuperBotijo reads directly from your OpenClaw installation:
 ├── workspace-studio/         ← sub-agent workspaces
 ├── workspace-infra/
 ├── ...
-└── workspace/mission-control/ ← SuperBotijo lives here
+└── workspace/superbotijo/ ← SuperBotijo lives here
 ```
 
 The app uses `OPENCLAW_DIR` to locate `openclaw.json` and all workspaces. **No manual agent configuration needed** — agents are auto-discovered from `openclaw.json`.
@@ -80,8 +80,8 @@ The app uses `OPENCLAW_DIR` to locate `openclaw.json` and all workspaces. **No m
 
 ```bash
 cd /root/.openclaw/workspace   # or your OPENCLAW_DIR/workspace
-git clone https://github.com/carlosazaustre/tenacitOS.git mission-control
-cd mission-control
+git clone https://github.com/carlosazaustre/tenacitOS.git superbotijo
+cd superbotijo
 npm install
 ```
 
@@ -165,14 +165,14 @@ Login at `http://localhost:3000` with the `ADMIN_PASSWORD` you set.
 ```bash
 npm run build
 
-pm2 start npm --name "mission-control" -- start
+pm2 start npm --name "superbotijo" -- start
 pm2 save
 pm2 startup   # enable auto-restart on reboot
 ```
 
 ### systemd
 
-Create `/etc/systemd/system/mission-control.service`:
+Create `/etc/systemd/system/superbotijo.service`:
 
 ```ini
 [Unit]
@@ -182,7 +182,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/root/.openclaw/workspace/mission-control
+WorkingDirectory=/root/.openclaw/workspace/superbotijo
 ExecStart=/usr/bin/npm start
 Restart=always
 RestartSec=10
@@ -194,14 +194,14 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable mission-control
-sudo systemctl start mission-control
+sudo systemctl enable superbotijo
+sudo systemctl start superbotijo
 ```
 
 ### Reverse proxy — Caddy (HTTPS)
 
 ```caddy
-mission-control.yourdomain.com {
+superbotijo.yourdomain.com {
     reverse_proxy localhost:3000
 }
 ```
@@ -295,7 +295,7 @@ See [docs/COST-TRACKING.md](./docs/COST-TRACKING.md) for details.
 ## Project Structure
 
 ```
-mission-control/
+superbotijo/
 ├── src/
 │   ├── app/
 │   │   ├── (dashboard)/      # Dashboard pages (protected)

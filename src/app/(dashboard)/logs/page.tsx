@@ -10,7 +10,7 @@ interface LogLine {
 }
 
 const SERVICES = [
-  { name: "mission-control", backend: "systemd", label: "SuperBotijo" },
+  { name: "superbotijo", backend: "systemd", label: "SuperBotijo" },
   { name: "classvault", backend: "pm2", label: "ClassVault" },
   { name: "content-vault", backend: "pm2", label: "Content Vault" },
   { name: "brain", backend: "pm2", label: "Brain" },
