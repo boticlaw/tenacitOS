@@ -75,7 +75,7 @@ function getAllowedServices(): { systemd: string[]; pm2: string[] } {
     // Filter OpenClaw-related services
     for (const svc of services) {
       const name = svc.unit.replace('.service', '');
-      // Auto-allow if contains openclaw, tenacitos, or mission-control
+      // Auto-allow if contains openclaw, superbotijo, or mission-control
       if (name.includes('openclaw') || 
           name.includes('tenacitos') || 
           name.includes('mission-control')) {

@@ -9,7 +9,7 @@ export type Locale = "en" | "es";
 type Messages = Record<string, unknown>;
 
 const DICTIONARY: Record<Locale, Messages> = { en, es };
-const COOKIE_NAME = "tenacitos-locale";
+const COOKIE_NAME = "superbotijo-locale";
 
 interface I18nContextValue {
   locale: Locale;

@@ -1,6 +1,7 @@
 {
-  "name": "mission-control",
-  "version": "0.1.0",
+  "name": "superbotijo",
+  "version": "1.0.0",
+  "description": "SuperBotijo - OpenClaw Mission Control Dashboard",
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",

@@ -10,7 +10,7 @@ export default function DashboardLayout({
 }) {
   return (
     <I18nProvider>
-      <div className="tenacios-shell" style={{ minHeight: "100vh" }}>
+      <div className="superbotijo-shell" style={{ minHeight: "100vh" }}>
         <Dock />
         <TopBar />
         
