@@ -30,7 +30,7 @@ const AGENT_POSITIONS: Record<string, { x: number; y: number }> = {
 
 // Map agent IDs to sprite filenames
 const SPRITE_FILES: Record<string, string> = {
-  main: "/office/sprite-tenacitas.png",
+  main: "/office/sprite-superbotijo.png",
   academic: "/office/sprite-profe.png",
   studio: "/office/sprite-studio.png",
   linkedin: "/office/sprite-linkedin.png",

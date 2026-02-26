@@ -1,10 +1,10 @@
-# 🦞 SuperBotijo - Roadmap
+# 🫙 SuperBotijo - Roadmap
 
 ## Fase 1: Fundamentos (Semana 1)
 > Mejorar lo que ya existe y añadir datos reales
 
 ### 1.1 Activity Logger Real
-- [ ] Crear endpoint POST `/api/activities` para que Tenacitas registre acciones
+- [ ] Crear endpoint POST `/api/activities` para que SuperBotijo registre acciones
 - [ ] Hook en OpenClaw para loguear automáticamente cada tool call
 - [ ] Campos: timestamp, type, description, status, duration, tokens_used
 - [ ] Retención: últimos 30 días
@@ -101,7 +101,7 @@
 > Interacción bidireccional
 
 ### 5.1 Command Terminal
-- [ ] Input para enviar mensajes/comandos a Tenacitas
+- [ ] Input para enviar mensajes/comandos a SuperBotijo
 - [ ] Output en tiempo real de respuesta
 - [ ] Historial de comandos
 - [ ] Shortcuts para comandos frecuentes
@@ -114,7 +114,7 @@
 
 ### 5.3 Session History ✅ (nuevo — 2026-02-21)
 - [x] **Lista de sesiones** → todas las sesiones de OpenClaw (main, cron, subagent, chats)
-- [x] **Tipos visuales** → badges con emoji 🦞 Main / 🕐 Cron / 🤖 Sub-agent / 💬 Direct
+- [x] **Tipos visuales** → badges con emoji 🫙 Main / 🕐 Cron / 🤖 Sub-agent / 💬 Direct
 - [x] **Token counter** → total tokens + barra de contexto (% usado) con color-coding
 - [x] **Model badge** → modelo mostrado (Sonnet 4.5, Opus 4.6, etc.)
 - [x] **Age display** → "2 hours ago", "3 days ago" con date-fns
@@ -179,7 +179,7 @@
 ### 7.1 Live Activity Stream
 - [ ] WebSocket connection
 - [ ] Updates en tiempo real del activity feed
-- [ ] Indicador "Tenacitas está trabajando..."
+- [ ] Indicador "SuperBotijo está trabajando..."
 - [ ] Toast notifications
 
 ### 7.2 System Status
@@ -417,4 +417,4 @@
 ---
 
 *Creado: 2026-02-07*
-*Última actualización: 2026-02-21 (Tenacitas nightly shift)*
+*Última actualización: 2026-02-21 (SuperBotijo nightly shift)*

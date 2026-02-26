@@ -74,7 +74,7 @@ EOF
 Environment variables (optional):
 
 - `OPENCLAW_DIR`: Path to OpenClaw installation (default: `/root/.openclaw`)
-- `TENACITOS_DB`: Path to SuperBotijo database (default: `$OPENCLAW_DIR/workspace/mission-control/data/activities.db`)
+- `SUPERBOTIJO_DB`: Path to SuperBotijo database (default: `$OPENCLAW_DIR/workspace/mission-control/data/activities.db`)
 
 ## What it syncs
 

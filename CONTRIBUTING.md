@@ -1,6 +1,6 @@
 # Contributing to SuperBotijo
 
-Thank you for your interest in contributing! 🦞
+Thank you for your interest in contributing! 🫙
 
 ## Getting Started
 
@@ -366,4 +366,4 @@ Check [ROADMAP.md](./ROADMAP.md) first - it might already be planned!
 
 ---
 
-Thank you for contributing! 🦞✨
+Thank you for contributing! 🫙✨

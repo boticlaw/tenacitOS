@@ -40,8 +40,8 @@ If you need to control services with different names (e.g., nginx, mysql):
 **Option 1: Environment variables**
 ```bash
 # In .env.local
-TENACITOS_SYSTEMD_SERVICES=nginx,mysql,redis-server
-TENACITOS_PM2_SERVICES=my-app,worker-1
+SUPERBOTIJO_SYSTEMD_SERVICES=nginx,mysql,redis-server
+SUPERBOTIJO_PM2_SERVICES=my-app,worker-1
 ```
 
 **Option 2: Config file**
