@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings, RefreshCw } from "lucide-react";
+import { Settings, RefreshCw, Server, FileJson } from "lucide-react";
 import { SystemInfo } from "@/components/SystemInfo";
 import { IntegrationStatus } from "@/components/IntegrationStatus";
 import { QuickActions } from "@/components/QuickActions";
+import { ConfigEditor } from "@/components/ConfigEditor";
 
 interface SystemData {
   agent: {
@@ -40,6 +41,12 @@ export default function SettingsPage() {
   const [systemData, setSystemData] = useState<SystemData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [activeTab, setActiveTab] = useState<"system" | "config">("system");
+
+  const tabs = [
+    { id: "system" as const, label: "System", icon: Server },
+    { id: "config" as const, label: "Config", icon: FileJson },
+  ];
 
   const fetchSystemData = async () => {
     try {
@@ -98,29 +105,54 @@ export default function SettingsPage() {
       </div>
 
       {/* Last Refresh Time */}
-      {lastRefresh && (
+      {lastRefresh && activeTab === "system" && (
         <div className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
           Last updated: {lastRefresh.toLocaleTimeString()}
         </div>
       )}
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* System Info - Full width on first row */}
-        <div className="lg:col-span-2">
-          <SystemInfo data={systemData} />
-        </div>
-
-        {/* Integration Status */}
-        <div>
-          <IntegrationStatus integrations={systemData?.integrations || null} />
-        </div>
-
-        {/* Quick Actions */}
-        <div>
-          <QuickActions onActionComplete={handleRefresh} />
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-1 mb-6 p-1 rounded-lg" style={{ backgroundColor: "var(--card)" }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="flex items-center gap-2 px-4 py-2 rounded-md transition-all"
+            style={{
+              backgroundColor: activeTab === tab.id ? "var(--accent)" : "transparent",
+              color: activeTab === tab.id ? "white" : "var(--text-secondary)",
+            }}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {/* Tab Content */}
+      {activeTab === "system" && (
+        <>
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            {/* System Info - Full width on first row */}
+            <div className="lg:col-span-2">
+              <SystemInfo data={systemData} />
+            </div>
+
+            {/* Integration Status */}
+            <div>
+              <IntegrationStatus integrations={systemData?.integrations || null} />
+            </div>
+
+            {/* Quick Actions */}
+            <div>
+              <QuickActions onActionComplete={handleRefresh} />
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === "config" && <ConfigEditor />}
 
       {/* Footer Info */}
       <div 

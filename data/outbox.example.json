@@ -1,0 +1,111 @@
+[
+  {
+    "id": "msg-001",
+    "timestamp": "2026-02-27T10:30:00.000Z",
+    "channel": "telegram",
+    "type": "notification",
+    "recipient": "@superbotijo_updates",
+    "subject": "Cron Job Completed",
+    "content": "The scheduled backup job has completed successfully. 156 files backed up to /backup/2026-02-27/",
+    "status": "delivered",
+    "metadata": {
+      "messageId": "tg_123456789",
+      "responseTime": 245
+    }
+  },
+  {
+    "id": "msg-002",
+    "timestamp": "2026-02-27T09:15:00.000Z",
+    "channel": "telegram",
+    "type": "alert",
+    "recipient": "@admin_alerts",
+    "subject": "High Memory Usage",
+    "content": "Warning: Memory usage has exceeded 85%. Current usage: 87.2%. Consider reviewing active processes.",
+    "status": "delivered",
+    "metadata": {
+      "messageId": "tg_123456790",
+      "responseTime": 189
+    }
+  },
+  {
+    "id": "msg-003",
+    "timestamp": "2026-02-26T18:45:00.000Z",
+    "channel": "email",
+    "type": "report",
+    "recipient": "admin@example.com",
+    "subject": "Weekly Activity Report",
+    "content": "Weekly Activity Report for SuperBotijo\n\nTotal Activities: 1,247\nSuccessful: 1,198 (96%)\nFailed: 49 (4%)\n\nTop Activity Types:\n- File Operations: 456\n- API Calls: 312\n- Cron Jobs: 234\n\nToken Usage: 2.4M tokens\nEstimated Cost: $12.45",
+    "status": "sent",
+    "metadata": {
+      "messageId": "email_abc123",
+      "responseTime": 1520
+    }
+  },
+  {
+    "id": "msg-004",
+    "timestamp": "2026-02-26T14:20:00.000Z",
+    "channel": "telegram",
+    "type": "reminder",
+    "recipient": "@daily_tasks",
+    "content": "Reminder: Daily code review session starts in 15 minutes.",
+    "status": "delivered",
+    "metadata": {
+      "messageId": "tg_123456791",
+      "responseTime": 156
+    }
+  },
+  {
+    "id": "msg-005",
+    "timestamp": "2026-02-25T22:10:00.000Z",
+    "channel": "discord",
+    "type": "notification",
+    "recipient": "#bot-updates",
+    "content": "New skill installed: git-workflow-enhanced v2.1.0",
+    "status": "failed",
+    "error": "Webhook rate limited. Retry in 60 seconds.",
+    "metadata": {
+      "retryCount": 3
+    }
+  },
+  {
+    "id": "msg-006",
+    "timestamp": "2026-02-25T16:30:00.000Z",
+    "channel": "telegram",
+    "type": "response",
+    "recipient": "@user_12345",
+    "content": "I've completed the file reorganization. Moved 47 files to the archive folder and created a summary in MEMORY.md.",
+    "status": "delivered",
+    "metadata": {
+      "messageId": "tg_123456792",
+      "responseTime": 312
+    }
+  },
+  {
+    "id": "msg-007",
+    "timestamp": "2026-02-24T08:00:00.000Z",
+    "channel": "telegram",
+    "type": "alert",
+    "recipient": "@admin_alerts",
+    "subject": "System Restart",
+    "content": "SuperBotijo has been restarted. All services are operational.",
+    "status": "delivered",
+    "metadata": {
+      "messageId": "tg_123456793",
+      "responseTime": 198
+    }
+  },
+  {
+    "id": "msg-008",
+    "timestamp": "2026-02-23T20:45:00.000Z",
+    "channel": "email",
+    "type": "report",
+    "recipient": "reports@example.com",
+    "subject": "Monthly Cost Summary",
+    "content": "Monthly Cost Summary - February 2026\n\nTotal API Calls: 45,678\nTotal Tokens: 12.3M\n\nCost Breakdown:\n- Claude Sonnet: $45.23\n- Claude Opus: $23.45\n- Gemini Pro: $12.34\n\nTotal: $81.02",
+    "status": "delivered",
+    "metadata": {
+      "messageId": "email_def456",
+      "responseTime": 2340
+    }
+  }
+]
