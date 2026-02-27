@@ -39,7 +39,8 @@ interface SkillsConfig {
 
 const CONFIG_PATH = path.join(process.cwd(), 'data', 'configured-skills.json');
 const DEFAULT_SYSTEM_PATH = '/usr/lib/node_modules/openclaw/skills';
-const DEFAULT_WORKSPACE_PATH = (process.env.OPENCLAW_DIR || '/root/.openclaw') + '/workspace-infra/skills';
+const OPENCLAW_DIR = process.env.OPENCLAW_DIR || '/root/.openclaw';
+const DEFAULT_WORKSPACE_PATH = path.join(OPENCLAW_DIR, 'workspace/skills');
 
 /**
  * Parse SKILL.md front matter (YAML between --- delimiters)
@@ -235,14 +236,63 @@ function loadConfiguredSkills(): ConfiguredSkill[] {
 }
 
 /**
+ * Auto-discover skills by scanning workspace skills directory
+ */
+function autoDiscoverSkills(): ConfiguredSkill[] {
+  const skills: ConfiguredSkill[] = [];
+  const seenNames = new Set<string>();
+  
+  // Try multiple possible locations
+  const possiblePaths = [
+    path.join(OPENCLAW_DIR, 'workspace/skills'),
+    path.join(OPENCLAW_DIR, 'workspace-infra/skills'),
+  ];
+  
+  for (const workspacePath of possiblePaths) {
+    try {
+      if (!fs.existsSync(workspacePath)) continue;
+      
+      const entries = fs.readdirSync(workspacePath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && !seenNames.has(entry.name)) {
+          const skillPath = path.join(workspacePath, entry.name);
+          const skillMdPath = path.join(skillPath, 'SKILL.md');
+          if (fs.existsSync(skillMdPath)) {
+            skills.push({ name: entry.name, location: 'workspace' });
+            seenNames.add(entry.name);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error scanning ${workspacePath}:`, error);
+    }
+  }
+  
+  return skills;
+}
+
+/**
  * Scan only configured skills and return parsed skills
  */
 export function scanAllSkills(): SkillInfo[] {
   const skills: SkillInfo[] = [];
   
   try {
-    const content = fs.readFileSync(CONFIG_PATH, 'utf-8');
-    const config: SkillsConfig = JSON.parse(content);
+    let config: SkillsConfig;
+    
+    // Try to read config file, fall back to auto-discovery
+    if (fs.existsSync(CONFIG_PATH)) {
+      const content = fs.readFileSync(CONFIG_PATH, 'utf-8');
+      config = JSON.parse(content);
+    } else {
+      // Auto-discover from multiple possible locations
+      const discoveredSkills = autoDiscoverSkills();
+      config = {
+        workspaceSkillsPath: path.join(OPENCLAW_DIR, 'workspace/skills'),
+        skills: discoveredSkills,
+      };
+      console.log(`[skill-parser] Auto-discovered ${discoveredSkills.length} skills`);
+    }
     
     const systemPath = config.systemSkillsPath || DEFAULT_SYSTEM_PATH;
     const workspacePath = config.workspaceSkillsPath || DEFAULT_WORKSPACE_PATH;

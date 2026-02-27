@@ -1,7 +1,17 @@
 {
-  "lastUpdated": "2026-01-01",
+  "lastUpdated": "2026-02-27",
+  "workspaceSkillsPath": "/root/.openclaw/workspace/skills",
   "skills": [
-    {"name": "weather", "location": "system", "description": "Get current weather and forecasts"},
-    {"name": "web-search", "location": "system", "description": "Search the web using Brave API"}
+    {"name": "agent-browser", "location": "workspace"},
+    {"name": "clawddocs", "location": "workspace"},
+    {"name": "github", "location": "workspace"},
+    {"name": "gog", "location": "workspace"},
+    {"name": "obsidian-brain-bases", "location": "workspace"},
+    {"name": "obsidian-brain-twitter", "location": "workspace"},
+    {"name": "opencode-controller", "location": "workspace"},
+    {"name": "scrapling-cli", "location": "workspace"},
+    {"name": "self-improving-agent", "location": "workspace"},
+    {"name": "smart-routing", "location": "workspace"},
+    {"name": "tavily-search", "location": "workspace"}
   ]
 }
