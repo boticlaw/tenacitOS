@@ -37,9 +37,13 @@ function writeDisabledSkills(disabled: string[]): void {
   );
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const skillId = decodeURIComponent(params.id);
+    const { id } = await params;
+    const skillId = decodeURIComponent(id);
     const body = await request.json();
     const { enabled } = body;
 
