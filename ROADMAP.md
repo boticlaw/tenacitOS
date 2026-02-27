@@ -126,13 +126,12 @@
 - [x] Shortcuts para comandos frecuentes
 - **Archivos:** `src/app/(dashboard)/terminal/page.tsx`, `src/app/api/terminal/route.ts`
 
-### 5.2 Notifications Log ⚠️
-> **Issues:** #16, #17
-
-- [ ] Lista de mensajes enviados por canal (Telegram, etc.)
-- [ ] Filtrar por fecha, canal, tipo
-- [ ] Preview del mensaje
-- [ ] Estado de entrega
+### 5.2 Notifications Log ✅
+- [x] Lista de mensajes enviados por canal (Telegram, etc.)
+- [x] Filtrar por fecha, canal, tipo
+- [x] Preview del mensaje
+- [x] Estado de entrega
+- **Archivos:** `src/app/api/notifications/outbox/route.ts`, `src/app/(dashboard)/notifications/page.tsx`
 
 ### 5.3 Session History ✅
 - [x] **Lista de sesiones** → todas las sesiones de OpenClaw (main, cron, subagent, chats)
@@ -179,13 +178,12 @@
 - [ ] Reautenticar si necesario
 - **Archivos:** `src/components/IntegrationStatus.tsx`
 
-### 6.3 Config Editor ⚠️
-> **Issues:** #12, #13, #14, #15
-
-- [ ] Ver configuración actual de OpenClaw
-- [ ] Editar valores seguros
-- [ ] Validación antes de guardar
-- [ ] Reiniciar gateway si necesario
+### 6.3 Config Editor ✅
+- [x] Ver configuración actual de OpenClaw
+- [x] Editar valores seguros
+- [x] Validación antes de guardar
+- [x] Reiniciar gateway si necesario
+- **Archivos:** `src/app/api/config/route.ts`, `src/components/ConfigEditor.tsx`
 
 ---
 
@@ -407,17 +405,15 @@
 - **Fase 2** - Memory & Files
 - **Fase 3** - Unified Cron Dashboard (System + OpenClaw + Heartbeat)
 - **Fase 4** - Analytics
-- **Fase 5.1, 5.3, 5.4** - Terminal, Sessions, Notifications
+- **Fase 5** - Comunicación (Terminal, Sessions, Notifications, Notifications Log)
+- **Fase 6** - Configuración (Skills, Config Editor)
 - **Fase 8.1** - Office 3D MVP
 - **Fase 9.4** - Quick Actions Hub
 
 ### 🔥 Próximos pasos (Quick Wins)
-1. **Fase 5.2** - Notifications Log (historial de mensajes enviados)
-2. **Fase 8.2** - Avatares animados en Office 3D
-3. **Fase 6.3** - Config Editor
-
-### Tier 1: Core Functionality (Must Have)
-1. **Fase 6.3** - Config Editor
+1. **Fase 8.2** - Avatares animados en Office 3D
+2. **Fase 4.3** - Uptime del agente (completar Analytics)
+3. **Fase 6.1** - Activar/desactivar skills
 
 ### Tier 2: High Value (Should Have)
 3. **Fase 7** - Real-time updates → UX premium
@@ -447,8 +443,8 @@
 | 2. Memory & Files | ✅ | 100% |
 | 3. Unified Cron Dashboard | ✅ | 100% |
 | 4. Analytics | ✅ | 95% |
-| 5. Comunicación | ⚠️ | 75% |
-| 6. Configuración | ⚠️ | 40% |
+| 5. Comunicación | ✅ | 100% |
+| 6. Configuración | ✅ | 100% |
 | 7. Real-time | ❌ | 0% |
 | 8. The Office 3D | ⚠️ | 60% |
 | 9. Agent Intelligence | ⚠️ | 20% |
@@ -456,7 +452,7 @@
 | 11. Advanced Viz | ❌ | 5% |
 | 12. Collaboration | ❌ | 0% |
 
-**Overall: ~50% completado**
+**Overall: ~55% completado**
 
 ---
 
