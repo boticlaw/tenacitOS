@@ -1,118 +1,127 @@
 # 🫙 SuperBotijo - Roadmap
 
-## Fase 1: Fundamentos (Semana 1)
+## Fase 1: Fundamentos ✅ COMPLETO
 > Mejorar lo que ya existe y añadir datos reales
 
-### 1.1 Activity Logger Real
-- [ ] Crear endpoint POST `/api/activities` para que SuperBotijo registre acciones
-- [ ] Hook en OpenClaw para loguear automáticamente cada tool call
-- [ ] Campos: timestamp, type, description, status, duration, tokens_used
-- [ ] Retención: últimos 30 días
+### 1.1 Activity Logger Real ✅
+- [x] Crear endpoint POST `/api/activities` para que SuperBotijo registre acciones
+- [x] Hook en OpenClaw para loguear automáticamente cada tool call
+- [x] Campos: timestamp, type, description, status, duration, tokens_used
+- [x] Retención: últimos 30 días
+- **Archivos:** `src/app/api/activities/route.ts`, `src/app/(dashboard)/activity/page.tsx`
 
-### 1.2 Integración con Cron Real
-- [ ] Leer cron jobs reales de OpenClaw (`cron list`)
-- [ ] Mostrar en calendario con próximas ejecuciones
-- [ ] Historial de ejecuciones pasadas
+### 1.2 Integración con Cron Real ✅
+- [x] Leer cron jobs reales de OpenClaw (`cron list`)
+- [x] Mostrar en calendario con próximas ejecuciones
+- [x] Historial de ejecuciones pasadas
 
-### 1.3 Stats Dashboard
-- [ ] Contador de actividades por día/semana
-- [ ] Tipos de acciones más frecuentes
-- [ ] Tasa de éxito/error
+### 1.3 Stats Dashboard ✅
+- [x] Contador de actividades por día/semana
+- [x] Tipos de acciones más frecuentes
+- [x] Tasa de éxito/error
+- **Archivos:** `src/components/charts/*`, `src/components/ActivityHeatmap.tsx`
 
 ---
 
-## Fase 2: Memory & Files (Semana 2)
+## Fase 2: Memory & Files ✅ COMPLETO
 > Gestión visual del workspace
 
-### 2.1 Memory Browser
-- [ ] Vista árbol de `memory/*.md` y archivos principales
-- [ ] Editor markdown con preview
-- [ ] Crear/renombrar/eliminar archivos
-- [ ] Búsqueda dentro de archivos
+### 2.1 Memory Browser ✅
+- [x] Vista árbol de `memory/*.md` y archivos principales
+- [x] Editor markdown con preview
+- [x] Crear/renombrar/eliminar archivos
+- [x] Búsqueda dentro de archivos
+- **Archivos:** `src/app/(dashboard)/memory/page.tsx`, `src/components/FileTree.tsx`, `src/components/MarkdownEditor.tsx`
 
-### 2.2 File Browser
-- [ ] Explorador del workspace completo
-- [ ] Preview de archivos (código, markdown, JSON)
-- [ ] Descargar archivos
-- [ ] Upload de archivos
+### 2.2 File Browser ✅
+- [x] Explorador del workspace completo
+- [x] Preview de archivos (código, markdown, JSON)
+- [x] Descargar archivos
+- [x] Upload de archivos
+- **Archivos:** `src/app/(dashboard)/files/page.tsx`, `src/components/FileBrowser.tsx`, `src/app/api/files/*`
 
-### 2.3 MEMORY.md Viewer
-- [ ] Vista especial para MEMORY.md con secciones colapsables
-- [ ] Edición inline
-- [ ] Historial de cambios (git log)
+### 2.3 MEMORY.md Viewer ✅
+- [x] Vista especial para MEMORY.md con secciones colapsables
+- [x] Edición inline
+- [x] Historial de cambios (git log) - integrado en Memory Browser
+- **Archivos:** Integrado en Memory Browser
 
 ---
 
-## Fase 3: Cron Manager (Semana 3)
+## Fase 3: Cron Manager ✅ COMPLETO
 > Control total de tareas programadas
 
-### 3.1 CRUD de Cron Jobs
-- [x] Listar todos los jobs con estado (ya existía)
-- [ ] Crear nuevo job con form visual (CronJobModal existe pero no está wired up al API)
-- [ ] Editar job existente
+### 3.1 CRUD de Cron Jobs ✅
+- [x] Listar todos los jobs con estado
+- [x] Crear nuevo job con form visual (CronJobModal conectado al API)
+- [x] Editar job existente
 - [x] Eliminar job (con confirmación)
 - [x] Activar/desactivar job
 
-### 3.2 Cron Builder Visual
-- [ ] Selector de frecuencia: diario, semanal, mensual, custom
-- [ ] Preview de próximas 5 ejecuciones
-- [ ] Selector de timezone
-- [ ] Templates predefinidos
+### 3.2 Cron Builder Visual ✅
+- [x] Selector de frecuencia: diario, semanal, mensual, custom
+- [x] Preview de próximas 5 ejecuciones
+- [x] Selector de timezone
+- [x] Templates predefinidos
+- [x] CronJobModal conectado al API backend
 
-### 3.3 Historial de Ejecuciones
-- [x] ~~Re-ejecutar manualmente~~ → **"Run Now" button** en CronJobCard (llama a `POST /api/cron/run`)
+### 3.3 Historial de Ejecuciones ✅
+- [x] **"Run Now" button** en CronJobCard (llama a `POST /api/cron/run`)
 - [x] **Run History inline** → botón History en CronJobCard, llama a `GET /api/cron/runs?id=<id>`
-- [ ] Filtrar historial por fecha, estado
-- [ ] Log con output completo
+- [x] Filtrar historial por fecha, estado
+- [x] Log con output completo
+- [x] Límite aumentado a 20 resultados con scroll
 
-### 3.4 Weekly Timeline View ✅ (nuevo — 2026-02-19)
+### 3.4 Weekly Timeline View ✅
 - [x] Vista tipo calendario de 7 días
 - [x] Eventos de cron posicionados por día con hora exacta
 - [x] Jobs de intervalo mostrados como "recurring" con dashed border
 - [x] Leyenda de colores por job
 - [x] Toggle Cards / Timeline en header
-- [x] Componente: `CronWeeklyTimeline.tsx`
-- [x] Nuevas rutas API: `POST /api/cron/run`, `GET /api/cron/runs`
+- **Archivos:** `src/components/CronWeeklyTimeline.tsx`, `src/app/api/cron/run/route.ts`, `src/app/api/cron/runs/route.ts`, `src/components/CronJobCard.tsx`, `src/components/CronJobModal.tsx`
 
 ---
 
-## Fase 4: Analytics (Semana 4)
+## Fase 4: Analytics ✅ COMPLETO
 > Visualización de datos
 
-### 4.1 Gráficas de Uso
-- [ ] Actividad por hora del día (heatmap)
-- [ ] Tokens consumidos por día (line chart)
-- [ ] Tipos de tareas (pie chart)
-- [ ] Tendencia semanal
+### 4.1 Gráficas de Uso ✅
+- [x] Actividad por hora del día (heatmap)
+- [x] Tokens consumidos por día (line chart)
+- [x] Tipos de tareas (pie chart)
+- [x] Tendencia semanal
+- **Archivos:** `src/app/(dashboard)/analytics/page.tsx`, `src/components/charts/*`
 
-### 4.2 Cost Tracking
-- [ ] Estimación de coste por modelo
-- [ ] Coste acumulado diario/mensual
-- [ ] Alertas de gasto (opcional)
+### 4.2 Cost Tracking ✅
+- [x] Estimación de coste por modelo
+- [x] Coste acumulado diario/mensual
+- [x] Alertas de gasto (opcional)
+- **Archivos:** `src/app/(dashboard)/costs/page.tsx`, `src/app/api/costs/route.ts`
 
-### 4.3 Performance Metrics
-- [ ] Tiempo promedio de respuesta
-- [ ] Tasa de éxito por tipo de tarea
+### 4.3 Performance Metrics ⚠️
+- [x] Tiempo promedio de respuesta (en activity)
+- [x] Tasa de éxito por tipo de tarea (SuccessRateGauge)
 - [ ] Uptime del agente
 
 ---
 
-## Fase 5: Comunicación (Semana 5)
+## Fase 5: Comunicación ⚠️ PARCIAL
 > Interacción bidireccional
 
-### 5.1 Command Terminal
-- [ ] Input para enviar mensajes/comandos a SuperBotijo
-- [ ] Output en tiempo real de respuesta
-- [ ] Historial de comandos
-- [ ] Shortcuts para comandos frecuentes
+### 5.1 Command Terminal ✅
+- [x] Input para enviar mensajes/comandos a SuperBotijo
+- [x] Output en tiempo real de respuesta
+- [x] Historial de comandos
+- [x] Shortcuts para comandos frecuentes
+- **Archivos:** `src/app/(dashboard)/terminal/page.tsx`, `src/app/api/terminal/route.ts`
 
-### 5.2 Notifications Log
+### 5.2 Notifications Log ❌
 - [ ] Lista de mensajes enviados por canal (Telegram, etc.)
 - [ ] Filtrar por fecha, canal, tipo
 - [ ] Preview del mensaje
 - [ ] Estado de entrega
 
-### 5.3 Session History ✅ (nuevo — 2026-02-21)
+### 5.3 Session History ✅
 - [x] **Lista de sesiones** → todas las sesiones de OpenClaw (main, cron, subagent, chats)
 - [x] **Tipos visuales** → badges con emoji 🫙 Main / 🕐 Cron / 🤖 Sub-agent / 💬 Direct
 - [x] **Token counter** → total tokens + barra de contexto (% usado) con color-coding
@@ -123,14 +132,9 @@
 - [x] **Filter tabs** → All / Main / Cron / Sub-agents / Chats con contador
 - [x] **Búsqueda** → filtro por key/model
 - [x] **Stats cards** → Total sessions, Total tokens, Cron runs, Models used
-- [x] **Sidebar + Dock** → añadido a navegación (icono History)
-- **Archivos:**
-  - NEW: `src/app/api/sessions/route.ts`
-  - NEW: `src/app/(dashboard)/sessions/page.tsx`
-  - MODIFIED: `src/components/Sidebar.tsx` (añadida entrada Sessions)
-  - MODIFIED: `src/components/SuperBotijo/Dock.tsx` (añadida entrada Sessions)
+- **Archivos:** `src/app/api/sessions/route.ts`, `src/app/(dashboard)/sessions/page.tsx`
 
-### 5.4 Notifications System ✅ (nuevo — 2026-02-20)
+### 5.4 Notifications System ✅
 - [x] **API de notificaciones** → `GET/POST/PATCH/DELETE /api/notifications`
 - [x] **NotificationDropdown component** → Bell icon en TopBar con dropdown funcional
 - [x] **Unread count badge** → Contador de notificaciones no leídas
@@ -140,32 +144,29 @@
 - [x] **Links** → Notificaciones pueden tener links a páginas internas
 - [x] **Auto-refresh** → Poll cada 30 segundos
 - [x] **Integración con cron** → Cron Run Now genera notificación
-- [x] **Storage** → JSON file en `data/notifications.json` (hasta 100 notificaciones)
-- **Archivos:**
-  - NEW: `src/app/api/notifications/route.ts`
-  - NEW: `src/components/NotificationDropdown.tsx`
-  - MODIFIED: `src/components/SuperBotijo/TopBar.tsx`
-  - MODIFIED: `src/app/api/cron/run/route.ts` (integración)
+- **Archivos:** `src/app/api/notifications/route.ts`, `src/components/NotificationDropdown.tsx`
 
 ---
 
-## Fase 6: Configuración (Semana 6)
+## Fase 6: Configuración ⚠️ PARCIAL
 > Admin del sistema
 
-### 6.1 Skills Manager
-- [ ] Lista de skills instalados
-- [ ] Ver SKILL.md de cada uno
+### 6.1 Skills Manager ✅
+- [x] Lista de skills instalados
+- [x] Ver SKILL.md de cada uno
 - [ ] Activar/desactivar
 - [ ] Instalar desde ClawHub
 - [ ] Actualizar skills
+- **Archivos:** `src/app/(dashboard)/skills/page.tsx`, `src/app/api/skills/route.ts`
 
-### 6.2 Integration Status
-- [ ] Estado de conexiones (Twitter, Gmail, etc.)
+### 6.2 Integration Status ⚠️
+- [x] Estado de conexiones (componente existe)
 - [ ] Última actividad por integración
 - [ ] Test de conectividad
 - [ ] Reautenticar si necesario
+- **Archivos:** `src/components/IntegrationStatus.tsx`
 
-### 6.3 Config Editor
+### 6.3 Config Editor ❌
 - [ ] Ver configuración actual de OpenClaw
 - [ ] Editar valores seguros
 - [ ] Validación antes de guardar
@@ -173,7 +174,7 @@
 
 ---
 
-## Fase 7: Real-time (Semana 7)
+## Fase 7: Real-time ❌ PENDIENTE
 > WebSockets y notificaciones live
 
 ### 7.1 Live Activity Stream
@@ -184,33 +185,35 @@
 
 ### 7.2 System Status
 - [ ] Heartbeat del agente
-- [ ] CPU/memoria del VPS
+- [ ] CPU/memoria del VPS (parcial en `/system`)
 - [ ] Cola de tareas pendientes
 
 ---
 
-## Fase 8: The Office 3D 🏢 (Semanas 8-10)
+## Fase 8: The Office 3D 🏢 ⚠️ PARCIAL
 > Entorno 3D navegable que simula una oficina virtual donde trabajan los agentes
 
 **Ver spec completa:** `ROADMAP-OFFICE-3D.md`
 
-### 8.1 MVP - Oficina Básica (Semana 8)
-- [ ] Sala 3D con React Three Fiber + 6 escritorios
-- [ ] Navegación WASD + mouse (fly mode)
-- [ ] Monitors mostrando estado: Working/Idle/Error
-- [ ] Click en escritorio → panel lateral con activity feed
-- [ ] Iluminación básica (día/noche)
-- [ ] Avatares simples (cubo/esfera con emoji del agente)
+### 8.1 MVP - Oficina Básica ✅
+- [x] Sala 3D con React Three Fiber + escritorios dinámicos
+- [x] Navegación WASD + mouse (fly mode) - FirstPersonControls
+- [x] Monitors mostrando estado: Working/Idle/Error
+- [x] Click en escritorio → panel lateral con activity feed
+- [x] Iluminación básica (día/noche)
+- [x] Avatares con emoji del agente
+- **Archivos:** `src/components/Office3D/Office3D.tsx`, `src/app/office/page.tsx`
 
-### 8.2 Interactions & Ambient (Semana 9)
+### 8.2 Interactions & Ambient ⚠️
 - [ ] Avatares animados (tecleando, pensando, error)
 - [ ] Sub-agents aparecen como "visitantes" en la oficina
 - [ ] Trail visual entre parent y sub-agent
 - [ ] Efectos visuales (partículas success, humo error, beam heartbeat)
 - [ ] Sonido ambiental toggleable (teclas, notificaciones, lofi)
-- [ ] Click en objetos (archivador→Memory, pizarra→Roadmap, café→Mood)
+- [x] Click en objetos (archivador→Memory, pizarra→Roadmap, café→Mood)
+- **Archivos:** `src/components/Office3D/FileCabinet.tsx`, `Whiteboard.tsx`, `CoffeeMachine.tsx`, `WallClock.tsx`
 
-### 8.3 Multi-Floor Building (Semana 10)
+### 8.3 Multi-Floor Building ❌
 - [ ] 4 plantas navegables con ascensor:
   - Planta 1: Main Office (agentes principales)
   - Planta 2: Server Room (DBs, VPS, integrations)
@@ -219,15 +222,20 @@
 - [ ] Customization: temas (modern, retro, cyberpunk, matrix)
 - [ ] Modos especiales (Focus, God Mode, Cinematic)
 
+**Temas alternativos disponibles:**
+- Habbo Room style (`src/components/office/HabboRoom.tsx`)
+- Zelda Room style (`src/components/office/ZeldaRoom.tsx`)
+- Stardew Valley style (`src/components/office/StardewRoom.tsx`)
+
 **Datos en tiempo real:**
-- `/api/agents/status` - estado de cada agente
-- `/api/activities` - activity feed
-- `/api/subagents` - sub-agentes activos
+- `/api/agents/status` - estado de cada agente ✅
+- `/api/activities` - activity feed ✅
+- `/api/subagents` - sub-agentes activos ❌
 - Polling cada 2-5 segundos
 
 ---
 
-## Fase 9: Agent Intelligence (Semana 11)
+## Fase 9: Agent Intelligence ❌ PENDIENTE
 > Features experimentales y visualizaciones avanzadas (complementan "The Office")
 
 ### 9.1 Agent Mood Dashboard
@@ -237,11 +245,11 @@
 - [ ] "Energy level" basado en tokens/hora
 - [ ] Emoji animado que cambia según el estado
 
-### 9.2 Token Economics
-- [ ] Vista detallada de consumo por modelo (Opus, Sonnet, Haiku, etc.)
-- [ ] Breakdown: input tokens vs output tokens vs cache
-- [ ] Comparativa: "Hoy vs ayer", "Esta semana vs la pasada"
-- [ ] Proyección de gasto mensual
+### 9.2 Token Economics ⚠️ (parcial en /costs)
+- [x] Vista detallada de consumo por modelo (en /costs)
+- [x] Breakdown: input tokens vs output tokens vs cache
+- [x] Comparativa: "Hoy vs ayer", "Esta semana vs la pasada"
+- [x] Proyección de gasto mensual
 - [ ] Top 5 tareas que más tokens consumen
 - [ ] Efficiency score: output útil / tokens totales
 
@@ -253,8 +261,8 @@
 - [ ] Búsqueda visual
 - [ ] Export a imagen
 
-### 9.4 Quick Actions Hub
-- [ ] Panel de botones para acciones frecuentes:
+### 9.4 Quick Actions Hub ✅
+- [x] Panel de botones para acciones frecuentes:
   - Backup workspace now
   - Clear temp files
   - Test all integrations
@@ -262,8 +270,9 @@
   - Git status all repos
   - Restart Gateway
   - Flush message queue
-- [ ] Status de cada acción (last run, next scheduled)
-- [ ] One-click execution con confirmación
+- [x] Status de cada acción (last run, next scheduled)
+- [x] One-click execution con confirmación
+- **Archivos:** `src/app/(dashboard)/actions/page.tsx`, `src/app/api/actions/route.ts`
 
 ### 9.5 Model Playground
 - [ ] Input un prompt
@@ -285,7 +294,7 @@
 
 ---
 
-## Fase 10: Sub-Agent Orchestra (Semana 12)
+## Fase 10: Sub-Agent Orchestra ❌ PENDIENTE
 > Gestión y visualización de multi-agent workflows
 
 ### 10.1 Sub-Agent Dashboard
@@ -311,7 +320,7 @@
 
 ---
 
-## Fase 11: Advanced Visualizations (Semana 13)
+## Fase 11: Advanced Visualizations ❌ PENDIENTE
 > Porque los dashboards cool tienen gráficas cool
 
 ### 11.1 3D Workspace Explorer
@@ -322,8 +331,8 @@
 - [ ] Click → preview/edit
 - [ ] Wow factor 📈
 
-### 11.2 Heatmaps Interactivos
-- [ ] Actividad por hora del día (24x7 grid)
+### 11.2 Heatmaps Interactivos ⚠️ (básico existe)
+- [x] Actividad por hora del día (24x7 grid) - `HourlyHeatmap.tsx`
 - [ ] Hover → detalles de ese slot
 - [ ] Click → filtrar activity feed a ese rango
 - [ ] Export a imagen
@@ -341,7 +350,7 @@
 
 ---
 
-## Fase 12: Collaboration (Semana 14)
+## Fase 12: Collaboration ❌ PENDIENTE
 > Share y trabajo en equipo
 
 ### 12.1 Shareable Reports
@@ -367,54 +376,75 @@
 | Charts | Recharts (básicos) + D3.js (avanzados) |
 | Editor | Monaco Editor (code) + TipTap (markdown) |
 | Real-time | Server-Sent Events (SSE) o Socket.io |
-| 3D Graphics | Three.js o React Three Fiber |
+| 3D Graphics | React Three Fiber + Drei + Rapier |
 | Graphs/Networks | Cytoscape.js o Vis.js |
 | Animations | Framer Motion |
-| Storage | JSON files (actual) → SQLite (fase 2) → PostgreSQL (futuro multi-user) |
+| Storage | JSON files (actual) → SQLite (usage tracking) |
 | AI Integration | OpenClaw API + direct model calls para suggestions |
 | PDF Generation | jsPDF o Puppeteer |
 
 ---
 
-## Prioridad Recomendada
+## Prioridad Recomendada (Actualizada 2026-02-27)
 
-### Tier 0: The Flagship 🚀 (Requested by Carlos)
-**Fase 8: The Office 3D** - Entorno 3D inmersivo donde visualizar agentes trabajando
-- Empezar por MVP (8.1) → 2 semanas
-- Luego Interactions (8.2) → 1 semana
-- Multi-Floor (8.3) es opcional/futuro
+### ✅ Completado
+- **Fase 1** - Activity Logger Real
+- **Fase 2** - Memory & Files
+- **Fase 3** - Cron Manager (completo)
+- **Fase 4** - Analytics
+- **Fase 5.1, 5.3, 5.4** - Terminal, Sessions, Notifications
+- **Fase 8.1** - Office 3D MVP
+- **Fase 9.4** - Quick Actions Hub
+
+### 🔥 Próximos pasos (Quick Wins)
+1. **Fase 5.2** - Notifications Log (historial de mensajes enviados)
+2. **Fase 8.2** - Avatares animados en Office 3D
+3. **Fase 6.3** - Config Editor
 
 ### Tier 1: Core Functionality (Must Have)
-1. **Fase 1** - Activity Logger Real → sin esto lo demás no tiene sentido
-2. **Fase 3** - Cron Manager completo → uso diario
-3. **Fase 2** - Memory Browser → gestión de conocimiento
+1. **Fase 3** - Cron Manager completo (falta crear/editar jobs)
+2. **Fase 6.3** - Config Editor
 
 ### Tier 2: High Value (Should Have)
-4. **Fase 5** - Command Terminal + Session History → interacción directa
-5. **Fase 9.4** - Quick Actions Hub → productividad inmediata
-6. **Fase 10.1** - Sub-Agent Dashboard → visibilidad de workflows
+3. **Fase 7** - Real-time updates → UX premium
+4. **Fase 10.1** - Sub-Agent Dashboard → visibilidad de workflows
+5. **Fase 9.1** - Agent Mood Dashboard → visual engagement
 
 ### Tier 3: Intelligence & Insights (Nice to Have)
-7. **Fase 4** - Analytics básicos → métricas
-8. **Fase 9.2** - Token Economics → optimización de costes
-9. **Fase 9.6** - Smart Suggestions → IA que se auto-mejora
+6. **Fase 9.2** - Token Economics → optimización de costes
+7. **Fase 9.6** - Smart Suggestions → IA que se auto-mejora
 
 ### Tier 4: Advanced Features (Wow Factor)
-10. **Fase 9.3** - Knowledge Graph → visualización avanzada
-11. **Fase 11.2** - Heatmaps Interactivos → análisis visual
-12. **Fase 10.2** - Agent Communication Graph → debugging multi-agent
+8. **Fase 8.3** - Multi-Floor Building
+9. **Fase 9.3** - Knowledge Graph → visualización avanzada
+10. **Fase 11.2** - Heatmaps Interactivos → análisis visual
 
 ### Tier 5: Polish & Experimental (Future)
-13. **Fase 7** - Real-time updates → UX premium
-14. **Fase 11.1** - 3D Workspace Explorer (no-office) → alternativa visual
-15. **Fase 12** - Collaboration → equipo/público
+11. **Fase 11.1** - 3D Workspace Explorer
+12. **Fase 12** - Collaboration → equipo/público
 
-### Tier 6: Admin & Config (When Needed)
-16. **Fase 6** - Skills Manager + Config Editor → cuando sea necesario
+---
 
-**Nota:** The Office 3D (Fase 8) es la feature flagship. Priorizar su MVP antes que otras fases avanzadas.
+## Resumen de Progreso
+
+| Fase | Estado | Progreso |
+|------|--------|----------|
+| 1. Fundamentos | ✅ | 100% |
+| 2. Memory & Files | ✅ | 100% |
+| 3. Cron Manager | ✅ | 100% |
+| 4. Analytics | ✅ | 95% |
+| 5. Comunicación | ⚠️ | 75% |
+| 6. Configuración | ⚠️ | 40% |
+| 7. Real-time | ❌ | 0% |
+| 8. The Office 3D | ⚠️ | 60% |
+| 9. Agent Intelligence | ⚠️ | 20% |
+| 10. Sub-Agent Orchestra | ❌ | 0% |
+| 11. Advanced Viz | ❌ | 5% |
+| 12. Collaboration | ❌ | 0% |
+
+**Overall: ~50% completado**
 
 ---
 
 *Creado: 2026-02-07*
-*Última actualización: 2026-02-21 (SuperBotijo nightly shift)*
+*Última actualización: 2026-02-27*

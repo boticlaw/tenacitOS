@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { execSync } from "child_process";
 
-// GET: Fetch run history for a cron job
+export const dynamic = "force-dynamic";
+
+// GET: Fetch run history for a cron job with optional filters
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+    const status = searchParams.get("status");
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
 
     if (!id) {
       return NextResponse.json({ error: "Job ID required" }, { status: 400 });
@@ -40,11 +46,44 @@ export async function GET(request: NextRequest) {
         error: r.error || null,
       }));
     } catch {
-      // Command might not support runs yet or no history — return empty
       runs = [];
     }
 
-    return NextResponse.json({ runs, total: runs.length });
+    let filteredRuns = runs;
+
+    if (from) {
+      const fromDate = new Date(from);
+      if (!isNaN(fromDate.getTime())) {
+        filteredRuns = filteredRuns.filter((r) => {
+          if (!r.startedAt) return false;
+          return new Date(r.startedAt) >= fromDate;
+        });
+      }
+    }
+
+    if (to) {
+      const toDate = new Date(to);
+      if (!isNaN(toDate.getTime())) {
+        toDate.setHours(23, 59, 59, 999);
+        filteredRuns = filteredRuns.filter((r) => {
+          if (!r.startedAt) return false;
+          return new Date(r.startedAt) <= toDate;
+        });
+      }
+    }
+
+    if (status && ["success", "error", "pending", "running"].includes(status)) {
+      filteredRuns = filteredRuns.filter((r) => r.status === status);
+    }
+
+    const limitedRuns = filteredRuns.slice(0, limit);
+
+    return NextResponse.json({
+      runs: limitedRuns,
+      total: filteredRuns.length,
+      limit,
+      filters: { from, to, status },
+    });
   } catch (error) {
     console.error("Error fetching run history:", error);
     return NextResponse.json({ error: "Failed to fetch run history" }, { status: 500 });

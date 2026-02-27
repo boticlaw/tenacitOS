@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Clock, RefreshCw, AlertCircle, LayoutGrid, CalendarDays, Zap } from "lucide-react";
+import { Clock, RefreshCw, AlertCircle, LayoutGrid, CalendarDays, Zap, Plus } from "lucide-react";
 import { CronJobCard, type CronJob } from "@/components/CronJobCard";
 import { CronWeeklyTimeline } from "@/components/CronWeeklyTimeline";
+import { CronJobModal } from "@/components/CronJobModal";
 
 type ViewMode = "cards" | "timeline";
 
@@ -14,6 +15,9 @@ export default function CronJobsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [runToast, setRunToast] = useState<{ id: string; status: "success" | "error"; name: string } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingJob, setEditingJob] = useState<CronJob | null>(null);
+  const [saveToast, setSaveToast] = useState<{ status: "success" | "error"; message: string } | null>(null);
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -86,6 +90,67 @@ export default function CronJobsPage() {
     setTimeout(() => setRunToast(null), 4000);
   };
 
+  const handleEdit = (job: CronJob) => {
+    setEditingJob(job);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateNew = () => {
+    setEditingJob(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (jobData: Partial<CronJob>) => {
+    try {
+      const isEditing = !!editingJob?.id;
+      const url = "/api/cron";
+      const method = isEditing ? "PUT" : "POST";
+
+      const body: Record<string, unknown> = {
+        name: jobData.name,
+        schedule: typeof jobData.schedule === "string" ? jobData.schedule : undefined,
+        timezone: jobData.timezone || "UTC",
+        message: jobData.description,
+      };
+
+      if (isEditing) {
+        body.id = editingJob.id;
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to save job");
+      }
+
+      setSaveToast({
+        status: "success",
+        message: isEditing ? `Job "${jobData.name}" updated!` : `Job "${jobData.name}" created!`,
+      });
+      setTimeout(() => setSaveToast(null), 4000);
+
+      setIsModalOpen(false);
+      setEditingJob(null);
+      fetchJobs();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save job";
+      setSaveToast({ status: "error", message });
+      setTimeout(() => setSaveToast(null), 4000);
+      throw err;
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingJob(null);
+  };
+
   const activeJobs = jobs.filter((j) => j.enabled).length;
   const pausedJobs = jobs.length - activeJobs;
 
@@ -105,6 +170,27 @@ export default function CronJobsPage() {
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Create Job button */}
+          <button
+            onClick={handleCreateNew}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--accent)',
+              color: '#000',
+              borderRadius: '0.5rem',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'opacity 0.2s'
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Create Job</span>
+          </button>
+
           {/* View mode toggle */}
           <div
             style={{
@@ -269,9 +355,27 @@ export default function CronJobsPage() {
           <h3 style={{ fontSize: '1.125rem', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
             No cron jobs found
           </h3>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Create cron jobs via Telegram or the OpenClaw CLI
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+            Create your first cron job to get started
           </p>
+          <button
+            onClick={handleCreateNew}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: 'var(--accent)',
+              color: '#000',
+              borderRadius: '0.5rem',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Create Job
+          </button>
         </div>
       ) : viewMode === "timeline" ? (
         /* Timeline View */
@@ -327,7 +431,7 @@ export default function CronJobsPage() {
               <CronJobCard
                 job={job}
                 onToggle={handleToggle}
-                onEdit={() => {}}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
                 onRun={handleRun}
               />
@@ -359,6 +463,14 @@ export default function CronJobsPage() {
           ))}
         </div>
       )}
+
+      {/* CronJobModal */}
+      <CronJobModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        editingJob={editingJob}
+      />
 
       {/* Run toast notification */}
       {runToast && (
@@ -392,6 +504,35 @@ export default function CronJobsPage() {
           {runToast.status === "success"
             ? `✓ "${runToast.name}" triggered!`
             : `✗ Failed to trigger "${runToast.name}"`}
+        </div>
+      )}
+
+      {/* Save toast notification */}
+      {saveToast && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '2.5rem',
+            right: '1.5rem',
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '0.875rem 1.25rem',
+            borderRadius: '0.75rem',
+            backdropFilter: 'blur(12px)',
+            backgroundColor: saveToast.status === "success"
+              ? 'color-mix(in srgb, var(--success) 15%, rgba(12,12,12,0.95))'
+              : 'color-mix(in srgb, var(--error) 15%, rgba(12,12,12,0.95))',
+            border: `1px solid ${saveToast.status === "success" ? 'color-mix(in srgb, var(--success) 40%, transparent)' : 'color-mix(in srgb, var(--error) 40%, transparent)'}`,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            color: 'var(--text-primary)',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            animation: 'slideInRight 0.3s ease',
+          }}
+        >
+          {saveToast.status === "success" ? "✓" : "✗"} {saveToast.message}
         </div>
       )}
 

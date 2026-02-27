@@ -67,7 +67,11 @@ interface Pm2Process {
 }
 
 function getAllowedServices(): { systemd: string[]; pm2: string[] } {
-  const systemdServices: string[] = [];
+  const systemdServices: Set<string> = new Set();
+  
+  const isAllowedService = (name: string): boolean => {
+    return name.includes('openclaw') || name.includes('superbotijo');
+  };
   
   try {
     const stdout = execSyncCb(
@@ -78,14 +82,33 @@ function getAllowedServices(): { systemd: string[]; pm2: string[] } {
     
     for (const svc of services) {
       const name = svc.unit.replace('.service', '');
-      if (name.includes('openclaw') || 
-          name.includes('superbotijo') || 
-          name.includes('superbotijo')) {
-        systemdServices.push(name);
+      if (isAllowedService(name)) {
+        systemdServices.add(name);
       }
     }
   } catch {
-    systemdServices.push('openclaw-gateway', 'superbotijo');
+    // Ignore errors from running services check
+  }
+  
+  try {
+    const stdout = execSyncCb(
+      'systemctl list-unit-files --type=service --no-pager 2>/dev/null',
+      { encoding: 'utf-8' }
+    );
+    const lines = stdout.split('\n');
+    for (const line of lines) {
+      const match = line.match(/^(\S+)\.service\s+/);
+      if (match) {
+        const name = match[1];
+        if (isAllowedService(name)) {
+          systemdServices.add(name);
+        }
+      }
+    }
+  } catch {
+    // Fallback if list-unit-files fails
+    systemdServices.add('openclaw-gateway');
+    systemdServices.add('superbotijo');
   }
   
   const pm2Services: string[] = [];

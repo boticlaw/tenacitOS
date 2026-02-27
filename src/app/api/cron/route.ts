@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { execSync } from "child_process";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync } from "fs";
+import { isValidCron } from "@/lib/cron-parser";
+
+export const dynamic = "force-dynamic";
 
 interface GatewayConfig {
   token: string;
@@ -18,6 +21,35 @@ function getGatewayConfig(): GatewayConfig {
   } catch {
     return { token: "", port: 18789 };
   }
+}
+
+function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, "'\\''")}'`;
+}
+
+interface CreateJobBody {
+  name: string;
+  schedule?: string;
+  every?: string;
+  at?: string;
+  timezone?: string;
+  agentId?: string;
+  message?: string;
+  description?: string;
+  disabled?: boolean;
+}
+
+interface UpdateJobBody {
+  id: string;
+  name?: string;
+  schedule?: string;
+  every?: string;
+  at?: string;
+  timezone?: string;
+  agentId?: string;
+  message?: string;
+  description?: string;
+  enabled?: boolean;
 }
 
 export async function GET() {
@@ -38,65 +70,173 @@ export async function GET() {
   }
 }
 
-function formatDescription(job: Record<string, unknown>): string {
-  const payload = job.payload as Record<string, unknown>;
-  if (!payload) return "";
-  if (payload.kind === "agentTurn") {
-    const msg = (payload.message as string) || "";
-    return msg.length > 120 ? msg.substring(0, 120) + "..." : msg;
+export async function POST(request: NextRequest) {
+  try {
+    const body: CreateJobBody = await request.json();
+    const { name, schedule, every, at, timezone, agentId, message, description, disabled } = body;
+
+    if (!name) {
+      return NextResponse.json({ error: "Job name is required" }, { status: 400 });
+    }
+
+    if (!schedule && !every && !at) {
+      return NextResponse.json({ error: "Schedule (cron), every, or at is required" }, { status: 400 });
+    }
+
+    if (schedule && !isValidCron(schedule)) {
+      return NextResponse.json({ error: "Invalid cron expression" }, { status: 400 });
+    }
+
+    const args: string[] = ["openclaw", "cron", "add", "--json"];
+
+    args.push("--name", escapeShellArg(name));
+
+    if (schedule) {
+      args.push("--cron", escapeShellArg(schedule));
+    }
+
+    if (every) {
+      args.push("--every", escapeShellArg(every));
+    }
+
+    if (at) {
+      args.push("--at", escapeShellArg(at));
+    }
+
+    if (timezone) {
+      args.push("--tz", escapeShellArg(timezone));
+    }
+
+    if (agentId) {
+      args.push("--agent", escapeShellArg(agentId));
+    }
+
+    if (message) {
+      args.push("--message", escapeShellArg(message));
+    }
+
+    if (description) {
+      args.push("--description", escapeShellArg(description));
+    }
+
+    if (disabled) {
+      args.push("--disabled");
+    }
+
+    const command = args.join(" ");
+    console.log("[cron API] Creating job:", command.replace(/--message '[^']*'/, "--message '[redacted]'"));
+
+    const output = execSync(command, {
+      timeout: 15000,
+      encoding: "utf-8",
+    });
+
+    let jobData;
+    try {
+      jobData = JSON.parse(output);
+    } catch {
+      jobData = { rawOutput: output };
+    }
+
+    await createNotification(
+      "Cron Job Created",
+      `Job "${name}" has been created successfully.`,
+      "success"
+    );
+
+    return NextResponse.json({ success: true, job: jobData });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to create cron job";
+    console.error("Error creating cron job:", error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-  if (payload.kind === "systemEvent") {
-    const text = (payload.text as string) || "";
-    return text.length > 120 ? text.substring(0, 120) + "..." : text;
-  }
-  return "";
 }
 
-function formatSchedule(schedule: Record<string, unknown>): string {
-  if (!schedule) return "Unknown";
-  switch (schedule.kind) {
-    case "cron":
-      return `${schedule.expr}${schedule.tz ? ` (${schedule.tz})` : ""}`;
-    case "every":
-      const ms = schedule.everyMs as number;
-      if (ms >= 3600000) return `Every ${ms / 3600000}h`;
-      if (ms >= 60000) return `Every ${ms / 60000}m`;
-      return `Every ${ms / 1000}s`;
-    case "at":
-      return `Once at ${schedule.at}`;
-    default:
-      return JSON.stringify(schedule);
-  }
-}
-
-// PUT: Toggle enable/disable a cron job
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { id, enabled } = body;
+    const body: UpdateJobBody = await request.json();
+    const { id, name, schedule, every, at, timezone, agentId, message, description, enabled } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
     }
 
-    const action = enabled ? "enable" : "disable";
-    // Use openclaw CLI to update the job
-    const output = execSync(
-      `openclaw cron ${action} ${id} --json 2>/dev/null || openclaw cron update ${id} --enabled=${enabled} --json 2>/dev/null`,
-      { timeout: 10000, encoding: "utf-8" }
-    );
+    if (schedule && !isValidCron(schedule)) {
+      return NextResponse.json({ error: "Invalid cron expression" }, { status: 400 });
+    }
 
-    return NextResponse.json({ success: true, id, enabled });
+    if (enabled !== undefined && !name && !schedule && !every && !at && !timezone && !agentId && !message && !description) {
+      const action = enabled ? "enable" : "disable";
+      execSync(`openclaw cron ${action} ${id} --json 2>/dev/null`, {
+        timeout: 10000,
+        encoding: "utf-8",
+      });
+      return NextResponse.json({ success: true, id, enabled });
+    }
+
+    const args: string[] = ["openclaw", "cron", "edit", id];
+
+    if (name) {
+      args.push("--name", escapeShellArg(name));
+    }
+
+    if (schedule) {
+      args.push("--cron", escapeShellArg(schedule));
+    }
+
+    if (every) {
+      args.push("--every", escapeShellArg(every));
+    }
+
+    if (at) {
+      args.push("--at", escapeShellArg(at));
+    }
+
+    if (timezone) {
+      args.push("--tz", escapeShellArg(timezone));
+    }
+
+    if (agentId) {
+      args.push("--agent", escapeShellArg(agentId));
+    }
+
+    if (message) {
+      args.push("--message", escapeShellArg(message));
+    }
+
+    if (description) {
+      args.push("--description", escapeShellArg(description));
+    }
+
+    if (enabled === true) {
+      args.push("--enable");
+    } else if (enabled === false) {
+      args.push("--disable");
+    }
+
+    const command = args.join(" ");
+    console.log("[cron API] Updating job:", command.replace(/--message '[^']*'/, "--message '[redacted]'"));
+
+    const output = execSync(command, {
+      timeout: 15000,
+      encoding: "utf-8",
+    });
+
+    let jobData;
+    try {
+      jobData = JSON.parse(output);
+    } catch {
+      jobData = { rawOutput: output };
+    }
+
+    return NextResponse.json({ success: true, id, job: jobData });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update cron job";
     console.error("Error updating cron job:", error);
-    return NextResponse.json(
-      { error: "Failed to update cron job" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// DELETE: Remove a cron job
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -106,7 +246,11 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Job ID is required" }, { status: 400 });
     }
 
-    execSync(`openclaw cron remove ${id} 2>/dev/null`, {
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+      return NextResponse.json({ error: "Invalid job ID" }, { status: 400 });
+    }
+
+    execSync(`openclaw cron rm ${id} 2>/dev/null`, {
       timeout: 10000,
       encoding: "utf-8",
     });
@@ -118,5 +262,17 @@ export async function DELETE(request: NextRequest) {
       { error: "Failed to delete cron job" },
       { status: 500 }
     );
+  }
+}
+
+async function createNotification(title: string, message: string, type: "info" | "success" | "warning" | "error" = "info") {
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/notifications`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, message, type }),
+    });
+  } catch (error) {
+    console.error("Failed to create notification:", error);
   }
 }

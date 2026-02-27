@@ -15,6 +15,9 @@ import {
   XCircle,
   History,
   Loader2,
+  Edit3,
+  Filter,
+  X,
 } from "lucide-react";
 
 export interface CronJob {
@@ -60,7 +63,7 @@ const AGENT_EMOJI: Record<string, string> = {
   freelance: "🔧",
 };
 
-export function CronJobCard({ job, onToggle, onDelete, onRun }: CronJobCardProps) {
+export function CronJobCard({ job, onToggle, onEdit, onDelete, onRun }: CronJobCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
@@ -68,6 +71,10 @@ export function CronJobCard({ job, onToggle, onDelete, onRun }: CronJobCardProps
   const [showHistory, setShowHistory] = useState(false);
   const [runHistory, setRunHistory] = useState<RunHistoryEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
 
   const handleToggle = async () => {
     setIsToggling(true);
@@ -91,28 +98,53 @@ export function CronJobCard({ job, onToggle, onDelete, onRun }: CronJobCardProps
     }
   }, [job.id, onRun, isRunning]);
 
-  const loadHistory = useCallback(async () => {
+  const loadHistory = useCallback(async (filters?: { status?: string; from?: string; to?: string }) => {
     if (loadingHistory) return;
     setLoadingHistory(true);
     try {
-      const res = await fetch(`/api/cron/runs?id=${job.id}`);
+      const params = new URLSearchParams({ id: job.id, limit: "20" });
+      const status = filters?.status || statusFilter;
+      const from = filters?.from || fromDate;
+      const to = filters?.to || toDate;
+      
+      if (status) params.set("status", status);
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+
+      const res = await fetch(`/api/cron/runs?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setRunHistory(data.runs || []);
+        setHistoryTotal(data.total || 0);
       }
     } catch {
       setRunHistory([]);
+      setHistoryTotal(0);
     } finally {
       setLoadingHistory(false);
     }
-  }, [job.id, loadingHistory]);
+  }, [job.id, loadingHistory, statusFilter, fromDate, toDate]);
 
   const handleToggleHistory = () => {
     const next = !showHistory;
     setShowHistory(next);
-    if (next && runHistory.length === 0) {
-      loadHistory();
+    if (next) {
+      setStatusFilter("");
+      setFromDate("");
+      setToDate("");
+      loadHistory({ status: "", from: "", to: "" });
     }
+  };
+
+  const handleApplyFilters = () => {
+    loadHistory({ status: statusFilter, from: fromDate, to: toDate });
+  };
+
+  const handleClearFilters = () => {
+    setStatusFilter("");
+    setFromDate("");
+    setToDate("");
+    loadHistory({ status: "", from: "", to: "" });
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -325,6 +357,23 @@ export function CronJobCard({ job, onToggle, onDelete, onRun }: CronJobCardProps
             <span className="hidden sm:inline">Delete</span>
           </button>
 
+          {/* Edit button */}
+          <button
+            onClick={() => onEdit(job)}
+            className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm rounded-lg"
+            style={{
+              color: 'var(--text-secondary)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+            title="Edit job"
+          >
+            <Edit3 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <span className="hidden sm:inline">Edit</span>
+          </button>
+
           {/* History button */}
           <button
             onClick={handleToggleHistory}
@@ -410,56 +459,170 @@ export function CronJobCard({ job, onToggle, onDelete, onRun }: CronJobCardProps
             >
               <History className="w-3.5 h-3.5" />
               Recent Runs
+              {historyTotal > 0 && (
+                <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({historyTotal} total)</span>
+              )}
               {loadingHistory && <Loader2 className="w-3 h-3 animate-spin ml-auto" />}
+            </div>
+
+            {/* Filters */}
+            <div
+              style={{
+                padding: '0.5rem 0.75rem',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0,0,0,0.1)'
+              }}
+            >
+              <Filter className="w-3 h-3" style={{ color: 'var(--text-muted)' }} />
+              
+              {/* Status filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.7rem',
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.25rem',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">All status</option>
+                <option value="success">Success</option>
+                <option value="error">Error</option>
+                <option value="pending">Pending</option>
+                <option value="running">Running</option>
+              </select>
+
+              {/* From date */}
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                placeholder="From"
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.7rem',
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.25rem',
+                  color: 'var(--text-primary)',
+                  width: 'auto'
+                }}
+              />
+
+              {/* To date */}
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                placeholder="To"
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.7rem',
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.25rem',
+                  color: 'var(--text-primary)',
+                  width: 'auto'
+                }}
+              />
+
+              {/* Apply button */}
+              <button
+                onClick={handleApplyFilters}
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  fontSize: '0.7rem',
+                  backgroundColor: 'var(--accent)',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '0.25rem',
+                  cursor: 'pointer',
+                  fontWeight: 500
+                }}
+              >
+                Apply
+              </button>
+
+              {/* Clear button */}
+              {(statusFilter || fromDate || toDate) && (
+                <button
+                  onClick={handleClearFilters}
+                  style={{
+                    padding: '0.25rem 0.5rem',
+                    fontSize: '0.7rem',
+                    backgroundColor: 'transparent',
+                    color: 'var(--text-muted)',
+                    border: 'none',
+                    borderRadius: '0.25rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem'
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                  Clear
+                </button>
+              )}
             </div>
 
             {!loadingHistory && runHistory.length === 0 && (
               <div style={{ padding: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                No run history available
+                {statusFilter || fromDate || toDate ? "No runs match filters" : "No run history available"}
               </div>
             )}
 
-            {runHistory.slice(0, 5).map((run, idx) => (
-              <div
-                key={run.id || idx}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  borderBottom: idx < Math.min(runHistory.length, 5) - 1 ? '1px solid var(--border)' : 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.75rem',
-                }}
-              >
-                {run.status === "success" ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--success)' }} />
-                ) : run.status === "error" ? (
-                  <XCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--error)' }} />
-                ) : (
-                  <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--warning)' }} />
-                )}
-                <span style={{ color: 'var(--text-secondary)', flex: 1 }}>
-                  {formatHistoryDate(run.startedAt)}
-                </span>
-                <span style={{ color: 'var(--text-muted)' }}>
-                  {formatDuration(run.durationMs)}
-                </span>
-                {run.error && (
-                  <span
-                    style={{
-                      color: 'var(--error)',
-                      maxWidth: '100px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}
-                    title={run.error}
-                  >
-                    {run.error}
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {runHistory.map((run, idx) => (
+                <div
+                  key={run.id || idx}
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    borderBottom: idx < runHistory.length - 1 ? '1px solid var(--border)' : 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  {run.status === "success" ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--success)' }} />
+                  ) : run.status === "error" ? (
+                    <XCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                  ) : (
+                    <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--warning)' }} />
+                  )}
+                  <span style={{ color: 'var(--text-secondary)', flex: 1 }}>
+                    {formatHistoryDate(run.startedAt)}
                   </span>
-                )}
-              </div>
-            ))}
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {formatDuration(run.durationMs)}
+                  </span>
+                  {run.error && (
+                    <span
+                      style={{
+                        color: 'var(--error)',
+                        maxWidth: '100px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title={run.error}
+                    >
+                      {run.error}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
