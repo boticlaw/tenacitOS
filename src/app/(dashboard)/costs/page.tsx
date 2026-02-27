@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TopTasksList } from "@/components/TopTasksList";
 import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, Calendar, PieChart } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, PieChart as RePieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -310,6 +311,9 @@ export default function CostsPage() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* Top Tasks by Token Consumption */}
+      <TopTasksList />
 
       {/* Model Pricing Table */}
       <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
