@@ -126,7 +126,9 @@
 - [x] Shortcuts para comandos frecuentes
 - **Archivos:** `src/app/(dashboard)/terminal/page.tsx`, `src/app/api/terminal/route.ts`
 
-### 5.2 Notifications Log ❌
+### 5.2 Notifications Log ⚠️
+> **Issues:** #16, #17
+
 - [ ] Lista de mensajes enviados por canal (Telegram, etc.)
 - [ ] Filtrar por fecha, canal, tipo
 - [ ] Preview del mensaje
@@ -177,7 +179,9 @@
 - [ ] Reautenticar si necesario
 - **Archivos:** `src/components/IntegrationStatus.tsx`
 
-### 6.3 Config Editor ❌
+### 6.3 Config Editor ⚠️
+> **Issues:** #12, #13, #14, #15
+
 - [ ] Ver configuración actual de OpenClaw
 - [ ] Editar valores seguros
 - [ ] Validación antes de guardar
