@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { QueueStatus } from "@/components/QueueStatus";
 import { Cpu, HardDrive, MemoryStick, Activity, Network, Server, ShieldCheck, RotateCw, Wifi, Monitor, Play, Square, X, Loader2, Terminal, ArrowDown, ArrowUp } from "lucide-react";
 
 interface SystemdService {
@@ -224,7 +225,8 @@ export default function SystemMonitorPage() {
 
       {/* Hardware Tab */}
       {selectedTab === "hardware" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* CPU */}
           <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--card)", border: "1px solid var(--border)" }}>
             <div className="flex items-center justify-between mb-4">
@@ -329,6 +331,8 @@ export default function SystemMonitorPage() {
               </div>
             </div>
           </div>
+          </div>
+          <QueueStatus />
         </div>
       )}
 
