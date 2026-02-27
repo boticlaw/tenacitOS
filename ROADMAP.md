@@ -48,19 +48,19 @@
 
 ---
 
-## Fase 3: Unified Cron Dashboard ⚠️ EN PROGRESO
+## Fase 3: Unified Cron Dashboard ✅ COMPLETO
 > Control total de tareas programadas - System + OpenClaw + Heartbeat
 
 > **Ver documentación:** `docs/CRON-SYSTEMS.md`
 
-### 3.1 System Cron Viewer ⚠️ (Issues #4, #5, #8)
-- [ ] API: Leer jobs de `/etc/cron.d/`
-- [ ] API: Run Now + View Logs
-- [ ] UI: SystemCronCard con badge diferenciado
-- [ ] UI: Modal de logs
-- **Issues:** #4, #5, #8
+### 3.1 System Cron Viewer ✅
+- [x] API: Leer jobs de `/etc/cron.d/`
+- [x] API: Run Now + View Logs
+- [x] UI: SystemCronCard con badge diferenciado
+- [x] UI: Modal de logs
+- **Archivos:** `src/app/api/cron/system/route.ts`, `src/app/api/cron/system-run/route.ts`, `src/app/api/cron/system-logs/route.ts`, `src/components/SystemCronCard.tsx`
 
-### 3.2 OpenClaw Cron Manager ✅ (Completado)
+### 3.2 OpenClaw Cron Manager ✅
 - [x] Listar todos los jobs con estado
 - [x] Crear nuevo job con form visual (CronJobModal conectado al API)
 - [x] Editar job existente
@@ -71,23 +71,22 @@
 - [x] Templates predefinidos
 - **Archivos:** `src/app/api/cron/route.ts`, `src/components/CronJobModal.tsx`
 
-### 3.3 Heartbeat Monitor ⚠️ (Issues #6, #9)
-- [ ] API: Estado de heartbeat (enabled, interval, target)
-- [ ] API: Leer/escribir HEARTBEAT.md
-- [ ] UI: Panel de estado
-- [ ] UI: Editor de HEARTBEAT.md con template
-- **Issues:** #6, #9
+### 3.3 Heartbeat Monitor ✅
+- [x] API: Estado de heartbeat (enabled, interval, target)
+- [x] API: Leer/escribir HEARTBEAT.md
+- [x] UI: Panel de estado
+- [x] UI: Editor de HEARTBEAT.md con template
+- **Archivos:** `src/app/api/heartbeat/route.ts`, `src/components/HeartbeatStatus.tsx`
 
-### 3.4 Unified Views ⚠️ (Issues #7, #10, #11)
-- [x] Weekly Timeline View (solo OpenClaw)
-- [ ] Tabs: All / System / OpenClaw / Heartbeat
-- [ ] Timeline unificado con jobs de ambos sistemas
-- [ ] Stats cards unificados (4 cards)
-- [ ] Filtros por origen
-- **Issues:** #7, #10, #11
+### 3.4 Unified Views ✅
+- [x] Tabs: All / System / OpenClaw / Heartbeat
+- [x] Weekly Timeline View (OpenClaw jobs)
+- [x] Stats cards unificados (4 cards: System, OpenClaw, Heartbeat, Paused)
+- [x] Click en stats filtra por tipo
+- **Archivos:** `src/app/(dashboard)/cron/page.tsx`, `src/components/CronWeeklyTimeline.tsx`
 
 ### 3.5 Historial de Ejecuciones ✅
-- [x] **"Run Now" button** en CronJobCard
+- [x] **"Run Now" button** en CronJobCard y SystemCronCard
 - [x] **Run History inline** con filtros
 - [x] Log con output completo
 - **Archivos:** `src/app/api/cron/run/route.ts`, `src/app/api/cron/runs/route.ts`
@@ -402,37 +401,19 @@
 ### ✅ Completado
 - **Fase 1** - Activity Logger Real
 - **Fase 2** - Memory & Files
-- **Fase 3.2** - OpenClaw Cron Manager
-- **Fase 3.5** - Historial de Ejecuciones
+- **Fase 3** - Unified Cron Dashboard (System + OpenClaw + Heartbeat)
 - **Fase 4** - Analytics
 - **Fase 5.1, 5.3, 5.4** - Terminal, Sessions, Notifications
 - **Fase 8.1** - Office 3D MVP
 - **Fase 9.4** - Quick Actions Hub
 
-### 🔥 En Progreso - Unified Cron Dashboard (Fase 3)
-Issues creados para completar la Fase 3:
-
-| # | Issue | Prioridad | Tamaño | Est. |
-|---|-------|-----------|--------|------|
-| 4 | API - System Cron Reader | High | Small | 3h |
-| 5 | API - System Cron Actions | High | Small | 2h |
-| 6 | API - Heartbeat Status | Medium | Small | 2h |
-| 7 | UI - Tabs Structure | High | Medium | 4h |
-| 8 | UI - System Cron Card | High | Medium | 4h |
-| 9 | UI - Heartbeat Tab | Medium | Medium | 4h |
-| 10 | UI - Unified Timeline | Medium | Medium | 3h |
-| 11 | UI - Unified Stats | Low | Small | 2h |
-| | **Total** | | | **24h** |
-
-### 🚀 Próximos pasos (Quick Wins)
-1. **Issues #4-5** - System Cron API (5h)
-2. **Issues #7-8** - UI Core (8h)
-3. **Fase 5.2** - Notifications Log
-4. **Fase 8.2** - Avatares animados en Office 3D
+### 🔥 Próximos pasos (Quick Wins)
+1. **Fase 5.2** - Notifications Log (historial de mensajes enviados)
+2. **Fase 8.2** - Avatares animados en Office 3D
+3. **Fase 6.3** - Config Editor
 
 ### Tier 1: Core Functionality (Must Have)
-1. **Fase 3** - Cron Manager completo (falta crear/editar jobs)
-2. **Fase 6.3** - Config Editor
+1. **Fase 6.3** - Config Editor
 
 ### Tier 2: High Value (Should Have)
 3. **Fase 7** - Real-time updates → UX premium
@@ -460,7 +441,7 @@ Issues creados para completar la Fase 3:
 |------|--------|----------|
 | 1. Fundamentos | ✅ | 100% |
 | 2. Memory & Files | ✅ | 100% |
-| 3. Unified Cron Dashboard | ⚠️ | 40% (8 issues pendientes) |
+| 3. Unified Cron Dashboard | ✅ | 100% |
 | 4. Analytics | ✅ | 95% |
 | 5. Comunicación | ⚠️ | 75% |
 | 6. Configuración | ⚠️ | 40% |
@@ -471,22 +452,7 @@ Issues creados para completar la Fase 3:
 | 11. Advanced Viz | ❌ | 5% |
 | 12. Collaboration | ❌ | 0% |
 
-**Overall: ~42% completado**
-
----
-
-## Issues Activos
-
-| # | Título | Labels | Estado |
-|---|--------|--------|--------|
-| [4](https://github.com/boticlaw/SuperBotijo/issues/4) | 🖥️ API - System Cron Reader | `type:feature`, `area:api`, `priority:high` | Open |
-| [5](https://github.com/boticlaw/SuperBotijo/issues/5) | ▶️ API - System Cron Actions | `type:feature`, `area:api`, `priority:high` | Open |
-| [6](https://github.com/boticlaw/SuperBotijo/issues/6) | 💓 API - Heartbeat Status | `type:feature`, `area:api`, `priority:medium` | Open |
-| [7](https://github.com/boticlaw/SuperBotijo/issues/7) | 🎨 UI - Cron Tabs Structure | `type:feature`, `area:ui`, `priority:high` | Open |
-| [8](https://github.com/boticlaw/SuperBotijo/issues/8) | 🖥️ UI - System Cron Card | `type:feature`, `area:ui`, `priority:high` | Open |
-| [9](https://github.com/boticlaw/SuperBotijo/issues/9) | 💓 UI - Heartbeat Tab | `type:feature`, `area:ui`, `priority:medium` | Open |
-| [10](https://github.com/boticlaw/SuperBotijo/issues/10) | 📅 UI - Unified Timeline | `type:feature`, `area:ui`, `priority:medium` | Open |
-| [11](https://github.com/boticlaw/SuperBotijo/issues/11) | 📊 UI - Unified Stats | `type:feature`, `area:ui`, `priority:low` | Open |
+**Overall: ~50% completado**
 
 ---
 
