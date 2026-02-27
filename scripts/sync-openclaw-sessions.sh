@@ -7,7 +7,7 @@ set -e
 
 # Configuration
 OPENCLAW_DIR="${OPENCLAW_DIR:-/root/.openclaw}"
-TENACITOS_DB="${TENACITOS_DB:-/root/.openclaw/workspace/mission-control/data/activities.db}"
+SUPERBOTIJO_DB="${SUPERBOTIJO_DB:-/root/.openclaw/workspace/superbotijo/data/activities.db}"
 OPENCLAW_CONFIG="$OPENCLAW_DIR/openclaw.json"
 
 # Check dependencies
@@ -28,7 +28,7 @@ if [ -f "$OPENCLAW_CONFIG" ]; then
 fi
 
 # Ensure activities table exists
-sqlite3 "$TENACITOS_DB" "CREATE TABLE IF NOT EXISTS activities (
+sqlite3 "$SUPERBOTIJO_DB" "CREATE TABLE IF NOT EXISTS activities (
   id TEXT PRIMARY KEY,
   timestamp TEXT NOT NULL,
   type TEXT NOT NULL,
@@ -41,8 +41,8 @@ sqlite3 "$TENACITOS_DB" "CREATE TABLE IF NOT EXISTS activities (
 );"
 
 # Create indexes for better performance
-sqlite3 "$TENACITOS_DB" "CREATE INDEX IF NOT EXISTS idx_activities_timestamp ON activities(timestamp DESC);"
-sqlite3 "$TENACITOS_DB" "CREATE INDEX IF NOT EXISTS idx_activities_agent ON activities(agent);"
+sqlite3 "$SUPERBOTIJO_DB" "CREATE INDEX IF NOT EXISTS idx_activities_timestamp ON activities(timestamp DESC);"
+sqlite3 "$SUPERBOTIJO_DB" "CREATE INDEX IF NOT EXISTS idx_activities_agent ON activities(agent);"
 
 # Process each agent's sessions
 sessions_added=0
@@ -69,7 +69,7 @@ for agent_dir in "$OPENCLAW_DIR"/agents/*/; do
         metadata=$(echo "$activity" | jq -c '.metadata' | sed "s/'/''/g")
 
         # Insert if not exists
-        result=$(sqlite3 "$TENACITOS_DB" "INSERT OR IGNORE INTO activities (id, timestamp, type, description, status, duration_ms, tokens_used, agent, metadata) VALUES ('$id', '$timestamp', '$type', '$description', '$status', NULL, NULL, '$agent', '$metadata'); SELECT changes();")
+        result=$(sqlite3 "$SUPERBOTIJO_DB" "INSERT OR IGNORE INTO activities (id, timestamp, type, description, status, duration_ms, tokens_used, agent, metadata) VALUES ('$id', '$timestamp', '$type', '$description', '$status', NULL, NULL, '$agent', '$metadata'); SELECT changes();")
         
         if [ "$result" -gt 0 ]; then
             ((sessions_added++))
@@ -112,6 +112,6 @@ done
 
 # Prune activities older than 30 days
 cutoff=$(date -d "30 days ago" -u +"%Y-%m-%dT%H:%M:%S.000Z")
-pruned=$(sqlite3 "$TENACITOS_DB" "DELETE FROM activities WHERE timestamp < '$cutoff'; SELECT changes();")
+pruned=$(sqlite3 "$SUPERBOTIJO_DB" "DELETE FROM activities WHERE timestamp < '$cutoff'; SELECT changes();")
 
 echo "✓ Synced $sessions_added new sessions, pruned $pruned old records"
