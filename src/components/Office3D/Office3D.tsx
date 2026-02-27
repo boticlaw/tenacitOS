@@ -17,6 +17,8 @@ import PlantPot from './PlantPot';
 import WallClock from './WallClock';
 import FirstPersonControls from './FirstPersonControls';
 import MovingAvatar from './MovingAvatar';
+import VisitorAvatar from './VisitorAvatar';
+import AgentTrail from './AgentTrail';
 
 interface Agent {
   id: string;
@@ -39,6 +41,17 @@ interface AgentStatusResponse {
   currentTask?: string;
   activeSessions?: number;
   lastActivity?: string;
+}
+
+
+interface Visitor {
+  id: string;
+  parentId: string;
+  parentName: string;
+  task: string;
+  model: string;
+  tokens: number;
+  status: 'active' | 'idle';
 }
 
 interface AgentConfig {
@@ -80,6 +93,7 @@ export default function Office3D() {
   const [avatarPositions, setAvatarPositions] = useState<Map<string, Vector3>>(new Map());
   const [agents, setAgents] = useState<AgentConfig[]>([]);
   const [agentStates, setAgentStates] = useState<Record<string, AgentState>>({});
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Get agent state with fallback
@@ -272,6 +286,36 @@ export default function Office3D() {
               onPositionUpdate={handleAvatarPositionUpdate}
             />
           ))}
+
+
+          {/* Visitors (sub-agents) */}
+          {visitors.map((visitor) => {
+            const parentAgent = agents.find(a => a.id === visitor.parentId);
+            if (!parentAgent) return null;
+            
+            return (
+              <group key={visitor.id}>
+                <AgentTrail
+                  start={parentAgent.position}
+                  end={[
+                    parentAgent.position[0] + Math.cos((visitors.filter(v => v.parentId === visitor.parentId).indexOf(visitor) / 5) * Math.PI * 2) * 1.5,
+                    0.8,
+                    parentAgent.position[2] + Math.sin((visitors.filter(v => v.parentId === visitor.parentId).indexOf(visitor) / 5) * Math.PI * 2) * 1.5
+                  ]}
+                  color="#60a5fa"
+                />
+                <VisitorAvatar
+                  id={visitor.id}
+                  task={visitor.task}
+                  model={visitor.model}
+                  tokens={visitor.tokens}
+                  status={visitor.status}
+                  parentPosition={parentAgent.position}
+                  index={visitors.filter(v => v.parentId === visitor.parentId).indexOf(visitor)}
+                />
+              </group>
+            );
+          })}
 
           {/* Mobiliario interactivo */}
           <FileCabinet
