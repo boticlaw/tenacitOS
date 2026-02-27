@@ -99,7 +99,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const paths = getHeartbeatPaths();
-    let targetPath = paths.find((p) => existsSync(p)) || paths[0];
+    const targetPath = paths.find((p) => existsSync(p)) || paths[0];
 
     const dir = dirname(targetPath);
     if (!existsSync(dir)) {

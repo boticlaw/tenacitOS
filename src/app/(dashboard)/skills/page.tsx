@@ -10,6 +10,7 @@ import {
   ExternalLink,
   FileText,
   X,
+  Power,
 } from "lucide-react";
 import { SectionHeader, MetricCard } from "@/components/SuperBotijo";
 
@@ -25,6 +26,7 @@ interface Skill {
   fullContent: string;
   files: string[];
   agents: string[];
+  enabled: boolean;
 }
 
 interface SkillsData {
@@ -36,6 +38,7 @@ export default function SkillsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterSource, setFilterSource] = useState<"all" | "workspace" | "system">("all");
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [togglingSkill, setTogglingSkill] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/skills")
@@ -43,6 +46,42 @@ export default function SkillsPage() {
       .then(setData)
       .catch(() => setData({ skills: [] }));
   }, []);
+
+  const handleToggleSkill = async (skillId: string, currentlyEnabled: boolean) => {
+    if (currentlyEnabled) {
+      if (!confirm(`Disable skill "${skillId}"? This may affect OpenClaw functionality.`)) {
+        return;
+      }
+    }
+
+    setTogglingSkill(skillId);
+    try {
+      const res = await fetch(`/api/skills/${encodeURIComponent(skillId)}/toggle`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !currentlyEnabled }),
+      });
+
+      if (res.ok) {
+        setData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            skills: prev.skills.map((s) =>
+              s.id === skillId ? { ...s, enabled: !currentlyEnabled } : s
+            ),
+          };
+        });
+        if (selectedSkill?.id === skillId) {
+          setSelectedSkill((prev) => (prev ? { ...prev, enabled: !currentlyEnabled } : null));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to toggle skill:", error);
+    } finally {
+      setTogglingSkill(null);
+    }
+  };
 
   if (!data) {
     return (
@@ -265,7 +304,13 @@ export default function SkillsPage() {
                 }}
               >
                 {workspaceSkills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} onClick={() => setSelectedSkill(skill)} />
+                  <SkillCard
+                    key={skill.id}
+                    skill={skill}
+                    onClick={() => setSelectedSkill(skill)}
+                    onToggle={() => handleToggleSkill(skill.id, skill.enabled)}
+                    isToggling={togglingSkill === skill.id}
+                  />
                 ))}
               </div>
             </div>
@@ -284,7 +329,13 @@ export default function SkillsPage() {
                 }}
               >
                 {systemSkills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} onClick={() => setSelectedSkill(skill)} />
+                  <SkillCard
+                    key={skill.id}
+                    skill={skill}
+                    onClick={() => setSelectedSkill(skill)}
+                    onToggle={() => handleToggleSkill(skill.id, skill.enabled)}
+                    isToggling={togglingSkill === skill.id}
+                  />
                 ))}
               </div>
             </div>
@@ -293,13 +344,30 @@ export default function SkillsPage() {
       )}
 
       {/* Detail Modal */}
-      {selectedSkill && <SkillDetailModal skill={selectedSkill} onClose={() => setSelectedSkill(null)} />}
+      {selectedSkill && (
+        <SkillDetailModal
+          skill={selectedSkill}
+          onClose={() => setSelectedSkill(null)}
+          onToggle={() => handleToggleSkill(selectedSkill.id, selectedSkill.enabled)}
+          isToggling={togglingSkill === selectedSkill.id}
+        />
+      )}
     </div>
   );
 }
 
 // Skill Card Component
-function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
+function SkillCard({
+  skill,
+  onClick,
+  onToggle,
+  isToggling,
+}: {
+  skill: Skill;
+  onClick: () => void;
+  onToggle: () => void;
+  isToggling: boolean;
+}) {
   return (
     <div
       style={{
@@ -309,6 +377,7 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
         border: "1px solid var(--border)",
         cursor: "pointer",
         transition: "all 150ms ease",
+        opacity: skill.enabled ? 1 : 0.6,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.backgroundColor = "var(--surface-hover)";
@@ -329,9 +398,7 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
           marginBottom: "12px",
         }}
       >
-        {skill.emoji && (
-          <span style={{ fontSize: "24px", flexShrink: 0 }}>{skill.emoji}</span>
-        )}
+        {skill.emoji && <span style={{ fontSize: "24px", flexShrink: 0 }}>{skill.emoji}</span>}
         <div style={{ flex: 1, minWidth: 0 }}>
           <h3
             style={{
@@ -388,23 +455,43 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
           >
             {skill.source}
           </div>
-          {skill.agents && skill.agents.length > 0 && skill.agents.map((agent) => (
+          {!skill.enabled && (
             <div
-              key={agent}
               style={{
                 backgroundColor: "var(--surface-elevated)",
-                color: "var(--text-secondary)",
-                padding: "3px 7px",
+                color: "var(--text-muted)",
+                padding: "3px 8px",
                 borderRadius: "4px",
-                fontFamily: "var(--font-mono)",
+                fontFamily: "var(--font-body)",
                 fontSize: "9px",
-                fontWeight: 600,
+                fontWeight: 700,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
                 border: "1px solid var(--border)",
               }}
             >
-              {agent}
+              DISABLED
             </div>
-          ))}
+          )}
+          {skill.agents &&
+            skill.agents.length > 0 &&
+            skill.agents.map((agent) => (
+              <div
+                key={agent}
+                style={{
+                  backgroundColor: "var(--surface-elevated)",
+                  color: "var(--text-secondary)",
+                  padding: "3px 7px",
+                  borderRadius: "4px",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "9px",
+                  fontWeight: 600,
+                  border: "1px solid var(--border)",
+                }}
+              >
+                {agent}
+              </div>
+            ))}
           <span
             style={{
               fontFamily: "var(--font-body)",
@@ -415,16 +502,58 @@ function SkillCard({ skill, onClick }: { skill: Skill; onClick: () => void }) {
             {skill.fileCount} files
           </span>
         </div>
-        {skill.homepage && (
-          <ExternalLink style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {skill.homepage && <ExternalLink style={{ width: "14px", height: "14px", color: "var(--text-muted)" }} />}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle();
+            }}
+            disabled={isToggling}
+            title={skill.enabled ? "Disable skill" : "Enable skill"}
+            style={{
+              width: "36px",
+              height: "20px",
+              borderRadius: "10px",
+              backgroundColor: skill.enabled ? "var(--accent)" : "var(--text-muted)",
+              border: "none",
+              cursor: isToggling ? "wait" : "pointer",
+              position: "relative",
+              transition: "background-color 200ms",
+              opacity: isToggling ? 0.5 : 1,
+            }}
+          >
+            <div
+              style={{
+                width: "16px",
+                height: "16px",
+                borderRadius: "50%",
+                backgroundColor: "white",
+                position: "absolute",
+                top: "2px",
+                left: skill.enabled ? "18px" : "2px",
+                transition: "left 200ms",
+              }}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
 // Skill Detail Modal Component
-function SkillDetailModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
+function SkillDetailModal({
+  skill,
+  onClose,
+  onToggle,
+  isToggling,
+}: {
+  skill: Skill;
+  onClose: () => void;
+  onToggle: () => void;
+  isToggling: boolean;
+}) {
   return (
     <div
       style={{
@@ -500,26 +629,42 @@ function SkillDetailModal({ skill, onClose }: { skill: Skill; onClose: () => voi
               >
                 {skill.description}
               </p>
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
                 <div className="badge-positive">{skill.source}</div>
                 <div className="badge-info">{skill.fileCount} archivos</div>
-                {skill.agents && skill.agents.length > 0 && skill.agents.map((agent) => (
+                {!skill.enabled && (
                   <div
-                    key={agent}
                     style={{
-                      backgroundColor: "var(--surface-elevated)",
-                      color: "var(--text-secondary)",
+                      backgroundColor: "rgba(239, 68, 68, 0.1)",
+                      color: "#ef4444",
                       padding: "3px 10px",
                       borderRadius: "4px",
-                      fontFamily: "var(--font-mono)",
                       fontSize: "11px",
                       fontWeight: 600,
-                      border: "1px solid var(--border)",
                     }}
                   >
-                    @{agent}
+                    DISABLED
                   </div>
-                ))}
+                )}
+                {skill.agents &&
+                  skill.agents.length > 0 &&
+                  skill.agents.map((agent) => (
+                    <div
+                      key={agent}
+                      style={{
+                        backgroundColor: "var(--surface-elevated)",
+                        color: "var(--text-secondary)",
+                        padding: "3px 10px",
+                        borderRadius: "4px",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      @{agent}
+                    </div>
+                  ))}
                 {skill.homepage && (
                   <a
                     href={skill.homepage}
@@ -540,6 +685,41 @@ function SkillDetailModal({ skill, onClose }: { skill: Skill; onClose: () => voi
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Toggle Button */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginTop: "16px",
+              padding: "12px 16px",
+              backgroundColor: "var(--surface-elevated)",
+              borderRadius: "8px",
+            }}
+          >
+            <Power style={{ width: "18px", height: "18px", color: skill.enabled ? "var(--accent)" : "var(--text-muted)" }} />
+            <span style={{ flex: 1, color: "var(--text-primary)", fontSize: "14px" }}>
+              {skill.enabled ? "Skill is enabled" : "Skill is disabled"}
+            </span>
+            <button
+              onClick={onToggle}
+              disabled={isToggling}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "6px",
+                backgroundColor: skill.enabled ? "rgba(239, 68, 68, 0.1)" : "var(--accent)",
+                color: skill.enabled ? "#ef4444" : "white",
+                border: "none",
+                cursor: isToggling ? "wait" : "pointer",
+                fontSize: "12px",
+                fontWeight: 600,
+                opacity: isToggling ? 0.5 : 1,
+              }}
+            >
+              {isToggling ? "..." : skill.enabled ? "Disable" : "Enable"}
+            </button>
           </div>
         </div>
 
