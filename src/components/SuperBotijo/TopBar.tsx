@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
+import { LiveStatusIndicator } from "@/components/LiveStatusIndicator";
 import { BRANDING } from "@/config/branding";
 import { useI18n } from "@/i18n/provider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -90,6 +91,7 @@ export function TopBar() {
           >
             {BRANDING.appTitle}
           </h1>
+          <LiveStatusIndicator />
         </div>
 
         <div className="flex items-center gap-3">
