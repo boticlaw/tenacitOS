@@ -109,10 +109,11 @@
 - [x] Alertas de gasto (opcional)
 - **Archivos:** `src/app/(dashboard)/costs/page.tsx`, `src/app/api/costs/route.ts`
 
-### 4.3 Performance Metrics ⚠️
+### 4.3 Performance Metrics ✅
 - [x] Tiempo promedio de respuesta (en activity)
 - [x] Tasa de éxito por tipo de tarea (SuccessRateGauge)
-- [ ] Uptime del agente
+- [x] Uptime del agente
+- **Archivos:** `src/app/api/system/uptime/route.ts`
 
 ---
 
@@ -166,10 +167,10 @@
 ### 6.1 Skills Manager ✅
 - [x] Lista de skills instalados
 - [x] Ver SKILL.md de cada uno
-- [ ] Activar/desactivar
+- [x] Activar/desactivar
 - [ ] Instalar desde ClawHub
 - [ ] Actualizar skills
-- **Archivos:** `src/app/(dashboard)/skills/page.tsx`, `src/app/api/skills/route.ts`
+- **Archivos:** `src/app/(dashboard)/skills/page.tsx`, `src/app/api/skills/route.ts`, `src/app/api/skills/[id]/toggle/route.ts`
 
 ### 6.2 Integration Status ⚠️
 - [x] Estado de conexiones (componente existe)
@@ -187,18 +188,19 @@
 
 ---
 
-## Fase 7: Real-time ❌ PENDIENTE
+## Fase 7: Real-time ⚠️ PARCIAL
 > WebSockets y notificaciones live
 
-### 7.1 Live Activity Stream
-- [ ] WebSocket connection
-- [ ] Updates en tiempo real del activity feed
-- [ ] Indicador "SuperBotijo está trabajando..."
-- [ ] Toast notifications
+### 7.1 Live Activity Stream ✅
+- [x] SSE connection (Server-Sent Events)
+- [x] Updates en tiempo real del activity feed
+- [x] Indicador "SuperBotijo está trabajando..." (LiveStatusIndicator)
+- [x] Toast notifications (ToastProvider + useToast)
+- **Archivos:** `src/app/api/activities/stream/route.ts`, `src/hooks/useActivityStream.ts`, `src/components/LiveStatusIndicator.tsx`, `src/components/Toast.tsx`
 
-### 7.2 System Status
-- [ ] Heartbeat del agente
-- [ ] CPU/memoria del VPS (parcial en `/system`)
+### 7.2 System Status ⚠️
+- [x] Heartbeat del agente (en /heartbeat)
+- [x] CPU/memoria del VPS (parcial en `/system`)
 - [ ] Cola de tareas pendientes
 
 ---
@@ -218,13 +220,13 @@
 - **Archivos:** `src/components/Office3D/Office3D.tsx`, `src/app/office/page.tsx`
 
 ### 8.2 Interactions & Ambient ⚠️
-- [ ] Avatares animados (tecleando, pensando, error)
+- [x] Avatares animados (tecleando, pensando, error)
 - [ ] Sub-agents aparecen como "visitantes" en la oficina
 - [ ] Trail visual entre parent y sub-agent
-- [ ] Efectos visuales (partículas success, humo error, beam heartbeat)
-- [ ] Sonido ambiental toggleable (teclas, notificaciones, lofi)
+- [x] Efectos visuales (partículas success, humo error, beam heartbeat)
+- [x] Sonido ambiental toggleable (teclas, notificaciones, lofi)
 - [x] Click en objetos (archivador→Memory, pizarra→Roadmap, café→Mood)
-- **Archivos:** `src/components/Office3D/FileCabinet.tsx`, `Whiteboard.tsx`, `CoffeeMachine.tsx`, `WallClock.tsx`
+- **Archivos:** `src/components/Office3D/AvatarAnimator.tsx`, `FileCabinet.tsx`, `Whiteboard.tsx`, `CoffeeMachine.tsx`, `WallClock.tsx`
 
 ### 8.3 Multi-Floor Building ❌
 - [ ] 4 plantas navegables con ascensor:
@@ -251,12 +253,13 @@
 ## Fase 9: Agent Intelligence ❌ PENDIENTE
 > Features experimentales y visualizaciones avanzadas (complementan "The Office")
 
-### 9.1 Agent Mood Dashboard
-- [ ] Widget de "estado de ánimo" basado en métricas recientes
-- [ ] Indicadores visuales: productivo, ocupado, idle, frustrado (muchos errores)
-- [ ] Streak counter: días consecutivos sin errores críticos
-- [ ] "Energy level" basado en tokens/hora
-- [ ] Emoji animado que cambia según el estado
+### 9.1 Agent Mood Dashboard ✅
+- [x] Widget de "estado de ánimo" basado en métricas recientes
+- [x] Indicadores visuales: productivo, ocupado, idle, frustrado (muchos errores)
+- [x] Streak counter: días consecutivos sin errores críticos
+- [x] "Energy level" basado en tokens/hora
+- [x] Emoji animado que cambia según el estado
+- **Archivos:** `src/app/api/agents/mood/route.ts`, `src/components/MoodWidget.tsx`
 
 ### 9.2 Token Economics ⚠️ (parcial en /costs)
 - [x] Vista detallada de consumo por modelo (en /costs)
@@ -404,25 +407,29 @@
 - **Fase 1** - Activity Logger Real
 - **Fase 2** - Memory & Files
 - **Fase 3** - Unified Cron Dashboard (System + OpenClaw + Heartbeat)
-- **Fase 4** - Analytics
+- **Fase 4** - Analytics (incl. Uptime tracker)
 - **Fase 5** - Comunicación (Terminal, Sessions, Notifications, Notifications Log)
-- **Fase 6** - Configuración (Skills, Config Editor)
+- **Fase 6** - Configuración (Skills toggle, Config Editor)
+- **Fase 7.1** - Real-time (SSE, Live Status, Toasts)
 - **Fase 8.1** - Office 3D MVP
+- **Fase 8.2** - Avatar Animations, Visual Effects, Ambient Audio
+- **Fase 9.1** - Agent Mood Dashboard
 - **Fase 9.4** - Quick Actions Hub
 
 ### 🔥 Próximos pasos (Quick Wins)
-1. **Fase 8.2** - Avatares animados en Office 3D
-2. **Fase 4.3** - Uptime del agente (completar Analytics)
-3. **Fase 6.1** - Activar/desactivar skills
+1. **Fase 7.2** - Cola de tareas pendientes
+2. **Fase 8.2** - Sub-agents como visitantes en Office 3D
+3. **Fase 9.2** - Top 5 tareas que más tokens consumen
 
 ### Tier 2: High Value (Should Have)
-3. **Fase 7** - Real-time updates → UX premium
-4. **Fase 10.1** - Sub-Agent Dashboard → visibilidad de workflows
-5. **Fase 9.1** - Agent Mood Dashboard → visual engagement
+1. **Fase 7.2** - System Status completo (cola de tareas)
+2. **Fase 10.1** - Sub-Agent Dashboard → visibilidad de workflows
+3. **Fase 9.2** - Token Economics completo → Top 5 tareas, Efficiency score
 
 ### Tier 3: Intelligence & Insights (Nice to Have)
-6. **Fase 9.2** - Token Economics → optimización de costes
-7. **Fase 9.6** - Smart Suggestions → IA que se auto-mejora
+1. **Fase 9.6** - Smart Suggestions → IA que se auto-mejora
+2. **Fase 9.3** - Knowledge Graph Viewer
+3. **Fase 9.5** - Model Playground
 
 ### Tier 4: Advanced Features (Wow Factor)
 8. **Fase 8.3** - Multi-Floor Building
@@ -442,17 +449,17 @@
 | 1. Fundamentos | ✅ | 100% |
 | 2. Memory & Files | ✅ | 100% |
 | 3. Unified Cron Dashboard | ✅ | 100% |
-| 4. Analytics | ✅ | 95% |
+| 4. Analytics | ✅ | 100% |
 | 5. Comunicación | ✅ | 100% |
 | 6. Configuración | ✅ | 100% |
-| 7. Real-time | ❌ | 0% |
-| 8. The Office 3D | ⚠️ | 60% |
-| 9. Agent Intelligence | ⚠️ | 20% |
+| 7. Real-time | ⚠️ | 80% |
+| 8. The Office 3D | ⚠️ | 70% |
+| 9. Agent Intelligence | ⚠️ | 40% |
 | 10. Sub-Agent Orchestra | ❌ | 0% |
 | 11. Advanced Viz | ❌ | 5% |
 | 12. Collaboration | ❌ | 0% |
 
-**Overall: ~55% completado**
+**Overall: ~65% completado**
 
 ---
 
