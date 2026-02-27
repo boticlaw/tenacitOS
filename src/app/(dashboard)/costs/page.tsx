@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { TopTasksList } from "@/components/TopTasksList";
+import { EfficiencyGauge } from "@/components/EfficiencyGauge";
 import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, Calendar, PieChart } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, PieChart as RePieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -208,6 +209,9 @@ export default function CostsPage() {
           </p>
         </div>
       </div>
+
+      {/* Efficiency Score */}
+      <EfficiencyGauge />
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
