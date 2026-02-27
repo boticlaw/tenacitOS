@@ -1,31 +1,93 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Clock, RefreshCw, AlertCircle, LayoutGrid, CalendarDays, Zap, Plus } from "lucide-react";
+import {
+  Clock,
+  RefreshCw,
+  AlertCircle,
+  LayoutGrid,
+  CalendarDays,
+  Zap,
+  Plus,
+  Server,
+  Bot,
+  Heart,
+  Play,
+} from "lucide-react";
 import { CronJobCard, type CronJob } from "@/components/CronJobCard";
 import { CronWeeklyTimeline } from "@/components/CronWeeklyTimeline";
 import { CronJobModal } from "@/components/CronJobModal";
+import {
+  SystemCronCard,
+  SystemCronLogsModal,
+} from "@/components/SystemCronCard";
+import { HeartbeatStatus } from "@/components/HeartbeatStatus";
+import type { SystemCronJob } from "@/app/api/cron/system/route";
 
 type ViewMode = "cards" | "timeline";
+type CronTab = "all" | "system" | "openclaw" | "heartbeat";
+
+interface HeartbeatData {
+  enabled: boolean;
+  every: string;
+  target: string;
+  activeHours: { start: string; end: string } | null;
+  heartbeatMd: string;
+  heartbeatMdPath: string;
+  configured: boolean;
+}
 
 export default function CronJobsPage() {
   const [jobs, setJobs] = useState<CronJob[]>([]);
+  const [systemJobs, setSystemJobs] = useState<SystemCronJob[]>([]);
+  const [heartbeat, setHeartbeat] = useState<HeartbeatData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
-  const [runToast, setRunToast] = useState<{ id: string; status: "success" | "error"; name: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<CronTab>("all");
+  const [runToast, setRunToast] = useState<{
+    id: string;
+    status: "success" | "error";
+    name: string;
+  } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<CronJob | null>(null);
-  const [saveToast, setSaveToast] = useState<{ status: "success" | "error"; message: string } | null>(null);
+  const [saveToast, setSaveToast] = useState<{
+    status: "success" | "error";
+    message: string;
+  } | null>(null);
 
-  const fetchJobs = useCallback(async () => {
+  const [logsModal, setLogsModal] = useState<{
+    isOpen: boolean;
+    jobId: string;
+    jobName: string;
+    logPath?: string;
+  }>({ isOpen: false, jobId: "", jobName: "" });
+
+  const fetchAllData = useCallback(async () => {
     try {
       setError(null);
-      const res = await fetch("/api/cron");
-      if (!res.ok) throw new Error("Failed to fetch jobs");
-      const data = await res.json();
-      setJobs(Array.isArray(data) ? data : []);
+      const [openclawRes, systemRes, heartbeatRes] = await Promise.all([
+        fetch("/api/cron"),
+        fetch("/api/cron/system"),
+        fetch("/api/heartbeat"),
+      ]);
+
+      if (openclawRes.ok) {
+        const data = await openclawRes.json();
+        setJobs(Array.isArray(data) ? data : []);
+      }
+
+      if (systemRes.ok) {
+        const data = await systemRes.json();
+        setSystemJobs(data.jobs || []);
+      }
+
+      if (heartbeatRes.ok) {
+        const data = await heartbeatRes.json();
+        setHeartbeat(data);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -34,8 +96,8 @@ export default function CronJobsPage() {
   }, []);
 
   useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+    fetchAllData();
+  }, [fetchAllData]);
 
   const handleToggle = async (id: string, enabled: boolean) => {
     try {
@@ -90,6 +152,36 @@ export default function CronJobsPage() {
     setTimeout(() => setRunToast(null), 4000);
   };
 
+  const handleSystemRun = async (id: string) => {
+    const job = systemJobs.find((j) => j.id === id);
+    const res = await fetch("/api/cron/system-run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      setRunToast({ id, status: "error", name: job?.name || id });
+      setTimeout(() => setRunToast(null), 4000);
+      throw new Error(data.error || "Run failed");
+    }
+
+    setRunToast({ id, status: "success", name: job?.name || id });
+    setTimeout(() => setRunToast(null), 4000);
+  };
+
+  const handleViewLogs = (id: string, logPath?: string) => {
+    const job = systemJobs.find((j) => j.id === id);
+    setLogsModal({
+      isOpen: true,
+      jobId: id,
+      jobName: job?.name || id,
+      logPath,
+    });
+  };
+
   const handleEdit = (job: CronJob) => {
     setEditingJob(job);
     setIsModalOpen(true);
@@ -108,7 +200,8 @@ export default function CronJobsPage() {
 
       const body: Record<string, unknown> = {
         name: jobData.name,
-        schedule: typeof jobData.schedule === "string" ? jobData.schedule : undefined,
+        schedule:
+          typeof jobData.schedule === "string" ? jobData.schedule : undefined,
         timezone: jobData.timezone || "UTC",
         message: jobData.description,
       };
@@ -131,19 +224,36 @@ export default function CronJobsPage() {
 
       setSaveToast({
         status: "success",
-        message: isEditing ? `Job "${jobData.name}" updated!` : `Job "${jobData.name}" created!`,
+        message: isEditing
+          ? `Job "${jobData.name}" updated!`
+          : `Job "${jobData.name}" created!`,
       });
       setTimeout(() => setSaveToast(null), 4000);
 
       setIsModalOpen(false);
       setEditingJob(null);
-      fetchJobs();
+      fetchAllData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to save job";
+      const message =
+        err instanceof Error ? err.message : "Failed to save job";
       setSaveToast({ status: "error", message });
       setTimeout(() => setSaveToast(null), 4000);
       throw err;
     }
+  };
+
+  const handleHeartbeatSave = async (content: string) => {
+    const res = await fetch("/api/heartbeat", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to save HEARTBEAT.md");
+    }
+
+    fetchAllData();
   };
 
   const handleCloseModal = () => {
@@ -154,280 +264,73 @@ export default function CronJobsPage() {
   const activeJobs = jobs.filter((j) => j.enabled).length;
   const pausedJobs = jobs.length - activeJobs;
 
-  return (
-    <div className="p-4 md:p-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 md:mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-1" style={{ 
-            color: 'var(--text-primary)',
-            fontFamily: 'var(--font-heading)'
-          }}>
-            Cron Jobs
-          </h1>
-          <p className="text-sm md:text-base" style={{ color: 'var(--text-secondary)' }}>
-            Scheduled tasks from OpenClaw Gateway
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {/* Create Job button */}
-          <button
-            onClick={handleCreateNew}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--accent)',
-              color: '#000',
-              borderRadius: '0.5rem',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 600,
-              transition: 'opacity 0.2s'
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Create Job</span>
-          </button>
+  const renderTabContent = () => {
+    if (activeTab === "heartbeat") {
+      if (!heartbeat) return null;
+      return <HeartbeatStatus data={heartbeat} onSave={handleHeartbeatSave} />;
+    }
 
-          {/* View mode toggle */}
-          <div
-            style={{
-              display: 'flex',
-              backgroundColor: 'var(--card)',
-              border: '1px solid var(--border)',
-              borderRadius: '0.5rem',
-              padding: '3px',
-            }}
-          >
-            <button
-              onClick={() => setViewMode("cards")}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.4rem 0.75rem',
-                borderRadius: '0.35rem',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                backgroundColor: viewMode === "cards" ? 'var(--accent)' : 'transparent',
-                color: viewMode === "cards" ? 'white' : 'var(--text-secondary)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              Cards
-            </button>
-            <button
-              onClick={() => setViewMode("timeline")}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.4rem 0.75rem',
-                borderRadius: '0.35rem',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                backgroundColor: viewMode === "timeline" ? 'var(--accent)' : 'transparent',
-                color: viewMode === "timeline" ? 'white' : 'var(--text-secondary)',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              Timeline
-            </button>
-          </div>
-
-          <button
-            onClick={() => { setIsLoading(true); fetchJobs(); }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--card)',
-              color: 'var(--text-primary)',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--border)',
-              cursor: 'pointer',
-              fontWeight: 500,
-              transition: 'opacity 0.2s'
-            }}
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-8">
-        <div style={{
-          backgroundColor: 'color-mix(in srgb, var(--card) 50%, transparent)',
-          border: '1px solid var(--border)',
-          borderRadius: '0.75rem',
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <div style={{ padding: '0.75rem', backgroundColor: 'color-mix(in srgb, var(--info) 20%, transparent)', borderRadius: '0.5rem' }}>
-            <Clock className="w-6 h-6" style={{ color: 'var(--info)' }} />
-          </div>
-          <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{jobs.length}</p>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Jobs</p>
-          </div>
-        </div>
-        <div style={{
-          backgroundColor: 'color-mix(in srgb, var(--card) 50%, transparent)',
-          border: '1px solid var(--border)',
-          borderRadius: '0.75rem',
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <div style={{ padding: '0.75rem', backgroundColor: 'color-mix(in srgb, var(--success) 20%, transparent)', borderRadius: '0.5rem' }}>
-            <RefreshCw className="w-6 h-6" style={{ color: 'var(--success)' }} />
-          </div>
-          <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{activeJobs}</p>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Active</p>
-          </div>
-        </div>
-        <div style={{
-          backgroundColor: 'color-mix(in srgb, var(--card) 50%, transparent)',
-          border: '1px solid var(--border)',
-          borderRadius: '0.75rem',
-          padding: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <div style={{ padding: '0.75rem', backgroundColor: 'color-mix(in srgb, var(--warning) 20%, transparent)', borderRadius: '0.5rem' }}>
-            <AlertCircle className="w-6 h-6" style={{ color: 'var(--warning)' }} />
-          </div>
-          <div>
-            <p style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>{pausedJobs}</p>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Paused</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div style={{
-          marginBottom: '1.5rem',
-          padding: '1rem',
-          backgroundColor: 'color-mix(in srgb, var(--error) 10%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--error) 30%, transparent)',
-          borderRadius: '0.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem'
-        }}>
-          <AlertCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />
-          <span style={{ color: 'var(--error)' }}>{error}</span>
-          <button onClick={() => setError(null)} style={{ marginLeft: 'auto', color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer' }}>
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {/* Loading */}
-      {isLoading ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem 0' }}>
-          <div style={{
-            width: '2rem', height: '2rem',
-            border: '2px solid var(--accent)', borderTopColor: 'transparent',
-            borderRadius: '50%', animation: 'spin 1s linear infinite'
-          }} />
-        </div>
-      ) : jobs.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-          <Clock className="w-8 h-8 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
-          <h3 style={{ fontSize: '1.125rem', fontWeight: 500, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-            No cron jobs found
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-            Create your first cron job to get started
-          </p>
-          <button
-            onClick={handleCreateNew}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
-              backgroundColor: 'var(--accent)',
-              color: '#000',
-              borderRadius: '0.5rem',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Create Job
-          </button>
-        </div>
-      ) : viewMode === "timeline" ? (
-        /* Timeline View */
+    if (viewMode === "timeline") {
+      return (
         <div
           className="rounded-xl overflow-hidden"
           style={{
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            padding: '1.25rem',
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+            padding: "1.25rem",
           }}
         >
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              marginBottom: '1.25rem',
-              paddingBottom: '1rem',
-              borderBottom: '1px solid var(--border)',
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              marginBottom: "1.25rem",
+              paddingBottom: "1rem",
+              borderBottom: "1px solid var(--border)",
             }}
           >
-            <CalendarDays className="w-5 h-5" style={{ color: 'var(--accent)' }} />
+            <CalendarDays
+              className="w-5 h-5"
+              style={{ color: "var(--accent)" }}
+            />
             <h2
               style={{
-                fontSize: '1rem',
+                fontSize: "1rem",
                 fontWeight: 700,
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-heading)',
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-heading)",
               }}
             >
               7-Day Schedule Overview
             </h2>
-            <span
-              style={{
-                marginLeft: 'auto',
-                fontSize: '0.75rem',
-                color: 'var(--text-muted)',
-                backgroundColor: 'var(--card-elevated)',
-                padding: '0.25rem 0.6rem',
-                borderRadius: '0.35rem',
-              }}
-            >
-              All times in local timezone
-            </span>
           </div>
           <CronWeeklyTimeline jobs={jobs} />
         </div>
-      ) : (
-        /* Cards View */
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
-          {jobs.map((job) => (
-            <div key={job.id} style={{ position: 'relative' }}>
+      );
+    }
+
+    const showSystem =
+      activeTab === "all" || activeTab === "system";
+    const showOpenclaw =
+      activeTab === "all" || activeTab === "openclaw";
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+        {showSystem &&
+          systemJobs.map((job) => (
+            <div key={job.id} style={{ position: "relative" }}>
+              <SystemCronCard
+                job={job}
+                onRun={handleSystemRun}
+                onViewLogs={handleViewLogs}
+              />
+            </div>
+          ))}
+
+        {showOpenclaw &&
+          jobs.map((job) => (
+            <div key={job.id} style={{ position: "relative" }}>
               <CronJobCard
                 job={job}
                 onToggle={handleToggle}
@@ -436,23 +339,59 @@ export default function CronJobsPage() {
                 onRun={handleRun}
               />
               {deleteConfirm === job.id && (
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  backgroundColor: 'rgba(12, 12, 12, 0.9)',
-                  borderRadius: '0.75rem',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  backdropFilter: 'blur(4px)',
-                  zIndex: 10,
-                }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <p style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Delete &quot;{job.name}&quot;?</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <button onClick={() => setDeleteConfirm(null)}
-                        style={{ padding: '0.5rem 1rem', color: 'var(--text-secondary)', background: 'none', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundColor: "rgba(12, 12, 12, 0.9)",
+                    borderRadius: "0.75rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backdropFilter: "blur(4px)",
+                    zIndex: 10,
+                  }}
+                >
+                  <div style={{ textAlign: "center" }}>
+                    <p
+                      style={{
+                        color: "var(--text-primary)",
+                        marginBottom: "1rem",
+                      }}
+                    >
+                      Delete &quot;{job.name}&quot;?
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      <button
+                        onClick={() => setDeleteConfirm(null)}
+                        style={{
+                          padding: "0.5rem 1rem",
+                          color: "var(--text-secondary)",
+                          background: "none",
+                          border: "none",
+                          borderRadius: "0.5rem",
+                          cursor: "pointer",
+                        }}
+                      >
                         Cancel
                       </button>
-                      <button onClick={() => handleDelete(job.id)}
-                        style={{ padding: '0.5rem 1rem', backgroundColor: 'var(--error)', color: 'var(--text-primary)', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>
+                      <button
+                        onClick={() => handleDelete(job.id)}
+                        style={{
+                          padding: "0.5rem 1rem",
+                          backgroundColor: "var(--error)",
+                          color: "var(--text-primary)",
+                          border: "none",
+                          borderRadius: "0.5rem",
+                          cursor: "pointer",
+                        }}
+                      >
                         Delete
                       </button>
                     </div>
@@ -461,10 +400,523 @@ export default function CronJobsPage() {
               )}
             </div>
           ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="p-4 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 md:mb-6">
+        <div>
+          <h1
+            className="text-2xl md:text-3xl font-bold mb-1"
+            style={{
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-heading)",
+            }}
+          >
+            Cron Manager
+          </h1>
+          <p className="text-sm md:text-base" style={{ color: "var(--text-secondary)" }}>
+            Scheduled tasks from System, OpenClaw & Heartbeat
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <button
+            onClick={handleCreateNew}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              backgroundColor: "var(--accent)",
+              color: "#000",
+              borderRadius: "0.5rem",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: 600,
+              transition: "opacity 0.2s",
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Create Job</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsLoading(true);
+              fetchAllData();
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              backgroundColor: "var(--card)",
+              color: "var(--text-primary)",
+              borderRadius: "0.5rem",
+              border: "1px solid var(--border)",
+              cursor: "pointer",
+              fontWeight: 500,
+              transition: "opacity 0.2s",
+            }}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.5rem",
+          marginBottom: "1rem",
+        }}
+      >
+        <button
+          onClick={() => setActiveTab("all")}
+          style={{
+            padding: "0.5rem 1rem",
+            borderRadius: "0.5rem",
+            backgroundColor:
+              activeTab === "all" ? "var(--accent)" : "var(--card)",
+            color: activeTab === "all" ? "#000" : "var(--text-secondary)",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: "0.85rem",
+          }}
+        >
+          All ({systemJobs.length + jobs.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("system")}
+          style={{
+            padding: "0.5rem 1rem",
+            borderRadius: "0.5rem",
+            backgroundColor:
+              activeTab === "system" ? "var(--info)" : "var(--card)",
+            color: activeTab === "system" ? "#000" : "var(--text-secondary)",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: "0.85rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+          }}
+        >
+          <Server className="w-4 h-4" />
+          System ({systemJobs.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("openclaw")}
+          style={{
+            padding: "0.5rem 1rem",
+            borderRadius: "0.5rem",
+            backgroundColor:
+              activeTab === "openclaw" ? "var(--accent)" : "var(--card)",
+            color: activeTab === "openclaw" ? "#000" : "var(--text-secondary)",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: "0.85rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+          }}
+        >
+          <Bot className="w-4 h-4" />
+          OpenClaw ({activeJobs})
+        </button>
+        <button
+          onClick={() => setActiveTab("heartbeat")}
+          style={{
+            padding: "0.5rem 1rem",
+            borderRadius: "0.5rem",
+            backgroundColor:
+              activeTab === "heartbeat" ? "var(--error)" : "var(--card)",
+            color: activeTab === "heartbeat" ? "#fff" : "var(--text-secondary)",
+            border: "1px solid var(--border)",
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: "0.85rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.25rem",
+          }}
+        >
+          <Heart className="w-4 h-4" />
+          Heartbeat {heartbeat?.enabled ? "✓" : ""}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+        <div
+          onClick={() => setActiveTab("system")}
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--info) 10%, var(--card))",
+            border:
+              activeTab === "system"
+                ? "2px solid var(--info)"
+                : "1px solid var(--border)",
+            borderRadius: "0.75rem",
+            padding: "1rem",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+          >
+            <div
+              style={{
+                padding: "0.75rem",
+                backgroundColor:
+                  "color-mix(in srgb, var(--info) 20%, transparent)",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Server className="w-6 h-6" style={{ color: "var(--info)" }} />
+            </div>
+            <div>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                }}
+              >
+                {systemJobs.length}
+              </p>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                System Jobs
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("openclaw")}
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--accent) 10%, var(--card))",
+            border:
+              activeTab === "openclaw"
+                ? "2px solid var(--accent)"
+                : "1px solid var(--border)",
+            borderRadius: "0.75rem",
+            padding: "1rem",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+          >
+            <div
+              style={{
+                padding: "0.75rem",
+                backgroundColor:
+                  "color-mix(in srgb, var(--accent) 20%, transparent)",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Bot className="w-6 h-6" style={{ color: "var(--accent)" }} />
+            </div>
+            <div>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                }}
+              >
+                {activeJobs}
+              </p>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                Agent Jobs
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("heartbeat")}
+          style={{
+            backgroundColor: "var(--card)",
+            border:
+              activeTab === "heartbeat"
+                ? "2px solid var(--error)"
+                : "1px solid var(--border)",
+            borderRadius: "0.75rem",
+            padding: "1rem",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+          >
+            <div
+              style={{
+                padding: "0.75rem",
+                backgroundColor: heartbeat?.enabled
+                  ? "color-mix(in srgb, var(--success) 20%, transparent)"
+                  : "var(--card-elevated)",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Heart
+                className="w-6 h-6"
+                style={{
+                  color: heartbeat?.enabled
+                    ? "var(--success)"
+                    : "var(--text-muted)",
+                }}
+              />
+            </div>
+            <div>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                }}
+              >
+                {heartbeat?.every || "—"}
+              </p>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                Heartbeat
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+            borderRadius: "0.75rem",
+            padding: "1rem",
+          }}
+        >
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+          >
+            <div
+              style={{
+                padding: "0.75rem",
+                backgroundColor: "var(--card-elevated)",
+                borderRadius: "0.5rem",
+              }}
+            >
+              <Play
+                className="w-6 h-6"
+                style={{ color: "var(--text-secondary)" }}
+              />
+            </div>
+            <div>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                }}
+              >
+                {pausedJobs}
+              </p>
+              <p
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                Paused
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div
+          style={{
+            marginBottom: "1.5rem",
+            padding: "1rem",
+            backgroundColor:
+              "color-mix(in srgb, var(--error) 10%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--error) 30%, transparent)",
+            borderRadius: "0.5rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+          }}
+        >
+          <AlertCircle
+            className="w-5 h-5"
+            style={{ color: "var(--error)" }}
+          />
+          <span style={{ color: "var(--error)" }}>{error}</span>
+          <button
+            onClick={() => setError(null)}
+            style={{
+              marginLeft: "auto",
+              color: "var(--error)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* CronJobModal */}
+      {activeTab !== "heartbeat" && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginBottom: "1rem",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: "0.5rem",
+              padding: "3px",
+            }}
+          >
+            <button
+              onClick={() => setViewMode("cards")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                padding: "0.4rem 0.75rem",
+                borderRadius: "0.35rem",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                backgroundColor:
+                  viewMode === "cards" ? "var(--accent)" : "transparent",
+                color:
+                  viewMode === "cards" ? "white" : "var(--text-secondary)",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Cards
+            </button>
+            <button
+              onClick={() => setViewMode("timeline")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                padding: "0.4rem 0.75rem",
+                borderRadius: "0.35rem",
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                backgroundColor:
+                  viewMode === "timeline" ? "var(--accent)" : "transparent",
+                color:
+                  viewMode === "timeline" ? "white" : "var(--text-secondary)",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              <CalendarDays className="w-3.5 h-3.5" />
+              Timeline
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "3rem 0",
+          }}
+        >
+          <div
+            style={{
+              width: "2rem",
+              height: "2rem",
+              border: "2px solid var(--accent)",
+              borderTopColor: "transparent",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+        </div>
+      ) : activeTab !== "heartbeat" &&
+        systemJobs.length === 0 &&
+        jobs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "4rem 0" }}>
+          <Clock
+            className="w-8 h-8 mx-auto mb-4"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <h3
+            style={{
+              fontSize: "1.125rem",
+              fontWeight: 500,
+              color: "var(--text-primary)",
+              marginBottom: "0.5rem",
+            }}
+          >
+            No cron jobs found
+          </h3>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "1rem" }}>
+            Create your first job to get started
+          </p>
+          <button
+            onClick={handleCreateNew}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 1rem",
+              backgroundColor: "var(--accent)",
+              color: "#000",
+              borderRadius: "0.5rem",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Create Job
+          </button>
+        </div>
+      ) : (
+        renderTabContent()
+      )}
+
       <CronJobModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -472,34 +924,51 @@ export default function CronJobsPage() {
         editingJob={editingJob}
       />
 
-      {/* Run toast notification */}
+      <SystemCronLogsModal
+        isOpen={logsModal.isOpen}
+        onClose={() => setLogsModal({ ...logsModal, isOpen: false })}
+        jobId={logsModal.jobId}
+        jobName={logsModal.jobName}
+        logPath={logsModal.logPath}
+      />
+
       {runToast && (
         <div
           style={{
-            position: 'fixed',
-            bottom: '2.5rem',
-            right: '1.5rem',
+            position: "fixed",
+            bottom: "2.5rem",
+            right: "1.5rem",
             zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.875rem 1.25rem',
-            borderRadius: '0.75rem',
-            backdropFilter: 'blur(12px)',
-            backgroundColor: runToast.status === "success"
-              ? 'color-mix(in srgb, var(--success) 15%, rgba(12,12,12,0.95))'
-              : 'color-mix(in srgb, var(--error) 15%, rgba(12,12,12,0.95))',
-            border: `1px solid ${runToast.status === "success" ? 'color-mix(in srgb, var(--success) 40%, transparent)' : 'color-mix(in srgb, var(--error) 40%, transparent)'}`,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            color: 'var(--text-primary)',
-            fontSize: '0.875rem',
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.875rem 1.25rem",
+            borderRadius: "0.75rem",
+            backdropFilter: "blur(12px)",
+            backgroundColor:
+              runToast.status === "success"
+                ? "color-mix(in srgb, var(--success) 15%, rgba(12,12,12,0.95))"
+                : "color-mix(in srgb, var(--error) 15%, rgba(12,12,12,0.95))",
+            border: `1px solid ${
+              runToast.status === "success"
+                ? "color-mix(in srgb, var(--success) 40%, transparent)"
+                : "color-mix(in srgb, var(--error) 40%, transparent)"
+            }`,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+            color: "var(--text-primary)",
+            fontSize: "0.875rem",
             fontWeight: 500,
-            animation: 'slideInRight 0.3s ease',
+            animation: "slideInRight 0.3s ease",
           }}
         >
           <Zap
             className="w-4 h-4"
-            style={{ color: runToast.status === "success" ? 'var(--success)' : 'var(--error)' }}
+            style={{
+              color:
+                runToast.status === "success"
+                  ? "var(--success)"
+                  : "var(--error)",
+            }}
           />
           {runToast.status === "success"
             ? `✓ "${runToast.name}" triggered!`
@@ -507,29 +976,33 @@ export default function CronJobsPage() {
         </div>
       )}
 
-      {/* Save toast notification */}
       {saveToast && (
         <div
           style={{
-            position: 'fixed',
-            bottom: '2.5rem',
-            right: '1.5rem',
+            position: "fixed",
+            bottom: "2.5rem",
+            right: "1.5rem",
             zIndex: 100,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.875rem 1.25rem',
-            borderRadius: '0.75rem',
-            backdropFilter: 'blur(12px)',
-            backgroundColor: saveToast.status === "success"
-              ? 'color-mix(in srgb, var(--success) 15%, rgba(12,12,12,0.95))'
-              : 'color-mix(in srgb, var(--error) 15%, rgba(12,12,12,0.95))',
-            border: `1px solid ${saveToast.status === "success" ? 'color-mix(in srgb, var(--success) 40%, transparent)' : 'color-mix(in srgb, var(--error) 40%, transparent)'}`,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            color: 'var(--text-primary)',
-            fontSize: '0.875rem',
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.875rem 1.25rem",
+            borderRadius: "0.75rem",
+            backdropFilter: "blur(12px)",
+            backgroundColor:
+              saveToast.status === "success"
+                ? "color-mix(in srgb, var(--success) 15%, rgba(12,12,12,0.95))"
+                : "color-mix(in srgb, var(--error) 15%, rgba(12,12,12,0.95))",
+            border: `1px solid ${
+              saveToast.status === "success"
+                ? "color-mix(in srgb, var(--success) 40%, transparent)"
+                : "color-mix(in srgb, var(--error) 40%, transparent)"
+            }`,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+            color: "var(--text-primary)",
+            fontSize: "0.875rem",
             fontWeight: 500,
-            animation: 'slideInRight 0.3s ease',
+            animation: "slideInRight 0.3s ease",
           }}
         >
           {saveToast.status === "success" ? "✓" : "✗"} {saveToast.message}
@@ -538,8 +1011,14 @@ export default function CronJobsPage() {
 
       <style jsx global>{`
         @keyframes slideInRight {
-          from { transform: translateX(2rem); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+          from {
+            transform: translateX(2rem);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
       `}</style>
     </div>
