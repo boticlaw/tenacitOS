@@ -1,175 +1,386 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Network, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
-import { CommunicationGraphComponent } from "@/components/CommunicationGraph";
-import type { CommunicationGraph, MessageType } from "@/lib/communication-aggregator";
+import { useEffect, useState } from "react";
+import { SubAgentCard } from "@/components/SubAgentCard";
+import { SubAgentTimeline } from "@/components/SubAgentTimeline";
+import {
+  Bot,
+  Activity,
+  Clock,
+  Zap,
+  CheckCircle,
+  Loader2,
+  Filter,
+} from "lucide-react";
+
+interface SubagentInfo {
+  id: string;
+  parentId: string;
+  parentName: string;
+  task: string;
+  model: string;
+  tokens: number;
+  inputTokens: number;
+  outputTokens: number;
+  startedAt: string;
+  ageMs: number;
+  status: "active" | "idle" | "completed" | "failed";
+  duration?: number;
+}
+
+interface TimelineEvent {
+  id: string;
+  type: "spawned" | "completed" | "failed";
+  timestamp: string;
+  task: string;
+  model: string;
+  duration?: number;
+}
+
+interface Metrics {
+  total: number;
+  active: number;
+  idle: number;
+  successRate: number;
+  totalTokens: number;
+  avgTokens: number;
+}
+
+interface SubagentsData {
+  subagents: SubagentInfo[];
+  timeline: TimelineEvent[];
+  metrics: Metrics;
+  timestamp: string;
+}
+
+type StatusFilter = "all" | "active" | "idle" | "completed" | "failed";
 
 export default function SubagentsPage() {
-  const [data, setData] = useState<CommunicationGraph | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<{ messageTypes: MessageType[] }>({ messageTypes: [] });
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      if (filters.messageTypes.length > 0) {
-        params.set("messageTypes", filters.messageTypes.join(","));
-      }
-
-      const res = await fetch(`/api/subagents/communications?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to fetch communications");
-      const graph = await res.json();
-      setData(graph);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters]);
+  const [data, setData] = useState<SubagentsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [modelFilter, setModelFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
-
-  const handleEdgeClick = useCallback((edge: CommunicationGraph["edges"][0]) => {
-    console.log("Edge clicked:", edge);
+    const interval = setInterval(fetchData, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
-  const handleFilterChange = useCallback((newFilters: { messageTypes: MessageType[] }) => {
-    setFilters(newFilters);
-  }, []);
+  const fetchData = async () => {
+    try {
+      const res = await fetch("/api/subagents");
+      if (res.ok) {
+        const json = await res.json();
+        setData(json);
+      }
+    } catch (error) {
+      console.error("Failed to fetch subagents:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2
+            className="w-12 h-12 animate-spin mx-auto mb-4"
+            style={{ color: "var(--accent)" }}
+          />
+          <p style={{ color: "var(--text-secondary)" }}>
+            Loading sub-agents...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Bot
+            className="w-16 h-16 mx-auto mb-4"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <p style={{ color: "var(--text-secondary)" }}>
+            Failed to load sub-agent data
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get unique models for filter
+  const models = Array.from(new Set(data.subagents.map(s => s.model)));
+
+  // Filter subagents
+  const filteredSubagents = data.subagents.filter(s => {
+    if (statusFilter !== "all" && s.status !== statusFilter) return false;
+    if (modelFilter !== "all" && s.model !== modelFilter) return false;
+    return true;
+  });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ padding: "24px 24px 16px 24px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <h1
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontSize: "24px",
-                fontWeight: 700,
-                letterSpacing: "-1px",
-                color: "var(--text-primary)",
-                marginBottom: "4px",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-              }}
-            >
-              <Network style={{ width: "28px", height: "28px", color: "var(--accent)" }} />
-              Agent Communication
-            </h1>
-            <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--text-secondary)" }}>
-              Visualización del flujo de comunicación entre agentes
-            </p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1
+          className="text-3xl font-bold mb-2"
+          style={{
+            fontFamily: "var(--font-heading)",
+            color: "var(--text-primary)",
+          }}
+        >
+          Sub-Agent Dashboard
+        </h1>
+        <p style={{ color: "var(--text-secondary)" }}>
+          Real-time monitoring of active sub-agents and their tasks
+        </p>
+      </div>
+
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Total */}
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Total
+            </span>
+            <Bot className="w-4 h-4" style={{ color: "var(--accent)" }} />
           </div>
-          <button
-            onClick={fetchData}
-            disabled={isLoading}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "8px 16px",
-              backgroundColor: "var(--card)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              color: "var(--text-primary)",
-              cursor: isLoading ? "wait" : "pointer",
-              fontSize: "13px",
-              opacity: isLoading ? 0.6 : 1,
-            }}
+          <div
+            className="text-2xl font-bold"
+            style={{ color: "var(--text-primary)" }}
           >
-            <RefreshCw size={16} style={{ animation: isLoading ? "spin 1s linear infinite" : "none" }} />
-            Refresh
-          </button>
+            {data.metrics.total}
+          </div>
+        </div>
+
+        {/* Active */}
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Active
+            </span>
+            <Activity className="w-4 h-4" style={{ color: "var(--success)" }} />
+          </div>
+          <div
+            className="text-2xl font-bold"
+            style={{ color: "var(--success)" }}
+          >
+            {data.metrics.active}
+          </div>
+        </div>
+
+        {/* Idle */}
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Idle
+            </span>
+            <Clock className="w-4 h-4" style={{ color: "var(--warning)" }} />
+          </div>
+          <div
+            className="text-2xl font-bold"
+            style={{ color: "var(--warning)" }}
+          >
+            {data.metrics.idle}
+          </div>
+        </div>
+
+        {/* Success Rate */}
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Success Rate
+            </span>
+            <CheckCircle className="w-4 h-4" style={{ color: "var(--success)" }} />
+          </div>
+          <div
+            className="text-2xl font-bold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {data.metrics.successRate.toFixed(1)}%
+          </div>
+        </div>
+
+        {/* Total Tokens */}
+        <div
+          className="p-4 rounded-xl"
+          style={{
+            backgroundColor: "var(--card)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Total Tokens
+            </span>
+            <Zap className="w-4 h-4" style={{ color: "var(--warning)" }} />
+          </div>
+          <div
+            className="text-2xl font-bold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {data.metrics.totalTokens.toLocaleString()}
+          </div>
         </div>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, borderTop: "1px solid var(--border)" }}>
-        {isLoading ? (
+      {/* Filters */}
+      <div
+        className="flex gap-4 p-4 rounded-xl"
+        style={{
+          backgroundColor: "var(--card)",
+          border: "1px solid var(--border)",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
+          <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            Filters:
+          </span>
+        </div>
+
+        {/* Status filter */}
+        <div
+          className="flex gap-1 p-1 rounded-lg"
+          style={{ backgroundColor: "var(--card-elevated)" }}
+        >
+          {(["all", "active", "idle"] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className="px-3 py-1 rounded text-xs font-medium transition-all capitalize"
+              style={{
+                backgroundColor:
+                  statusFilter === status ? "var(--accent)" : "transparent",
+                color:
+                  statusFilter === status ? "white" : "var(--text-secondary)",
+              }}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+
+        {/* Model filter */}
+        {models.length > 1 && (
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              color: "var(--text-muted)",
-            }}
+            className="flex gap-1 p-1 rounded-lg"
+            style={{ backgroundColor: "var(--card-elevated)" }}
           >
-            <div style={{ textAlign: "center" }}>
-              <Loader2 size={32} style={{ animation: "spin 1s linear infinite", marginBottom: "12px" }} />
-              <p>Loading communication graph...</p>
-            </div>
-          </div>
-        ) : error ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              color: "var(--error)",
-            }}
-          >
-            <div style={{ textAlign: "center" }}>
-              <AlertCircle size={32} style={{ marginBottom: "12px" }} />
-              <p>{error}</p>
+            <button
+              onClick={() => setModelFilter("all")}
+              className="px-3 py-1 rounded text-xs font-medium transition-all"
+              style={{
+                backgroundColor:
+                  modelFilter === "all" ? "var(--accent)" : "transparent",
+                color:
+                  modelFilter === "all" ? "white" : "var(--text-secondary)",
+              }}
+            >
+              All Models
+            </button>
+            {models.map((model) => (
               <button
-                onClick={fetchData}
+                key={model}
+                onClick={() => setModelFilter(model)}
+                className="px-3 py-1 rounded text-xs font-medium transition-all"
                 style={{
-                  marginTop: "12px",
-                  padding: "8px 16px",
-                  backgroundColor: "var(--card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "8px",
-                  color: "var(--text-primary)",
-                  cursor: "pointer",
+                  backgroundColor:
+                    modelFilter === model ? "var(--accent)" : "transparent",
+                  color:
+                    modelFilter === model ? "white" : "var(--text-secondary)",
                 }}
               >
-                Retry
+                {model}
               </button>
-            </div>
-          </div>
-        ) : data && data.nodes.length > 0 ? (
-          <CommunicationGraphComponent
-            data={data}
-            onEdgeClick={handleEdgeClick}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-          />
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              color: "var(--text-muted)",
-            }}
-          >
-            <div style={{ textAlign: "center" }}>
-              <Network size={64} style={{ opacity: 0.3, marginBottom: "16px" }} />
-              <p style={{ fontSize: "14px" }}>No communication data found</p>
-              <p style={{ fontSize: "12px", marginTop: "8px" }}>
-                Run some sessions with subagents to see the communication graph
-              </p>
-            </div>
+            ))}
           </div>
         )}
       </div>
 
-      <style jsx global>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sub-agents list */}
+        <div className="lg:col-span-2">
+          <div
+            className="p-6 rounded-xl"
+            style={{
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <h3
+              className="text-lg font-semibold mb-4"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Active Sub-Agents ({filteredSubagents.length})
+            </h3>
+
+            {filteredSubagents.length === 0 ? (
+              <div className="text-center py-8">
+                <Bot
+                  className="w-12 h-12 mx-auto mb-3"
+                  style={{ color: "var(--text-muted)" }}
+                />
+                <p style={{ color: "var(--text-secondary)" }}>
+                  No sub-agents match the current filters
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredSubagents.map((subagent) => (
+                  <SubAgentCard key={subagent.id} subagent={subagent} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <div className="lg:col-span-1">
+          <SubAgentTimeline events={data.timeline} />
+        </div>
+      </div>
+
+      {/* Last updated */}
+      <div
+        className="text-xs text-center"
+        style={{ color: "var(--text-muted)" }}
+      >
+        Last updated: {new Date(data.timestamp).toLocaleString()}
+        {" • "}
+        Auto-refresh every 5 seconds
+      </div>
     </div>
   );
 }

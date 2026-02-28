@@ -11,8 +11,11 @@ import {
   FileText,
   X,
   Power,
+  Download,
+  Cloud,
 } from "lucide-react";
 import { SectionHeader, MetricCard } from "@/components/SuperBotijo";
+import { ClawHubBrowser } from "@/components/ClawHubBrowser";
 
 interface Skill {
   id: string;
@@ -39,6 +42,13 @@ export default function SkillsPage() {
   const [filterSource, setFilterSource] = useState<"all" | "workspace" | "system">("all");
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [togglingSkill, setTogglingSkill] = useState<string | null>(null);
+  const [showClawHub, setShowClawHub] = useState(false);
+  const [updates, setUpdates] = useState<Array<{
+    slug: string;
+    currentVersion: string;
+    latestVersion: string;
+    hasUpdate: boolean;
+  }>>([]);
 
   useEffect(() => {
     fetch("/api/skills")
@@ -46,6 +56,36 @@ export default function SkillsPage() {
       .then(setData)
       .catch(() => setData({ skills: [] }));
   }, []);
+
+  // Check for updates
+  useEffect(() => {
+    fetch("/api/skills/updates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.updates) {
+          setUpdates(data.updates);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleInstallFromClawHub = (slug: string) => {
+    // Refresh skills list after installation
+    fetch("/api/skills")
+      .then((res) => res.json())
+      .then(setData)
+      .catch(() => {});
+    // Refresh updates
+    fetch("/api/skills/updates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.updates) {
+          setUpdates(data.updates);
+        }
+      })
+      .catch(() => {});
+    setShowClawHub(false);
+  };
 
   const handleToggleSkill = async (skillId: string, currentlyEnabled: boolean) => {
     if (currentlyEnabled) {
@@ -144,6 +184,49 @@ export default function SkillsPage() {
         >
           Skills disponibles en el sistema OpenClaw
         </p>
+        
+        {/* Action buttons */}
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => setShowClawHub(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{
+              backgroundColor: "var(--accent)",
+              color: "white",
+            }}
+          >
+            <Cloud className="w-4 h-4" />
+            Browse ClawHub
+          </button>
+          
+          {updates.filter(u => u.hasUpdate).length > 0 && (
+            <button
+              onClick={async () => {
+                if (confirm(`Update ${updates.filter(u => u.hasUpdate).length} skills?`)) {
+                  for (const update of updates.filter(u => u.hasUpdate)) {
+                    try {
+                      await fetch(`/api/skills/${encodeURIComponent(update.slug)}/update`, {
+                        method: "POST",
+                      });
+                    } catch (err) {
+                      console.error(`Failed to update ${update.slug}:`, err);
+                    }
+                  }
+                  // Refresh
+                  window.location.reload();
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: "var(--warning)",
+                color: "white",
+              }}
+            >
+              <Download className="w-4 h-4" />
+              Update All ({updates.filter(u => u.hasUpdate).length})
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -351,6 +434,25 @@ export default function SkillsPage() {
           onToggle={() => handleToggleSkill(selectedSkill.id, selectedSkill.enabled)}
           isToggling={togglingSkill === selectedSkill.id}
         />
+      )}
+
+      {/* ClawHub Browser Modal */}
+      {showClawHub && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          onClick={() => setShowClawHub(false)}
+        >
+          <div
+            className="w-full max-w-3xl max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ClawHubBrowser
+              onInstall={handleInstallFromClawHub}
+              onClose={() => setShowClawHub(false)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
