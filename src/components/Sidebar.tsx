@@ -28,6 +28,8 @@ import {
   Bot,
   Beaker,
   GitBranch,
+  Calendar,
+  Bell,
 } from "lucide-react";
 import { getAgentDisplayName } from "@/config/branding";
 
@@ -48,6 +50,8 @@ const navGroups = [
       { href: "/files", label: "Files", icon: FolderOpen },
       { href: "/sessions", label: "Sessions", icon: Timer },
       { href: "/activity", label: "Activity", icon: Activity },
+      { href: "/calendar", label: "Calendar", icon: Calendar },
+      { href: "/notifications", label: "Notifications", icon: Bell },
     ],
   },
   {

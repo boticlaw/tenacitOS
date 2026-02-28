@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { FileBarChart, FileText, RefreshCw, Clock, HardDrive } from "lucide-react";
+import { FileBarChart, FileText, RefreshCw, Clock, HardDrive, Download, Share2, Plus, Loader2 } from "lucide-react";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
 
 interface Report {
@@ -36,6 +36,14 @@ export default function ReportsPage() {
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [sharingId, setSharingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const loadReports = useCallback(async () => {
     try {
@@ -74,11 +82,59 @@ export default function ReportsPage() {
     [loadContent]
   );
 
+  const handleGenerate = useCallback(async (type: "weekly" | "monthly") => {
+    setIsGenerating(true);
+    try {
+      const now = new Date();
+      const name = `${type}-report-${now.toISOString().split('T')[0]}`;
+      const res = await fetch("/api/reports/generated", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, type, period: type }),
+      });
+      if (res.ok) {
+        showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} report generated!`);
+        loadReports();
+      } else {
+        showToast("Failed to generate report");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error generating report");
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [loadReports, showToast]);
+
+  const handleExport = useCallback((reportPath: string) => {
+    const id = reportPath.split('/').pop()?.replace('.md', '') || reportPath;
+    window.open(`/api/reports/${id}/pdf`, '_blank');
+  }, []);
+
+  const handleShare = useCallback(async (reportPath: string) => {
+    const id = reportPath.split('/').pop()?.replace('.md', '') || reportPath;
+    setSharingId(id);
+    try {
+      const res = await fetch(`/api/reports/${id}/share`, { method: 'POST' });
+      if (res.ok) {
+        const data = await res.json();
+        await navigator.clipboard.writeText(data.shareUrl);
+        showToast("Link copied to clipboard!");
+      } else {
+        showToast("Failed to share report");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Error sharing report");
+    } finally {
+      setSharingId(null);
+    }
+  }, [showToast]);
+
   useEffect(() => {
     loadReports();
   }, [loadReports]);
 
-  // Auto-select first report
   useEffect(() => {
     if (reports.length > 0 && !selectedPath) {
       handleSelect(reports[0]);
@@ -87,6 +143,20 @@ export default function ReportsPage() {
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className="fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg"
+          style={{
+            backgroundColor: "var(--accent)",
+            color: "white",
+            animation: "fadeIn 0.3s ease",
+          }}
+        >
+          {toast}
+        </div>
+      )}
+
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 md:p-4"
@@ -112,14 +182,48 @@ export default function ReportsPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={loadReports}
-          className="p-2 rounded-lg transition-colors hover:opacity-80"
-          style={{ color: "var(--text-secondary)" }}
-          title="Refresh reports"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Generate buttons */}
+          <div className="hidden sm:flex items-center gap-2">
+            <button
+              onClick={() => handleGenerate('weekly')}
+              disabled={isGenerating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'white',
+                opacity: isGenerating ? 0.5 : 1,
+              }}
+            >
+              {isGenerating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+              Weekly
+            </button>
+            <button
+              onClick={() => handleGenerate('monthly')}
+              disabled={isGenerating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: 'var(--card-elevated)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+              }}
+            >
+              Monthly
+            </button>
+          </div>
+          <button
+            onClick={loadReports}
+            className="p-2 rounded-lg transition-colors hover:opacity-80"
+            style={{ color: "var(--text-secondary)" }}
+            title="Refresh reports"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Main content - split layout */}
@@ -150,99 +254,135 @@ export default function ReportsPage() {
               <FileBarChart className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p>No reports found</p>
               <p className="text-xs mt-1">
-                Reports matching *-analysis-* or *-report-* patterns in memory/ will appear here
+                Click &quot;Weekly&quot; or &quot;Monthly&quot; to generate a report
               </p>
             </div>
           )}
 
           <div className="p-2 space-y-2">
             {reports.map((report) => (
-              <button
-                key={report.path}
-                onClick={() => handleSelect(report)}
-                className="w-full text-left rounded-lg p-3 transition-all"
-                style={{
-                  backgroundColor:
-                    selectedPath === report.path
-                      ? "var(--accent)"
-                      : "var(--card-elevated, var(--background))",
-                  border: `1px solid ${
-                    selectedPath === report.path
-                      ? "var(--accent)"
-                      : "var(--border)"
-                  }`,
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => {
-                  if (selectedPath !== report.path) {
-                    e.currentTarget.style.borderColor = "var(--accent)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedPath !== report.path) {
-                    e.currentTarget.style.borderColor = "var(--border)";
-                  }
-                }}
-              >
-                <div className="flex items-start gap-3">
-                  <FileText
-                    className="w-5 h-5 mt-0.5 flex-shrink-0"
-                    style={{
-                      color:
-                        selectedPath === report.path
-                          ? "var(--text-primary)"
-                          : "var(--accent)",
-                    }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className="font-medium text-sm truncate"
+              <div key={report.path} className="relative">
+                <button
+                  onClick={() => handleSelect(report)}
+                  className="w-full text-left rounded-lg p-3 transition-all"
+                  style={{
+                    backgroundColor:
+                      selectedPath === report.path
+                        ? "var(--accent)"
+                        : "var(--card-elevated, var(--background))",
+                    border: `1px solid ${
+                      selectedPath === report.path
+                        ? "var(--accent)"
+                        : "var(--border)"
+                    }`,
+                    cursor: "pointer",
+                    paddingRight: "70px",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedPath !== report.path) {
+                      e.currentTarget.style.borderColor = "var(--accent)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedPath !== report.path) {
+                      e.currentTarget.style.borderColor = "var(--border)";
+                    }
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <FileText
+                      className="w-5 h-5 mt-0.5 flex-shrink-0"
                       style={{
                         color:
                           selectedPath === report.path
                             ? "var(--text-primary)"
-                            : "var(--text-primary)",
+                            : "var(--accent)",
                       }}
-                    >
-                      {report.title}
-                    </p>
-                    <div
-                      className="flex items-center gap-3 mt-1 text-xs"
-                      style={{
-                        color:
-                          selectedPath === report.path
-                            ? "var(--text-primary)"
-                            : "var(--text-muted)",
-                        opacity: selectedPath === report.path ? 0.8 : 1,
-                      }}
-                    >
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(report.modified)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <HardDrive className="w-3 h-3" />
-                        {formatSize(report.size)}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="font-medium text-sm truncate"
+                        style={{
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        {report.title}
+                      </p>
+                      <div
+                        className="flex items-center gap-3 mt-1 text-xs"
+                        style={{
+                          color:
+                            selectedPath === report.path
+                              ? "var(--text-primary)"
+                              : "var(--text-muted)",
+                          opacity: selectedPath === report.path ? 0.8 : 1,
+                        }}
+                      >
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(report.modified)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <HardDrive className="w-3 h-3" />
+                          {formatSize(report.size)}
+                        </span>
+                      </div>
+                      <span
+                        className="inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor:
+                            selectedPath === report.path
+                              ? "rgba(255,255,255,0.15)"
+                              : "var(--background)",
+                          color:
+                            selectedPath === report.path
+                              ? "var(--text-primary)"
+                              : "var(--text-secondary)",
+                        }}
+                      >
+                        {report.type}
                       </span>
                     </div>
-                    <span
-                      className="inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor:
-                          selectedPath === report.path
-                            ? "rgba(255,255,255,0.15)"
-                            : "var(--background)",
-                        color:
-                          selectedPath === report.path
-                            ? "var(--text-primary)"
-                            : "var(--text-secondary)",
-                      }}
-                    >
-                      {report.type}
-                    </span>
                   </div>
+                </button>
+                {/* Action buttons */}
+                <div
+                  className="absolute top-3 right-2 flex items-center gap-1"
+                  style={{ opacity: 0.7 }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleExport(report.path);
+                    }}
+                    className="p-1.5 rounded transition-all hover:opacity-100"
+                    style={{
+                      color: selectedPath === report.path ? "var(--text-primary)" : "var(--text-muted)",
+                    }}
+                    title="Export"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShare(report.path);
+                    }}
+                    disabled={sharingId === report.path}
+                    className="p-1.5 rounded transition-all hover:opacity-100"
+                    style={{
+                      color: selectedPath === report.path ? "var(--text-primary)" : "var(--text-muted)",
+                    }}
+                    title="Share"
+                  >
+                    {sharingId === report.path ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Share2 className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -276,6 +416,13 @@ export default function ReportsPage() {
           )}
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }

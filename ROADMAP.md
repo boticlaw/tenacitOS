@@ -163,6 +163,13 @@
 - [x] **Integración con cron** → Cron Run Now genera notificación
 - **Archivos:** `src/app/api/notifications/route.ts`, `src/components/NotificationDropdown.tsx`
 
+### 5.5 Notifications Page ✅
+- [x] Lista completa de notificaciones
+- [x] Filtros por tipo y fecha
+- [x] Marcar como leída
+- [x] Eliminar notificaciones
+- **Archivos:** `src/app/(dashboard)/notifications/page.tsx`
+
 ---
 
 ## Fase 6: Configuración ✅ COMPLETO
@@ -172,8 +179,8 @@
 - [x] Lista de skills instalados
 - [x] Ver SKILL.md de cada uno
 - [x] Activar/desactivar
-- [ ] Instalar desde ClawHub
-- [ ] Actualizar skills
+- [x] Instalar desde ClawHub
+- [x] Actualizar skills
 - **Archivos:** `src/app/(dashboard)/skills/page.tsx`, `src/app/api/skills/route.ts`, `src/app/api/skills/[id]/toggle/route.ts`
 
 ### 6.2 Integration Status ✅
@@ -189,6 +196,20 @@
 - [x] Validación antes de guardar
 - [x] Reiniciar gateway si necesario
 - **Archivos:** `src/app/api/config/route.ts`, `src/components/ConfigEditor.tsx`
+
+### 6.4 Git Dashboard ✅
+- [x] Lista de repositorios en workspace
+- [x] Ver branch, ahead/behind, último commit
+- [x] Ver archivos staged, unstaged, untracked
+- [x] Acciones: status, log, diff, pull
+- **Archivos:** `src/app/(dashboard)/git/page.tsx`, `src/app/api/git/route.ts`
+
+### 6.5 Calendar ✅
+- [x] Vista semanal de calendario
+- [x] Mostrar tareas programadas
+- [x] Navegación entre semanas
+- [x] Tareas mostradas por día y hora
+- **Archivos:** `src/app/(dashboard)/calendar/page.tsx`, `src/app/api/tasks/route.ts`
 
 ---
 
@@ -303,7 +324,8 @@
   - "Token usage alto en horario Y, programar tareas pesadas en horario valle"
 - [x] Tarjetas de sugerencia con botón "Apply" o "Dismiss"
 - [x] Learn from dismissals
-- **Archivos:** `src/lib/suggestions.ts`, `src/components/SuggestionsPanel.tsx`
+- [x] **Integración en Dashboard** - SuggestionsPanel visible en home
+- **Archivos:** `src/lib/suggestions-engine.ts`, `src/components/SuggestionsPanel.tsx`
 
 ---
 
@@ -378,6 +400,7 @@
 - [x] Export a imagen (PNG via html2canvas)
 - [x] Share link público (read-only)
 - [x] Custom date ranges
+- [x] **UI completa** - Botones Generate/Export/Share funcionales
 - **Archivos:** `src/app/(dashboard)/reports/page.tsx`, `src/app/(dashboard)/reports/[token]/page.tsx`
 
 ### 12.2 Team Dashboard (futuro)
@@ -421,17 +444,16 @@
 | 9. Agent Intelligence | ✅ | 100% |
 | 10. Sub-Agent Orchestra | ✅ | 100% |
 | 11. Advanced Viz | ✅ | 100% |
-| 12. Collaboration | ⚠️ | 50% (Team Dashboard pendiente) |
+| 12. Collaboration | ✅ | 90% (solo Team Dashboard pendiente) |
 
-**Overall: ~95% completado**
+**Overall: ~99% completado**
 
 ---
 
 ## Próximos Pasos (Future Work)
 
 ### Tier 1: Polish
-1. **Skills Manager** - Instalar desde ClawHub, actualizar skills
-2. **Team Dashboard** - Multi-user support
+1. **Team Dashboard** - Multi-user support
 
 ### Tier 2: Experimental
 1. **AI Agents personalizables** - Configurar comportamiento de cada agente

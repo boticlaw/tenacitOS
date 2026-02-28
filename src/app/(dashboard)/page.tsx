@@ -6,6 +6,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { WeatherWidget } from "@/components/WeatherWidget";
 import { Notepad } from "@/components/Notepad";
 import { MoodWidget } from "@/components/MoodWidget";
+import { SuggestionsPanel } from "@/components/SuggestionsPanel";
 import {
   Activity,
   CheckCircle,
@@ -315,6 +316,22 @@ export default function DashboardPage() {
           {/* Mood Widget */}
           <div style={{ margin: "1rem", marginTop: "0.5rem" }}>
             <MoodWidget />
+          </div>
+
+          {/* Smart Suggestions */}
+          <div style={{ margin: "1rem", marginTop: "0.5rem" }}>
+            <div
+              className="p-4 rounded-lg"
+              style={{ backgroundColor: 'var(--card-elevated)', border: '1px solid var(--border)' }}
+            >
+              <h3
+                className="text-sm font-semibold mb-3"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                💡 Smart Suggestions
+              </h3>
+              <SuggestionsPanel compact maxItems={3} />
+            </div>
           </div>
 
           {/* Notepad */}
