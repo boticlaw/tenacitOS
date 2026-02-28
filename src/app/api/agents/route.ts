@@ -1,171 +1,69 @@
-import { NextResponse } from "next/server";
-import { existsSync, readFileSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+/**
+ * Agents API - CRUD operations for agent management
+ */
+import { NextRequest, NextResponse } from 'next/server';
+import { registerAgent, getAgents, getAgentById, pauseAgent, resumeAgent } from '@/operations/agent-ops';
 
-export const dynamic = "force-dynamic";
+// GET /api/agents - List all agents
+export async function GET(request: NextRequest) {
+  const result = await getAgents();
 
-interface Agent {
-  id: string;
-  name?: string;
-  emoji: string;
-  color: string;
-  model: string;
-  workspace: string;
-  dmPolicy?: string;
-  allowAgents?: string[];
-  allowAgentsDetails?: Array<{
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-  }>;
-  botToken?: string;
-  status: "online" | "offline";
-  lastActivity?: string;
-  activeSessions: number;
-}
-
-interface AgentConfig {
-  id: string;
-  name?: string;
-  workspace?: string;
-  model?: { primary?: string };
-  subagents?: { allowAgents?: string[] };
-  ui?: { emoji?: string; color?: string };
-}
-
-const DEFAULT_AGENT_CONFIG: Record<string, { emoji: string; color: string; name?: string }> = {
-  main: {
-    emoji: process.env.NEXT_PUBLIC_AGENT_EMOJI || "🤖",
-    color: "#ff6b35",
-    name: process.env.NEXT_PUBLIC_AGENT_NAME || "SuperBotijo",
-  },
-};
-
-function getAgentDisplayInfo(agentId: string, agentConfig: AgentConfig | null): { emoji: string; color: string; name: string } {
-  const configEmoji = agentConfig?.ui?.emoji;
-  const configColor = agentConfig?.ui?.color;
-  const configName = agentConfig?.name;
-
-  const defaults = DEFAULT_AGENT_CONFIG[agentId];
-
-  return {
-    emoji: configEmoji || defaults?.emoji || "🤖",
-    color: configColor || defaults?.color || "#666666",
-    name: configName || defaults?.name || agentId,
-  };
-}
-
-function getLatestMtimeIsoFromDir(dirPath: string, fileFilter: (name: string) => boolean): string | undefined {
-  if (!existsSync(dirPath)) return undefined;
-
-  let latest = 0;
-  const files = readdirSync(dirPath);
-  for (const name of files) {
-    if (!fileFilter(name)) continue;
-    try {
-      const fullPath = join(dirPath, name);
-      const stat = statSync(fullPath);
-      const mtimeMs = stat.mtime.getTime();
-      if (mtimeMs > latest) latest = mtimeMs;
-    } catch {
-      // ignore transient file errors
-    }
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
   }
 
-  return latest > 0 ? new Date(latest).toISOString() : undefined;
+  return NextResponse.json({ agents: result.data });
 }
 
-function resolveAgentWorkspace(agent: AgentConfig, openclawDir: string): string {
-  if (typeof agent?.workspace === "string" && agent.workspace.length > 0) {
-    return agent.workspace;
-  }
-
-  if (agent?.id === "main" || agent?.id === "pepon") {
-    return join(openclawDir, "workspace");
-  }
-
-  const candidate = join(openclawDir, `workspace-${agent?.id || ""}`);
-  if (existsSync(candidate)) return candidate;
-
-  return join(openclawDir, "workspace");
-}
-
-function getAgentLastActivity(agentId: string, workspace?: string, openclawDir?: string): string | undefined {
-  // 1) Prefer sessions activity (actual chat traffic, near real-time)
-  const sessionsDir = join(openclawDir || "/root/.openclaw", "agents", agentId, "sessions");
-  const latestSessionActivity = getLatestMtimeIsoFromDir(
-    sessionsDir,
-    (name) => name.endsWith(".jsonl") || name.endsWith(".jsonl.lock") || name === "sessions.json"
-  );
-  if (latestSessionActivity) return latestSessionActivity;
-
-  // 2) Fallback to memory activity (if sessions data is unavailable)
-  if (!workspace) return undefined;
-  const memoryDir = join(workspace, "memory");
-  return getLatestMtimeIsoFromDir(memoryDir, (name) => /^\d{4}-\d{2}-\d{2}\.md$/.test(name));
-}
-
-export async function GET() {
+// POST /api/agents - Create a new agent
+export async function POST(request: NextRequest) {
   try {
-    const openclawDir = process.env.OPENCLAW_DIR || "/root/.openclaw";
-    const configPath = openclawDir + "/openclaw.json";
-    const config = JSON.parse(readFileSync(configPath, "utf-8"));
+    const body = await request.json();
+    const { id, name, model, systemPrompt, skills, temperature, maxTokens, autoStart } = body;
 
-    const agents: Agent[] = config.agents.list.map((agent: AgentConfig) => {
-      const agentInfo = getAgentDisplayInfo(agent.id, agent);
+    // Validation
+    if (!name || typeof name !== 'string') {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
 
-      const telegramAccount = config.channels?.telegram?.accounts?.[agent.id];
-      const botToken = telegramAccount?.botToken;
+    // Generate ID if not provided
+    const agentId = id || `agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      const workspace = resolveAgentWorkspace(agent, openclawDir);
-      const lastActivity = getAgentLastActivity(agent.id, workspace, openclawDir);
-      const status: "online" | "offline" =
-        lastActivity && Date.now() - new Date(lastActivity).getTime() < 5 * 60 * 1000
-          ? "online"
-          : "offline";
+    // Register the agent
+    const result = await registerAgent(agentId, name, model || 'claude-sonnet-4-20250514');
 
-      const allowAgents = agent.subagents?.allowAgents || [];
-      const allowAgentsDetails = allowAgents.map((subagentId: string) => {
-        const subagentConfig = config.agents.list.find((a: AgentConfig) => a.id === subagentId);
-        if (subagentConfig) {
-          const subagentInfo = getAgentDisplayInfo(subagentId, subagentConfig);
-          return {
-            id: subagentId,
-            name: subagentConfig.name || subagentInfo.name,
-            emoji: subagentInfo.emoji,
-            color: subagentInfo.color,
-          };
-        }
-        const fallbackInfo = getAgentDisplayInfo(subagentId, null);
-        return {
-          id: subagentId,
-          name: fallbackInfo.name,
-          emoji: fallbackInfo.emoji,
-          color: fallbackInfo.color,
-        };
-      });
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
 
-      return {
-        id: agent.id,
-        name: agent.name || agentInfo.name,
-        emoji: agentInfo.emoji,
-        color: agentInfo.color,
-        model: agent.model?.primary || config.agents.defaults.model.primary,
-        workspace,
-        dmPolicy: telegramAccount?.dmPolicy || config.channels?.telegram?.dmPolicy || "pairing",
-        allowAgents,
-        allowAgentsDetails,
-        botToken: botToken ? "configured" : undefined,
-        status,
-        lastActivity,
-        activeSessions: 0,
-      };
-    });
+    // In production, we would also:
+    // - Create the agent's SOUL.md file
+    // - Set up the agent's workspace
+    // - Configure skills
+    // - Start the agent process if autoStart is true
 
-    return NextResponse.json({ agents });
+    const agent = result.data!;
+
+    // Add additional config
+    const fullAgent = {
+      ...agent,
+      systemPrompt,
+      skills: skills || [],
+      temperature: temperature || 0.7,
+      maxTokens: maxTokens || 4096,
+      autoStart: autoStart !== false,
+    };
+
+    return NextResponse.json({ 
+      success: true, 
+      agent: fullAgent,
+      message: `Agent "${name}" created successfully`,
+    }, { status: 201 });
   } catch (error) {
-    console.error("Error reading agents:", error);
-    return NextResponse.json({ error: "Failed to load agents" }, { status: 500 });
+    console.error('[api/agents] POST error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to create agent' },
+      { status: 500 }
+    );
   }
 }
