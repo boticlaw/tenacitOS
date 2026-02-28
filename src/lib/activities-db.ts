@@ -25,9 +25,10 @@ export type ActivityType =
   | 'web_search'
   | 'message_sent'
   | 'tool_call'
-  | 'agent_action';
+  | 'agent_action'
+  | 'approval';
 
-export type ActivityStatus = 'success' | 'error' | 'pending' | 'running';
+export type ActivityStatus = 'success' | 'error' | 'pending' | 'running' | 'approved' | 'rejected';
 
 export interface Activity {
   id: string;
@@ -155,6 +156,31 @@ export function updateActivity(
     UPDATE activities SET status = ?, duration_ms = COALESCE(?, duration_ms), tokens_used = COALESCE(?, tokens_used)
     WHERE id = ?
   `).run(status, opts?.duration_ms ?? null, opts?.tokens_used ?? null, id);
+}
+
+export function getActivityById(id: string): Activity | null {
+  const db = getDb();
+  const row = db.prepare('SELECT * FROM activities WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+  return row ? parseRow(row) : null;
+}
+
+export function updateActivityStatus(
+  id: string,
+  status: string,
+  metadata?: Record<string, unknown>
+): void {
+  const db = getDb();
+  if (metadata) {
+    db.prepare(`
+      UPDATE activities SET status = ?, metadata = ?
+      WHERE id = ?
+    `).run(status, JSON.stringify(metadata), id);
+  } else {
+    db.prepare(`
+      UPDATE activities SET status = ?
+      WHERE id = ?
+    `).run(status, id);
+  }
 }
 
 export interface GetActivitiesOptions {

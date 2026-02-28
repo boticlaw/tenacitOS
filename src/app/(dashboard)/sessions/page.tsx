@@ -17,6 +17,7 @@ import {
   Hash,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { ModelDropdown } from "@/components/ModelDropdown";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -484,9 +485,11 @@ function SessionDetail({
 function SessionRow({
   session,
   onClick,
+  onModelChanged,
 }: {
   session: Session;
   onClick: () => void;
+  onModelChanged?: (sessionId: string, newModel: string) => void;
 }) {
   const color = typeColor(session.type);
   const contextBar =
@@ -565,10 +568,16 @@ function SessionRow({
       </div>
 
       {/* Model */}
-      <div style={{ display: "none", flexDirection: "column", alignItems: "flex-end", minWidth: "80px" }} className="sm-flex">
-        <span style={{ fontSize: "0.7rem", color: "#a78bfa", whiteSpace: "nowrap" }}>
-          {shortModel(session.model)}
-        </span>
+      <div
+        style={{ display: "none", flexDirection: "column", alignItems: "flex-end", minWidth: "100px" }}
+        className="sm-flex"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ModelDropdown
+          currentModel={session.model}
+          sessionKey={session.key}
+          onModelChanged={(newModel) => onModelChanged?.(session.id, newModel)}
+        />
       </div>
 
       {/* Tokens + ctx bar */}
@@ -655,6 +664,12 @@ export default function SessionsPage() {
   useEffect(() => {
     loadSessions();
   }, [loadSessions]);
+
+  const handleModelChanged = useCallback((sessionId: string, newModel: string) => {
+    setSessions((prev) =>
+      prev.map((s) => (s.id === sessionId ? { ...s, model: newModel } : s))
+    );
+  }, []);
 
   const filtered = sessions.filter((s) => {
     if (filter !== "all" && s.type !== filter) return false;
@@ -977,6 +992,7 @@ export default function SessionsPage() {
                 key={session.id}
                 session={session}
                 onClick={() => setSelectedSession(session)}
+                onModelChanged={handleModelChanged}
               />
             ))}
         </div>

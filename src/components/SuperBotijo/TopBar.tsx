@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { NotificationDropdown } from "@/components/NotificationDropdown";
 import { LiveStatusIndicator } from "@/components/LiveStatusIndicator";
+import { GatewayStatusBadge } from "@/components/GatewayStatusBadge";
 import { BRANDING } from "@/config/branding";
 import { useI18n } from "@/i18n/provider";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -91,6 +92,7 @@ export function TopBar() {
           >
             {BRANDING.appTitle}
           </h1>
+          <GatewayStatusBadge />
           <LiveStatusIndicator />
         </div>
 

@@ -451,7 +451,9 @@ export default function MemoryPage() {
               <RefreshCw size={24} style={{ animation: "spin 1s linear infinite" }} />
             </div>
           ) : graphData && graphData.entities.length > 0 ? (
-            <KnowledgeGraphComponent data={graphData} />
+            <div style={{ height: "100%", width: "100%" }}>
+              <KnowledgeGraphComponent data={graphData} />
+            </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)" }}>
               <div style={{ textAlign: "center" }}>

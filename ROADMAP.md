@@ -411,6 +411,136 @@
 
 ---
 
+---
+
+## Fase 13: UI/UX Improvements (OpenClaw Studio Analysis)
+> Ideas extraídas del análisis de openclaw-studio - Febrero 2026
+
+### 13.1 TIER 1 - Quick Wins 🔥
+> Implementar ya - alto impacto, bajo esfuerzo
+
+#### 1. Approval Cards en Activity Feed ✅
+- [x] Cards inline para aprobar/rechazar comandos pendientes
+- [x] Botones de acción directa sin cambiar de página
+- [x] Feedback visual inmediato (animación de aprobación)
+- [x] API para procesar aprobaciones (`/api/activities/[id]/approve`)
+- **Prioridad:** critical
+- **Esfuerzo:** 1-2 días
+- **Archivos:** `src/components/ApprovalCard.tsx`, `src/app/api/activities/[id]/approve/route.ts`
+
+#### 2. Model Selector en Session Cards ✅
+- [x] Dropdown en cada session card para cambiar modelo
+- [x] Sin navegar a settings - acción in-place
+- [x] Persistir preferencia por sesión (via API)
+- **Prioridad:** high
+- **Esfuerzo:** 1 día
+- **Archivos:** `src/components/ModelDropdown.tsx`, `src/app/api/models/route.ts`, `src/app/api/sessions/[key]/model/route.ts`
+
+#### 3. Gateway Connection Status en TopBar ✅
+- [x] Badge de estado de conexión (connected/connecting/error)
+- [x] Indicador visual con color coding
+- [x] Tooltip con detalles de conexión (latencia, puerto)
+- [x] Auto-refresh cada 30 segundos + refresh manual
+- **Prioridad:** high
+- **Esfuerzo:** 0.5 días
+- **Archivos:** `src/components/GatewayStatusBadge.tsx`, `src/hooks/useGatewayStatus.ts`, `src/app/api/gateway/status/route.ts`
+
+---
+
+### 13.2 TIER 2 - Feature Improvements ⭐
+> Mejoras que añaden valor significativo
+
+#### 4. Fleet Sidebar con Filtros
+- [ ] Panel lateral colapsable con todos los agentes
+- [ ] Filtros por estado, modelo, tipo
+- [ ] Búsqueda rápida de agentes
+- [ ] Quick actions (pause, resume, view logs)
+- **Prioridad:** high
+- **Esfuerzo:** 2-3 días
+- **Referencia:** `src/components/FleetSidebar.tsx` (nuevo)
+
+#### 5. Runtime Event Bridge Pattern
+- [ ] Arquitectura modular para eventos entre componentes
+- [ ] Desacoplar productores de consumidores
+- [ ] Type-safe event definitions
+- [ ] Fácil extensibilidad para nuevos eventos
+- **Prioridad:** medium
+- **Esfuerzo:** 2-3 días
+- **Referencia:** `src/lib/runtime-events.ts` (nuevo)
+
+#### 6. Transcript Viewer para Sessions
+- [ ] Ver transcript completo de sesiones en panel dedicado
+- [ ] Navegación por mensajes con timestamps
+- [ ] Filtros por tipo (user/assistant/tool_use)
+- [ ] Search dentro del transcript
+- **Prioridad:** medium
+- **Esfuerzo:** 1-2 días
+- **Referencia:** `src/components/TranscriptViewer.tsx`
+
+---
+
+### 13.3 TIER 3 - Major Features 🚀
+> Features grandes que transforman la experiencia
+
+#### 7. WebSocket Proxy para Real-time
+- [ ] Conexión bidireccional en vez de SSE unidireccional
+- [ ] Latencia reducida para updates
+- [ ] Soporte para acciones push desde el server
+- [ ] Reconnection automática con backoff
+- **Prioridad:** medium
+- **Esfuerzo:** 3-5 días
+- **Referencia:** `src/app/api/ws/route.ts`, `src/hooks/useWebSocket.ts`
+
+#### 8. Workflow Operations Layer
+- [ ] Separar lógica de negocio de componentes UI
+- [ ] Operations como funciones reutilizables
+- [ ] State management consistente
+- [ ] Testing más fácil de lógica
+- **Prioridad:** medium
+- **Esfuerzo:** 3-5 días
+- **Referencia:** `src/operations/*.ts` (nuevo)
+
+#### 9. Agent Create Modal Mejorado
+- [ ] UI completa para crear nuevos agentes
+- [ ] Wizard con pasos: tipo, modelo, skills, configuración
+- [ ] Preview del agente antes de crear
+- [ ] Templates predefinidos (assistant, specialist, worker)
+- **Prioridad:** medium
+- **Esfuerzo:** 2-3 días
+- **Referencia:** `src/components/AgentCreateModal.tsx`
+
+---
+
+### 13.4 TIER 4 - Nice to Have 💡
+> Mejoras de calidad de vida
+
+#### 10. Skills System Rediseñado
+- [ ] Eligibility checks antes de instalar
+- [ ] Install flow mejorado con progreso
+- [ ] Dependencies resolution automática
+- [ ] Rollback en caso de error
+- **Prioridad:** low
+- **Esfuerzo:** 3-4 días
+- **Referencia:** `src/app/(dashboard)/skills/page.tsx`
+
+#### 11. Inspect Panels para Agentes
+- [ ] Panel unificado con tabs para cada agente
+- [ ] Tabs: Overview, Activity, Logs, Config, Metrics
+- [ ] Context menu con quick actions
+- [ ] Persistir layout preferido
+- **Prioridad:** low
+- **Esfuerzo:** 2-3 días
+- **Referencia:** `src/components/AgentInspectPanel.tsx`
+
+#### 12. Color System Semántico
+- [ ] Consistencia de colores en toda la app
+- [ ] Semantic tokens (success, warning, error, info)
+- [ ] Dark mode consistente
+- [ ] Accessibility contrast compliance
+- **Prioridad:** low
+- **Esfuerzo:** 1-2 días
+- **Referencia:** `tailwind.config.ts`, `src/styles/semantic.css`
+
 ## Stack Técnico
 
 | Componente | Tecnología |
@@ -445,6 +575,7 @@
 | 10. Sub-Agent Orchestra | ✅ | 100% |
 | 11. Advanced Viz | ✅ | 100% |
 | 12. Collaboration | ✅ | 90% (solo Team Dashboard pendiente) |
+| 13. UI/UX Improvements | 🔄 | 30% (Tier 1 completo: 3/12 items) |
 
 **Overall: ~99% completado**
 
@@ -463,3 +594,8 @@
 
 *Creado: 2026-02-07*
 *Última actualización: 2026-02-28*
+
+**NUEVO en 2026-02-28:**
+- Gateway Connection Status en TopBar (Issue #1)
+- Model Selector en Session Cards (Issue #2)
+- Approval Cards en Activity Feed (Issue #3)

@@ -26,6 +26,7 @@ import {
   Download,
 } from "lucide-react";
 import { RichDescription } from "@/components/RichDescription";
+import { ApprovalCard } from "@/components/ApprovalCard";
 
 interface Activity {
   id: string;
@@ -56,6 +57,7 @@ const typeIcons: Record<string, React.ComponentType<{ className?: string; style?
   task: Zap,
   cron: RotateCcw,
   memory: Brain,
+  approval: Shield,
   default: Zap,
 };
 
@@ -69,6 +71,7 @@ const typeColorVars: Record<string, string> = {
   task: "--type-task",
   cron: "--type-cron",
   memory: "--type-memory",
+  approval: "--type-approval",
 };
 
 const statusConfig: Record<string, { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; colorVar: string }> = {
@@ -77,7 +80,7 @@ const statusConfig: Record<string, { icon: React.ComponentType<{ className?: str
   pending: { icon: Clock, colorVar: "--warning" },
 };
 
-const allTypes = ["file", "search", "message", "command", "security", "build", "task", "cron", "memory"];
+const allTypes = ["file", "search", "message", "command", "security", "build", "task", "cron", "memory", "approval"];
 
 const datePresets = [
   { label: "Today", days: 0 },
@@ -452,6 +455,22 @@ export default function ActivityPage() {
         )}
 
         {activities.map((activity, index) => {
+          if (activity.type === "approval") {
+            return (
+              <ApprovalCard
+                key={activity.id}
+                id={activity.id}
+                description={activity.description}
+                timestamp={activity.timestamp}
+                status={activity.status as "pending" | "approved" | "rejected"}
+                metadata={activity.metadata as Record<string, unknown> | null}
+                onDecision={(id, approved) => {
+                  console.log(`Activity ${id} ${approved ? "approved" : "rejected"}`);
+                }}
+              />
+            );
+          }
+
           const TypeIcon = typeIcons[activity.type] || typeIcons.default;
           const colorVar = typeColorVars[activity.type] || "--text-secondary";
           const status = statusConfig[activity.status] || statusConfig.success;
