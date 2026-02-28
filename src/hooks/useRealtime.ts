@@ -137,7 +137,7 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
         }
 
         // Dispatch to handler
-        if (onEvent && data.type in ServerEventMap.prototype) {
+        if (onEvent && true) {
           onEvent(data.type as keyof ServerEventMap, data.payload as any);
         }
       } catch (err) {

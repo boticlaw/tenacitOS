@@ -12,25 +12,25 @@ interface AgentPanelProps {
 export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
   const getStatusColor = () => {
     switch (state.status) {
-      case 'working': return 'text-green-500';
-      case 'online': return 'text-green-400';
-      case 'thinking': return 'text-blue-500 animate-pulse';
-      case 'error': return 'text-red-500';
-      case 'idle': return 'text-yellow-500';
+      case 'working': return 'text-success';
+      case 'online': return 'text-success';
+      case 'thinking': return 'text-info animate-pulse';
+      case 'error': return 'text-error';
+      case 'idle': return 'text-warning';
       case 'offline':
-      default: return 'text-gray-500';
+      default: return 'text-neutral-500';
     }
   };
 
   const getStatusBgColor = () => {
     switch (state.status) {
-      case 'working': return 'bg-green-500/20';
-      case 'online': return 'bg-green-400/20';
-      case 'thinking': return 'bg-blue-500/20';
-      case 'error': return 'bg-red-500/20';
-      case 'idle': return 'bg-yellow-500/20';
+      case 'working': return 'bg-success/20';
+      case 'online': return 'bg-success/20';
+      case 'thinking': return 'bg-info/20';
+      case 'error': return 'bg-error/20';
+      case 'idle': return 'bg-warning/20';
       case 'offline':
-      default: return 'bg-gray-500/20';
+      default: return 'bg-neutral-500/20';
     }
   };
 
@@ -61,7 +61,7 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
             <span className="text-4xl">{agent.emoji}</span>
             {agent.name}
           </h2>
-          <p className="text-sm text-gray-400 mt-1">{agent.role}</p>
+          <p className="text-sm text-neutral-400 mt-1">{agent.role}</p>
         </div>
         <button
           onClick={onClose}
@@ -82,7 +82,7 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
       {/* Last Activity */}
       {state.lastActivity && (
         <div className="mb-6 text-sm">
-          <span className="text-gray-400">Last activity: </span>
+          <span className="text-neutral-400">Last activity: </span>
           <span className="text-white font-medium">{formatLastActivity(state.lastActivity)}</span>
         </div>
       )}
@@ -90,37 +90,37 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
       {/* Current task */}
       {state.currentTask && (
         <div className="mb-6">
-          <h3 className="text-sm font-semibold text-gray-400 mb-2">Current Task</h3>
+          <h3 className="text-sm font-semibold text-neutral-400 mb-2">Current Task</h3>
           <p className="text-base">{state.currentTask}</p>
         </div>
       )}
 
       {/* Stats */}
       <div className="space-y-4 mb-6">
-        <h3 className="text-sm font-semibold text-gray-400">Stats</h3>
+        <h3 className="text-sm font-semibold text-neutral-400">Stats</h3>
         
         <div className="grid grid-cols-2 gap-4">
           {/* Model */}
           <div className="bg-white/5 p-3 rounded-lg">
-            <p className="text-xs text-gray-400 mb-1">Model</p>
+            <p className="text-xs text-neutral-400 mb-1">Model</p>
             <p className="text-lg font-bold capitalize">{state.model || 'N/A'}</p>
           </div>
 
           {/* Tokens/hour */}
           <div className="bg-white/5 p-3 rounded-lg">
-            <p className="text-xs text-gray-400 mb-1">Tokens/hour</p>
+            <p className="text-xs text-neutral-400 mb-1">Tokens/hour</p>
             <p className="text-lg font-bold">{state.tokensPerHour?.toLocaleString() || '0'}</p>
           </div>
 
           {/* Tasks in queue */}
           <div className="bg-white/5 p-3 rounded-lg">
-            <p className="text-xs text-gray-400 mb-1">Queue</p>
+            <p className="text-xs text-neutral-400 mb-1">Queue</p>
             <p className="text-lg font-bold">{state.tasksInQueue || 0} tasks</p>
           </div>
 
           {/* Uptime */}
           <div className="bg-white/5 p-3 rounded-lg">
-            <p className="text-xs text-gray-400 mb-1">Uptime</p>
+            <p className="text-xs text-neutral-400 mb-1">Uptime</p>
             <p className="text-lg font-bold">{state.uptime || 0} days</p>
           </div>
         </div>
@@ -128,18 +128,18 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
 
       {/* Activity Feed (placeholder) */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-400 mb-3">Recent Activity</h3>
+        <h3 className="text-sm font-semibold text-neutral-400 mb-3">Recent Activity</h3>
         <div className="space-y-2">
           <div className="bg-white/5 p-3 rounded-lg text-sm">
-            <p className="text-gray-400 text-xs mb-1">2 minutes ago</p>
+            <p className="text-neutral-400 text-xs mb-1">2 minutes ago</p>
             <p>Completed task: Generate report</p>
           </div>
           <div className="bg-white/5 p-3 rounded-lg text-sm">
-            <p className="text-gray-400 text-xs mb-1">15 minutes ago</p>
+            <p className="text-neutral-400 text-xs mb-1">15 minutes ago</p>
             <p>Started: {state.currentTask || 'Processing data'}</p>
           </div>
           <div className="bg-white/5 p-3 rounded-lg text-sm">
-            <p className="text-gray-400 text-xs mb-1">1 hour ago</p>
+            <p className="text-neutral-400 text-xs mb-1">1 hour ago</p>
             <p>Switched model to {state.model}</p>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
 
       {/* Quick Actions */}
       <div className="mt-6 pt-6 border-t border-white/10">
-        <h3 className="text-sm font-semibold text-gray-400 mb-3">Quick Actions</h3>
+        <h3 className="text-sm font-semibold text-neutral-400 mb-3">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-2">
           <button className="px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
             Send Message
@@ -158,7 +158,7 @@ export default function AgentPanel({ agent, state, onClose }: AgentPanelProps) {
           <button className="px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors">
             Change Model
           </button>
-          <button className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg text-sm transition-colors text-red-400">
+          <button className="px-3 py-2 bg-error/20 hover:bg-error/30 rounded-lg text-sm transition-colors text-error">
             Kill Task
           </button>
         </div>

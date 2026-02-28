@@ -5,13 +5,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getActivities } from '@/lib/activities-db';
 import { getAgentMood } from '@/operations/agent-ops';
 
-interface RouteParams {
-  params: { id: string };
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const agentId = params.id;
+    const { id: agentId } = await params;
     
     // Get activities for this agent
     const activitiesResult = getActivities({ limit: 1000, sort: 'newest' });
@@ -32,7 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const errorCount = last24h.filter(a => a.status === 'error').length;
     const successRate = last24h.length > 0 ? (successCount / last24h.length) * 100 : 100;
 
-    const totalDuration = last24h.reduce((sum, a) => sum + (a.duration || 0), 0);
+    const totalDuration = last24h.reduce((sum, a) => sum + (a.duration_ms || 0), 0);
     const avgResponseTime = last24h.length > 0 ? totalDuration / last24h.length / 1000 : 0;
 
     const tokensPerDay = last24h.reduce((sum, a) => sum + (a.tokens_used || 0), 0);

@@ -118,8 +118,8 @@ export async function GET(request: NextRequest) {
                     description: activity.description,
                     timestamp: activity.timestamp,
                     status: activity.status,
-                    duration: activity.duration,
-                    tokens_used: activity.tokens_used,
+                    duration: activity.duration_ms ?? undefined,
+                    tokens_used: activity.tokens_used ?? undefined,
                   }));
                 }
                 lastActivityId = newest.id;
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
 
         // Schedule next poll with adaptive interval
         if (!closed) {
-          const interval = pollAttempt > 0 ? getBackoff(pollAttempt) : 2000;
+          const interval = pollAttempt > 0 ? getBackoffMs(pollAttempt) : 2000;
           setTimeout(poll, interval);
         }
       };

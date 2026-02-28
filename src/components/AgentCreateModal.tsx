@@ -209,17 +209,17 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-white dark:bg-neutral-900 rounded-xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">
               Create New Agent
             </h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -234,10 +234,10 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                     step === s
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-info text-white'
                       : i < ['template', 'config', 'skills', 'preview'].indexOf(step)
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                      ? 'bg-success text-white'
+                      : 'bg-neutral-200 dark:bg-neutral-700 text-neutral-500'
                   }`}
                 >
                   {i + 1}
@@ -246,8 +246,8 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                   <div
                     className={`w-12 h-1 ${
                       i < ['template', 'config', 'skills', 'preview'].indexOf(step)
-                        ? 'bg-green-500'
-                        : 'bg-gray-200 dark:bg-gray-700'
+                        ? 'bg-success'
+                        : 'bg-neutral-200 dark:bg-neutral-700'
                     }`}
                   />
                 )}
@@ -267,7 +267,7 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                 exit={{ opacity: 0, x: -20 }}
                 className="grid grid-cols-2 gap-4"
               >
-                <p className="col-span-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <p className="col-span-2 text-sm text-neutral-600 dark:text-neutral-400 mb-2">
                   Choose a template to get started quickly
                 </p>
                 {AGENT_TEMPLATES.map(template => (
@@ -276,15 +276,15 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                     onClick={() => handleTemplateSelect(template.id)}
                     className={`p-4 rounded-xl border-2 text-left transition-all ${
                       selectedTemplate === template.id
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                        ? 'border-info bg-info-soft dark:bg-info-soft'
+                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300'
                     }`}
                   >
                     <div className="text-3xl mb-2">{template.emoji}</div>
-                    <div className="font-medium text-gray-900 dark:text-white">
+                    <div className="font-medium text-neutral-900 dark:text-white">
                       {template.name}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                       {template.description}
                     </div>
                   </button>
@@ -301,7 +301,7 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                     Agent Name *
                   </label>
                   <input
@@ -309,18 +309,18 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                     value={config.name}
                     onChange={e => setConfig(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="My Agent"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-info outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                     Model
                   </label>
                   <select
                     value={config.model}
                     onChange={e => setConfig(prev => ({ ...prev, model: e.target.value }))}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-info outline-none"
                   >
                     {AVAILABLE_MODELS.map(model => (
                       <option key={model.id} value={model.id}>
@@ -331,20 +331,20 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                     System Prompt
                   </label>
                   <textarea
                     value={config.systemPrompt}
                     onChange={e => setConfig(prev => ({ ...prev, systemPrompt: e.target.value }))}
                     rows={4}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+                    className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-info outline-none font-mono text-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                       Temperature: {config.temperature}
                     </label>
                     <input
@@ -358,14 +358,14 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                       Max Tokens
                     </label>
                     <input
                       type="number"
                       value={config.maxTokens}
                       onChange={e => setConfig(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 focus:ring-2 focus:ring-info outline-none"
                     />
                   </div>
                 </div>
@@ -376,9 +376,9 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                       type="checkbox"
                       checked={config.autoStart}
                       onChange={e => setConfig(prev => ({ ...prev, autoStart: e.target.checked }))}
-                      className="rounded border-gray-300"
+                      className="rounded border-neutral-300"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Auto-start on system boot</span>
+                    <span className="text-sm text-neutral-700 dark:text-neutral-300">Auto-start on system boot</span>
                   </label>
                 </div>
               </motion.div>
@@ -392,7 +392,7 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-4"
               >
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Select skills to enable for this agent
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -402,18 +402,18 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                       onClick={() => toggleSkill(skill.id)}
                       className={`p-3 rounded-lg border text-left transition-all ${
                         config.skills.includes(skill.id)
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                          ? 'border-info bg-info-soft dark:bg-info-soft'
+                          : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300'
                       }`}
                     >
-                      <div className="font-medium text-gray-900 dark:text-white">
+                      <div className="font-medium text-neutral-900 dark:text-white">
                         {skill.name}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                      <div className="text-sm text-neutral-500 dark:text-neutral-400">
                         {skill.description}
                       </div>
                       {config.skills.includes(skill.id) && (
-                        <span className="text-blue-600 text-xs mt-1 block">✓ Selected</span>
+                        <span className="text-info text-xs mt-1 block">✓ Selected</span>
                       )}
                     </button>
                   ))}
@@ -429,52 +429,52 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-4"
               >
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-neutral-900 dark:text-white">
                   Preview: {config.name || 'Unnamed Agent'}
                 </h3>
 
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
+                <div className="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4 space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Type</span>
-                    <span className="font-medium text-gray-900 dark:text-white capitalize">{config.type}</span>
+                    <span className="text-neutral-500 dark:text-neutral-400">Type</span>
+                    <span className="font-medium text-neutral-900 dark:text-white capitalize">{config.type}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Model</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-500 dark:text-neutral-400">Model</span>
+                    <span className="font-medium text-neutral-900 dark:text-white">
                       {AVAILABLE_MODELS.find(m => m.id === config.model)?.name || config.model}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Temperature</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{config.temperature}</span>
+                    <span className="text-neutral-500 dark:text-neutral-400">Temperature</span>
+                    <span className="font-medium text-neutral-900 dark:text-white">{config.temperature}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Max Tokens</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{config.maxTokens}</span>
+                    <span className="text-neutral-500 dark:text-neutral-400">Max Tokens</span>
+                    <span className="font-medium text-neutral-900 dark:text-white">{config.maxTokens}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Skills</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-500 dark:text-neutral-400">Skills</span>
+                    <span className="font-medium text-neutral-900 dark:text-white">
                       {config.skills.length > 0 ? config.skills.join(', ') : 'None'}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Auto-start</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
+                    <span className="text-neutral-500 dark:text-neutral-400">Auto-start</span>
+                    <span className="font-medium text-neutral-900 dark:text-white">
                       {config.autoStart ? 'Yes' : 'No'}
                     </span>
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-gray-500 dark:text-gray-400 text-sm">System Prompt</span>
-                  <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono text-sm whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+                  <span className="text-neutral-500 dark:text-neutral-400 text-sm">System Prompt</span>
+                  <div className="mt-1 p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg font-mono text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
                     {config.systemPrompt || '(empty)'}
                   </div>
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">
+                  <div className="p-3 bg-red-50 dark:bg-error-soft text-error dark:text-error rounded-lg text-sm">
                     {error}
                   </div>
                 )}
@@ -484,10 +484,10 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+        <div className="px-6 py-4 border-t border-neutral-200 dark:border-neutral-700 flex justify-between">
           <button
             onClick={step === 'template' ? onClose : handleBack}
-            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="px-4 py-2 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
           >
             {step === 'template' ? 'Cancel' : 'Back'}
           </button>
@@ -496,7 +496,7 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
             <button
               onClick={handleCreate}
               disabled={!canProceed() || isCreating}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-info hover:bg-info disabled:bg-neutral-400 text-white rounded-lg transition-colors flex items-center gap-2"
             >
               {isCreating && (
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -510,7 +510,7 @@ export function AgentCreateModal({ isOpen, onClose, onCreate }: AgentCreateModal
             <button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+              className="px-6 py-2 bg-info hover:bg-info disabled:bg-neutral-400 text-white rounded-lg transition-colors"
             >
               Next
             </button>

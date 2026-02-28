@@ -4,8 +4,65 @@
 /* ============================================
    TenacitOS Design System
    Based on tenacios-design.json (Pencil)
-   Updated: 2026-02-17
+   Updated: 2026-02-28 - Semantic Color System
    ============================================ */
+
+/* ============================================
+   Tailwind v4 Theme Configuration
+   Semantic Color Tokens
+   ============================================ */
+@theme {
+  /* Semantic Colors - Success (Green) */
+  --color-success: #32D74B;
+  --color-success-soft: rgba(50, 215, 75, 0.125);
+  --color-success-muted: rgba(50, 215, 75, 0.1);
+  --color-success-bg: rgba(50, 215, 75, 0.1);
+  
+  /* Semantic Colors - Warning (Yellow/Amber) */
+  --color-warning: #FFD60A;
+  --color-warning-soft: rgba(255, 214, 10, 0.125);
+  --color-warning-muted: rgba(255, 214, 10, 0.1);
+  --color-warning-bg: rgba(255, 214, 10, 0.1);
+  
+  /* Semantic Colors - Error (Red) */
+  --color-error: #FF453A;
+  --color-error-soft: rgba(255, 69, 58, 0.125);
+  --color-error-muted: rgba(255, 69, 58, 0.1);
+  --color-error-bg: rgba(255, 69, 58, 0.1);
+  
+  /* Semantic Colors - Info (Blue) */
+  --color-info: #0A84FF;
+  --color-info-soft: rgba(10, 132, 255, 0.125);
+  --color-info-muted: rgba(10, 132, 255, 0.1);
+  --color-info-bg: rgba(10, 132, 255, 0.1);
+  
+  /* Semantic Colors - Neutral (Grays) */
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F4F4F5;
+  --color-neutral-200: #E4E4E7;
+  --color-neutral-300: #D4D4D8;
+  --color-neutral-400: #A1A1AA;
+  --color-neutral-500: #71717A;
+  --color-neutral-600: #52525B;
+  --color-neutral-700: #3F3F46;
+  --color-neutral-800: #27272A;
+  --color-neutral-900: #18181B;
+  --color-neutral-950: #0C0C0F;
+  
+  /* Surface Colors */
+  --color-surface: #1A1A1A;
+  --color-surface-elevated: #242424;
+  --color-surface-hover: #2E2E2E;
+  
+  /* Border Colors */
+  --color-border: #2A2A2A;
+  --color-border-strong: #3A3A3A;
+  
+  /* Accent Colors */
+  --color-accent: #FF3B30;
+  --color-accent-soft: rgba(255, 59, 48, 0.125);
+  --color-accent-hover: #FF524A;
+}
 
 :root {
   /* Core Colors */

@@ -4,13 +4,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAgentById, pauseAgent, resumeAgent, unregisterAgent } from '@/operations/agent-ops';
 
-interface RouteParams {
-  params: { id: string };
-}
-
 // GET /api/agents/[id] - Get agent by ID
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  const result = await getAgentById(params.id);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const result = await getAgentById(id);
 
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 404 });
@@ -20,8 +17,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PATCH /api/agents/[id] - Update agent status
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { action } = body;
 
@@ -29,10 +27,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     switch (action) {
       case 'pause':
-        result = await pauseAgent(params.id);
+        result = await pauseAgent(id);
         break;
       case 'resume':
-        result = await resumeAgent(params.id);
+        result = await resumeAgent(id);
         break;
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -52,8 +50,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/agents/[id] - Delete an agent
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
-  const result = await unregisterAgent(params.id);
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const result = await unregisterAgent(id);
 
   if (!result.success) {
     return NextResponse.json({ error: result.error }, { status: 400 });

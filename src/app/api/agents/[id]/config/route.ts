@@ -4,10 +4,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAgentById } from '@/operations/agent-ops';
 
-interface RouteParams {
-  params: { id: string };
-}
-
 // In-memory config store (would be DB in production)
 const agentConfigs = new Map<string, Record<string, any>>();
 
@@ -22,9 +18,9 @@ const DEFAULT_CONFIG = {
   skills: [],
 };
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const agentId = params.id;
+    const { id: agentId } = await params;
     
     // Verify agent exists
     const agentResult = await getAgentById(agentId);
@@ -48,9 +44,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const agentId = params.id;
+    const { id: agentId } = await params;
     const body = await request.json();
     
     // Verify agent exists

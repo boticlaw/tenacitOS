@@ -40,30 +40,30 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 const statusConfig = {
   connected: {
     icon: CheckCircle,
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
+    color: "text-success",
+    bg: "bg-success/10",
+    border: "border-success/30",
     label: "Connected",
   },
   disconnected: {
     icon: XCircle,
-    color: "text-red-400",
-    bg: "bg-red-500/10",
-    border: "border-red-500/30",
+    color: "text-error",
+    bg: "bg-error/10",
+    border: "border-error/30",
     label: "Disconnected",
   },
   configured: {
     icon: CheckCircle,
-    color: "text-blue-400",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
+    color: "text-info",
+    bg: "bg-info/10",
+    border: "border-info/30",
     label: "Configured",
   },
   not_configured: {
     icon: AlertCircle,
-    color: "text-yellow-400",
-    bg: "bg-yellow-500/10",
-    border: "border-yellow-500/30",
+    color: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning/30",
     label: "Not Configured",
   },
 };
@@ -126,21 +126,21 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
 
   if (!integrations) {
     return (
-      <div className="bg-gray-900 rounded-xl p-6 animate-pulse">
-        <div className="h-6 bg-gray-800 rounded w-1/3 mb-4"></div>
+      <div className="bg-neutral-900 rounded-xl p-6 animate-pulse">
+        <div className="h-6 bg-neutral-800 rounded w-1/3 mb-4"></div>
         <div className="space-y-3">
-          <div className="h-16 bg-gray-800 rounded"></div>
-          <div className="h-16 bg-gray-800 rounded"></div>
-          <div className="h-16 bg-gray-800 rounded"></div>
+          <div className="h-16 bg-neutral-800 rounded"></div>
+          <div className="h-16 bg-neutral-800 rounded"></div>
+          <div className="h-16 bg-neutral-800 rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-900 rounded-xl p-6">
+    <div className="bg-neutral-900 rounded-xl p-6">
       <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-        <MessageCircle className="w-5 h-5 text-emerald-400" />
+        <MessageCircle className="w-5 h-5 text-success" />
         Integrations
       </h2>
 
@@ -161,12 +161,12 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-800 rounded-lg">
-                    <Icon className="w-5 h-5 text-gray-300" />
+                  <div className="p-2 bg-neutral-800 rounded-lg">
+                    <Icon className="w-5 h-5 text-neutral-300" />
                   </div>
                   <div>
                     <div className="font-medium text-white">{integration.name}</div>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <div className="flex items-center gap-2 text-xs text-neutral-400">
                       {stats?.lastActivityRelative ? (
                         <span>Last: {stats.lastActivityRelative}</span>
                       ) : integration.lastActivity ? (
@@ -178,7 +178,7 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
                         </span>
                       ) : null}
                       {integration.detail && (
-                        <span className="text-gray-500">• {integration.detail}</span>
+                        <span className="text-neutral-500">• {integration.detail}</span>
                       )}
                     </div>
                   </div>
@@ -195,13 +195,13 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
                   <button
                     onClick={() => handleTest(integration.id)}
                     disabled={isTesting}
-                    className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors disabled:opacity-50"
+                    className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors disabled:opacity-50"
                     title="Test connection"
                   >
                     {isTesting ? (
-                      <RefreshCw className="w-4 h-4 text-gray-400 animate-spin" />
+                      <RefreshCw className="w-4 h-4 text-neutral-400 animate-spin" />
                     ) : (
-                      <Play className="w-4 h-4 text-gray-400" />
+                      <Play className="w-4 h-4 text-neutral-400" />
                     )}
                   </button>
 
@@ -209,10 +209,10 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
                   {integration.status !== "not_configured" && (
                     <button
                       onClick={() => handleReauth(integration.id)}
-                      className="p-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
+                      className="p-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors"
                       title="Reauthenticate"
                     >
-                      <RotateCcw className="w-4 h-4 text-gray-400" />
+                      <RotateCcw className="w-4 h-4 text-neutral-400" />
                     </button>
                   )}
                 </div>
@@ -223,8 +223,8 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
                 <div
                   className={`mt-3 p-2 rounded text-xs ${
                     testResult.success
-                      ? "bg-emerald-500/20 text-emerald-300"
-                      : "bg-red-500/20 text-red-300"
+                      ? "bg-success/20 text-emerald-300"
+                      : "bg-error/20 text-error"
                   }`}
                 >
                   <div className="font-medium">{testResult.message}</div>
@@ -236,12 +236,12 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
 
               {/* Usage stats */}
               {stats && (
-                <div className="mt-3 pt-3 border-t border-gray-700/50">
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
+                <div className="mt-3 pt-3 border-t border-neutral-700/50">
+                  <div className="flex items-center gap-4 text-xs text-neutral-400">
                     <button
                       onClick={() => loadActivityStats(integration.id)}
                       disabled={isLoadingStats}
-                      className="hover:text-gray-300 transition-colors"
+                      className="hover:text-neutral-300 transition-colors"
                     >
                       {isLoadingStats ? (
                         <RefreshCw className="w-3 h-3 animate-spin inline mr-1" />
@@ -249,13 +249,13 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
                       Usage:
                     </button>
                     <span>
-                      <strong className="text-gray-300">{stats.usage24h}</strong> today
+                      <strong className="text-neutral-300">{stats.usage24h}</strong> today
                     </span>
                     <span>
-                      <strong className="text-gray-300">{stats.usage7d}</strong> this week
+                      <strong className="text-neutral-300">{stats.usage7d}</strong> this week
                     </span>
                     <span>
-                      <strong className="text-gray-300">{stats.usage30d}</strong> this month
+                      <strong className="text-neutral-300">{stats.usage30d}</strong> this month
                     </span>
                   </div>
                 </div>
@@ -270,7 +270,7 @@ export function IntegrationStatus({ integrations }: IntegrationStatusProps) {
         onClick={() => {
           integrations.forEach((i) => loadActivityStats(i.id));
         }}
-        className="mt-4 w-full py-2 text-sm text-gray-400 hover:text-gray-300 transition-colors"
+        className="mt-4 w-full py-2 text-sm text-neutral-400 hover:text-neutral-300 transition-colors"
       >
         Load usage statistics for all integrations
       </button>

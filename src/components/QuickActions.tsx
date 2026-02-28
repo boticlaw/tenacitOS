@@ -103,18 +103,18 @@ export function QuickActions({ onActionComplete }: QuickActionsProps) {
 
   const colorClasses = {
     emerald:
-      "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20",
-    blue: "bg-blue-500/10 text-blue-400 border-blue-500/30 hover:bg-blue-500/20",
+      "bg-success/10 text-success border-success/30 hover:bg-success/20",
+    blue: "bg-info/10 text-info border-info/30 hover:bg-info/20",
     yellow:
-      "bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20",
-    red: "bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20",
+      "bg-warning/10 text-warning border-warning/30 hover:bg-warning/20",
+    red: "bg-error/10 text-error border-error/30 hover:bg-error/20",
   };
 
   return (
     <>
-      <div className="bg-gray-900 rounded-xl p-6">
+      <div className="bg-neutral-900 rounded-xl p-6">
         <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-          <RefreshCw className="w-5 h-5 text-emerald-400" />
+          <RefreshCw className="w-5 h-5 text-success" />
           Quick Actions
         </h2>
 
@@ -123,8 +123,8 @@ export function QuickActions({ onActionComplete }: QuickActionsProps) {
           <div
             className={`flex items-center gap-2 p-3 rounded-lg mb-4 ${
               notification.type === "success"
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                : "bg-red-500/10 text-red-400 border border-red-500/30"
+                ? "bg-success/10 text-success border border-success/30"
+                : "bg-error/10 text-error border border-error/30"
             }`}
           >
             {notification.type === "success" ? (

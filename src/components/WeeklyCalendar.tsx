@@ -47,25 +47,25 @@ export function WeeklyCalendar() {
   const goToToday = () => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   return (
-    <div className="bg-gray-900 rounded-xl overflow-hidden">
+    <div className="bg-neutral-900 rounded-xl overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className="flex items-center justify-between p-4 border-b border-neutral-800">
         <div className="flex items-center gap-4">
           <button
             onClick={goToPreviousWeek}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-400" />
+            <ChevronLeft className="w-5 h-5 text-neutral-400" />
           </button>
           <button
             onClick={goToNextWeek}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
           >
-            <ChevronRight className="w-5 h-5 text-gray-400" />
+            <ChevronRight className="w-5 h-5 text-neutral-400" />
           </button>
           <button
             onClick={goToToday}
-            className="px-3 py-1.5 text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-sm bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg transition-colors"
           >
             Today
           </button>
@@ -75,32 +75,32 @@ export function WeeklyCalendar() {
           {format(currentWeekStart, "MMMM yyyy")}
         </h2>
 
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+        <div className="flex items-center gap-2 text-sm text-neutral-400">
           <Calendar className="w-4 h-4" />
           <span>{tasks.length} scheduled tasks</span>
         </div>
       </div>
 
       {/* Day Headers */}
-      <div className="grid grid-cols-8 border-b border-gray-800">
-        <div className="p-3 text-center text-sm text-gray-500 border-r border-gray-800">
+      <div className="grid grid-cols-8 border-b border-neutral-800">
+        <div className="p-3 text-center text-sm text-neutral-500 border-r border-neutral-800">
           Time
         </div>
         {days.map((day) => (
           <div
             key={day.toISOString()}
-            className={`p-3 text-center border-r border-gray-800 last:border-r-0 ${
+            className={`p-3 text-center border-r border-neutral-800 last:border-r-0 ${
               isSameDay(day, new Date())
-                ? "bg-emerald-500/10"
+                ? "bg-success/10"
                 : ""
             }`}
           >
-            <div className="text-xs text-gray-500 uppercase">
+            <div className="text-xs text-neutral-500 uppercase">
               {format(day, "EEE")}
             </div>
             <div
               className={`text-lg font-medium ${
-                isSameDay(day, new Date()) ? "text-emerald-400" : "text-white"
+                isSameDay(day, new Date()) ? "text-success" : "text-white"
               }`}
             >
               {format(day, "d")}
@@ -112,8 +112,8 @@ export function WeeklyCalendar() {
       {/* Time Grid - Show 6am to 10pm */}
       <div className="max-h-[600px] overflow-y-auto">
         {hours.filter(h => h >= 6 && h <= 22).map((hour) => (
-          <div key={hour} className="grid grid-cols-8 border-b border-gray-800 last:border-b-0">
-            <div className="p-2 text-xs text-gray-500 text-right pr-3 border-r border-gray-800">
+          <div key={hour} className="grid grid-cols-8 border-b border-neutral-800 last:border-b-0">
+            <div className="p-2 text-xs text-neutral-500 text-right pr-3 border-r border-neutral-800">
               {format(new Date().setHours(hour, 0), "HH:mm")}
             </div>
             {days.map((day) => {
@@ -121,19 +121,19 @@ export function WeeklyCalendar() {
               return (
                 <div
                   key={`${day.toISOString()}-${hour}`}
-                  className={`p-1 min-h-[48px] border-r border-gray-800 last:border-r-0 ${
-                    isSameDay(day, new Date()) ? "bg-emerald-500/5" : ""
+                  className={`p-1 min-h-[48px] border-r border-neutral-800 last:border-r-0 ${
+                    isSameDay(day, new Date()) ? "bg-success/5" : ""
                   }`}
                 >
                   {dayTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="bg-emerald-600/20 border-l-2 border-emerald-500 px-2 py-1 rounded text-xs mb-1"
+                      className="bg-success/20 border-l-2 border-success px-2 py-1 rounded text-xs mb-1"
                     >
-                      <div className="font-medium text-emerald-400 truncate">
+                      <div className="font-medium text-success truncate">
                         {task.name}
                       </div>
-                      <div className="text-gray-500 truncate">
+                      <div className="text-neutral-500 truncate">
                         {task.schedule}
                       </div>
                     </div>

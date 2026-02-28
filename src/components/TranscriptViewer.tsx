@@ -44,7 +44,7 @@ export function TranscriptViewer({ sessionKey, onClose }: TranscriptViewerProps)
   useEffect(() => {
     const fetchTranscript = async () => {
       try {
-        const res = await fetch(\`/api/sessions/\${encodeURIComponent(sessionKey)}/transcript\`);
+        const res = await fetch(`/api/sessions/${encodeURIComponent(sessionKey)}/transcript`);
         const data = await res.json();
         setMessages(data.messages || []);
       } catch (error) {
@@ -114,7 +114,7 @@ export function TranscriptViewer({ sessionKey, onClose }: TranscriptViewerProps)
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = \`transcript-\${sessionKey.replace(/\//g, "-")}.json\`;
+    a.download = `transcript-${sessionKey.replace(/\//g, "-")}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };

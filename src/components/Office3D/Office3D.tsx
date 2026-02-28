@@ -227,17 +227,17 @@ export default function Office3D() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-gray-900 flex items-center justify-center" style={{ height: '100vh', width: '100vw' }}>
+      <div className="fixed inset-0 bg-neutral-900 flex items-center justify-center" style={{ height: '100vh', width: '100vw' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-          <p className="text-gray-400 text-lg">Loading office...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-warning mx-auto mb-4"></div>
+          <p className="text-neutral-400 text-lg">Loading office...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-900" style={{ height: '100vh', width: '100vw' }}>
+    <div className="fixed inset-0 bg-neutral-900" style={{ height: '100vh', width: '100vw' }}>
       <Canvas
         camera={{ position: [0, 8, 12], fov: 60 }}
         shadows
@@ -369,33 +369,33 @@ export default function Office3D() {
       {/* Modal de interacciones con objetos */}
       {interactionModal && (
         <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="bg-gray-900 border border-yellow-500 rounded-lg p-8 max-w-2xl w-full mx-4 shadow-2xl">
+          <div className="bg-neutral-900 border border-warning rounded-lg p-8 max-w-2xl w-full mx-4 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-yellow-400">
+              <h2 className="text-2xl font-bold text-warning">
                 {interactionModal === 'memory' && '📁 Memory Browser'}
                 {interactionModal === 'roadmap' && '📋 Roadmap & Planning'}
                 {interactionModal === 'energy' && '☕ Agent Energy Dashboard'}
               </h2>
               <button
                 onClick={handleCloseModal}
-                className="text-gray-400 hover:text-white text-3xl leading-none"
+                className="text-neutral-400 hover:text-white text-3xl leading-none"
               >
                 ×
               </button>
             </div>
 
-            <div className="text-gray-300 space-y-4">
+            <div className="text-neutral-300 space-y-4">
               {interactionModal === 'memory' && (
                 <>
                   <p className="text-lg">🧠 Access to workspace memories and files</p>
-                  <div className="bg-gray-800 p-4 rounded border border-gray-700">
-                    <p className="text-sm text-gray-400 mb-2">Quick links:</p>
+                  <div className="bg-neutral-800 p-4 rounded border border-neutral-700">
+                    <p className="text-sm text-neutral-400 mb-2">Quick links:</p>
                     <ul className="space-y-2">
-                      <li><a href="/memory" className="text-yellow-400 hover:underline">→ Full Memory Browser</a></li>
-                      <li><a href="/files" className="text-yellow-400 hover:underline">→ File Explorer</a></li>
+                      <li><a href="/memory" className="text-warning hover:underline">→ Full Memory Browser</a></li>
+                      <li><a href="/files" className="text-warning hover:underline">→ File Explorer</a></li>
                     </ul>
                   </div>
-                  <p className="text-sm text-gray-500 italic">
+                  <p className="text-sm text-neutral-500 italic">
                     This would show a file tree of memory/*.md and workspace files
                   </p>
                 </>
@@ -404,24 +404,24 @@ export default function Office3D() {
               {interactionModal === 'roadmap' && (
                 <>
                   <p className="text-lg">🗺️ Project roadmap and planning board</p>
-                  <div className="bg-gray-800 p-4 rounded border border-gray-700">
-                    <p className="text-sm text-gray-400 mb-2">Active phases:</p>
+                  <div className="bg-neutral-800 p-4 rounded border border-neutral-700">
+                    <p className="text-sm text-neutral-400 mb-2">Active phases:</p>
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
-                        <span className="text-green-400">✓</span>
+                        <span className="text-success">✓</span>
                         <span>Phase 0: SuperBotijo Shell</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-yellow-400">●</span>
+                        <span className="text-warning">●</span>
                         <span>Phase 8: The Office 3D (MVP)</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-gray-500">○</span>
+                        <span className="text-neutral-500">○</span>
                         <span>Phase 2: File Browser Pro</span>
                       </li>
                     </ul>
                   </div>
-                  <p className="text-sm text-gray-500 italic">
+                  <p className="text-sm text-neutral-500 italic">
                     Full roadmap available at workspace/superbotijo/ROADMAP.md
                   </p>
                 </>
@@ -430,21 +430,21 @@ export default function Office3D() {
               {interactionModal === 'energy' && (
                 <>
                   <p className="text-lg">⚡ Agent activity and energy levels</p>
-                  <div className="bg-gray-800 p-4 rounded border border-gray-700 space-y-3">
+                  <div className="bg-neutral-800 p-4 rounded border border-neutral-700 space-y-3">
                     <div>
-                      <p className="text-sm text-gray-400">Tokens consumed today:</p>
-                      <p className="text-2xl font-bold text-yellow-400">47,000</p>
+                      <p className="text-sm text-neutral-400">Tokens consumed today:</p>
+                      <p className="text-2xl font-bold text-warning">47,000</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">Active agents:</p>
-                      <p className="text-2xl font-bold text-green-400">3 / 6</p>
+                      <p className="text-sm text-neutral-400">Active agents:</p>
+                      <p className="text-2xl font-bold text-success">3 / 6</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">System uptime:</p>
-                      <p className="text-2xl font-bold text-blue-400">12h 34m</p>
+                      <p className="text-sm text-neutral-400">System uptime:</p>
+                      <p className="text-2xl font-bold text-info">12h 34m</p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 italic">
+                  <p className="text-sm text-neutral-500 italic">
                     This would show real-time agent mood/productivity metrics
                   </p>
                 </>
@@ -453,7 +453,7 @@ export default function Office3D() {
 
             <button
               onClick={handleCloseModal}
-              className="mt-6 w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded transition-colors"
+              className="mt-6 w-full bg-warning hover:bg-warning text-black font-bold py-3 rounded transition-colors"
             >
               Close
             </button>
@@ -483,7 +483,7 @@ export default function Office3D() {
         </div>
         <button
           onClick={() => setControlMode(controlMode === 'orbit' ? 'fps' : 'orbit')}
-          className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-3 rounded text-xs transition-colors"
+          className="w-full bg-warning hover:bg-warning text-black font-bold py-2 px-3 rounded text-xs transition-colors"
         >
           Switch to {controlMode === 'orbit' ? 'FPS Mode' : 'Orbit Mode'}
         </button>
@@ -494,19 +494,19 @@ export default function Office3D() {
         <h3 className="text-sm font-bold mb-2">Estados</h3>
         <div className="text-xs space-y-1">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-success rounded-full"></div>
             <span>Working</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="w-3 h-3 bg-info rounded-full animate-pulse"></div>
             <span>Thinking</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-neutral-500 rounded-full"></div>
             <span>Idle</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-error rounded-full"></div>
             <span>Error</span>
           </div>
         </div>

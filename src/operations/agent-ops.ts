@@ -113,7 +113,7 @@ export async function pauseAgent(id: string): Promise<OperationResult> {
     const result = await updateAgentStatus(id, 'paused');
     
     if (!result.success) {
-      return result;
+      return { success: false, error: result.error };
     }
 
     // Log the pause
@@ -143,7 +143,8 @@ export async function resumeAgent(id: string): Promise<OperationResult> {
       return { success: false, error: 'Agent is not paused' };
     }
 
-    return updateAgentStatus(id, 'idle');
+    const result = await updateAgentStatus(id, 'idle');
+    return { success: result.success };
   } catch (error) {
     return {
       success: false,

@@ -184,7 +184,7 @@ export async function getCronJobById(id: string): Promise<OperationResult<CronJo
   try {
     const result = await getCronJobs();
     if (!result.success || !result.data) {
-      return result as OperationResult<CronJob>;
+      return { success: false, error: result.error };
     }
 
     const job = result.data.find(j => j.id === id);

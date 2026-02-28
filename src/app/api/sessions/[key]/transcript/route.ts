@@ -5,10 +5,11 @@ import { existsSync } from "fs";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
-    const sessionKey = decodeURIComponent(params.key);
+    const { key } = await params;
+    const sessionKey = decodeURIComponent(key);
     
     // Construct path to session JSONL file
     const workspaceRoot = process.env.WORKSPACE_ROOT || "/root/.openclaw/workspace";

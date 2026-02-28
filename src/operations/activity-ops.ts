@@ -1,7 +1,7 @@
 /**
  * Activity Operations - Business logic for activity management
  */
-import { getActivities, addActivity, updateActivityStatus, type Activity } from '@/lib/activities-db';
+import { getActivities, logActivity, updateActivityStatus, type Activity } from '@/lib/activities-db';
 import type { OperationResult, PaginationParams, PaginatedResult } from './index';
 
 export interface ActivityFilters {
@@ -103,14 +103,17 @@ export async function createActivity(
   metadata: Partial<Activity> = {}
 ): Promise<OperationResult<Activity>> {
   try {
-    const activity = addActivity({
+    const activity = logActivity(
       type,
       description,
-      status: metadata.status || 'success',
-      duration: metadata.duration,
-      tokens_used: metadata.tokens_used,
-      ...metadata,
-    });
+      metadata.status || 'success',
+      {
+        duration_ms: metadata.duration_ms ?? null,
+        tokens_used: metadata.tokens_used ?? null,
+        agent: metadata.agent ?? null,
+        metadata: metadata.metadata ?? null,
+      }
+    );
 
     return { success: true, data: activity };
   } catch (error) {
@@ -144,11 +147,7 @@ export async function approveActivity(
     updateActivityStatus(id, 'approved');
     
     // Log the approval
-    addActivity({
-      type: 'approval',
-      description: `Activity ${id} approved${notes ? `: ${notes}` : ''}`,
-      status: 'success',
-    });
+    logActivity('approval', `Activity ${id} approved${notes ? `: ${notes}` : ''}`, 'success');
 
     return { success: true };
   } catch (error) {
@@ -182,11 +181,7 @@ export async function rejectActivity(
     updateActivityStatus(id, 'rejected');
     
     // Log the rejection
-    addActivity({
-      type: 'rejection',
-      description: `Activity ${id} rejected${reason ? `: ${reason}` : ''}`,
-      status: 'success',
-    });
+    logActivity('rejection', `Activity ${id} rejected${reason ? `: ${reason}` : ''}`, 'success');
 
     return { success: true };
   } catch (error) {
@@ -228,8 +223,8 @@ export async function getActivityStats(
       byStatus[activity.status] = (byStatus[activity.status] || 0) + 1;
       byType[activity.type] = (byType[activity.type] || 0) + 1;
       
-      if (activity.duration) {
-        totalDuration += activity.duration;
+      if (activity.duration_ms) {
+        totalDuration += activity.duration_ms;
         durationCount++;
       }
       

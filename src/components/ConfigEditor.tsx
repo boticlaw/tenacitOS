@@ -108,7 +108,7 @@ function ConfigSectionCard({
             {name}
           </span>
           {section.editable ? (
-            <Unlock className="w-4 h-4 text-green-500" />
+            <Unlock className="w-4 h-4 text-success" />
           ) : (
             <Lock className="w-4 h-4" style={{ color: "var(--text-muted)" }} />
           )}
@@ -168,7 +168,7 @@ function ConfigDataViewer({ data, editable, path, onChange, depth = 0 }: ConfigD
       );
     }
     return (
-      <span className="text-sm font-mono text-blue-400">{String(data)}</span>
+      <span className="text-sm font-mono text-info">{String(data)}</span>
     );
   }
 
@@ -465,7 +465,7 @@ export function ConfigEditor() {
       {toast && (
         <div
           className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${
-            toast.type === "success" ? "bg-green-600" : "bg-red-600"
+            toast.type === "success" ? "bg-success" : "bg-error"
           } text-white`}
         >
           {toast.type === "success" ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
@@ -480,9 +480,9 @@ export function ConfigEditor() {
           border: "1px solid rgba(234, 179, 8, 0.3)",
         }}
       >
-        <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+        <AlertTriangle className="w-5 h-5 text-warning mt-0.5 flex-shrink-0" />
         <div>
-          <p className="font-medium text-yellow-500">Be careful when editing configuration</p>
+          <p className="font-medium text-warning">Be careful when editing configuration</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             Changes may affect how OpenClaw works. A backup is created automatically before each save.
           </p>
@@ -520,7 +520,7 @@ export function ConfigEditor() {
         <button
           onClick={handleSave}
           disabled={!hasChanges || saving}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-success transition-colors"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? "Saving..." : "Save Changes"}

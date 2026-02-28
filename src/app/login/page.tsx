@@ -148,9 +148,9 @@ export default function LoginPage() {
               border: '1px solid var(--border)',
             }}
           >
-            <div className="h-8 bg-gray-700 rounded mb-4" />
-            <div className="h-12 bg-gray-700 rounded mb-4" />
-            <div className="h-10 bg-gray-700 rounded" />
+            <div className="h-8 bg-neutral-700 rounded mb-4" />
+            <div className="h-12 bg-neutral-700 rounded mb-4" />
+            <div className="h-10 bg-neutral-700 rounded" />
           </div>
         }>
           <LoginForm />
