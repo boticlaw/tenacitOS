@@ -9,69 +9,29 @@ import {
   Bot,
   Building2,
   Activity,
-  Clock,
-  Puzzle,
   DollarSign,
   Settings,
-  History,
   LogOut,
   Users,
   FileBarChart,
   Workflow,
   Beaker,
   SquareTerminal,
-  GitFork,
   Server,
-  Terminal,
 } from "lucide-react";
 
-const dockGroups = [
-  {
-    title: "Main",
-    items: [
-      { href: "/", label: "Dashboard", icon: Home },
-      { href: "/agents", label: "Agents", icon: Users },
-      { href: "/subagents", label: "Sub-Agents", icon: Bot },
-      { href: "/office", label: "Office", icon: Building2 },
-    ],
-  },
-  {
-    title: "Data",
-    items: [
-      { href: "/memory", label: "Memory", icon: Brain },
-      { href: "/files", label: "Files", icon: FolderOpen },
-      { href: "/sessions", label: "Sessions", icon: History },
-      { href: "/activity", label: "Activity", icon: Activity },
-    ],
-  },
-  {
-    title: "Analytics",
-    items: [
-      { href: "/analytics", label: "Analytics", icon: DollarSign },
-      { href: "/reports", label: "Reports", icon: FileBarChart },
-    ],
-  },
-  {
-    title: "Tools",
-    items: [
-      { href: "/workflows", label: "Workflows", icon: Workflow },
-      { href: "/playground", label: "Playground", icon: Beaker },
-      { href: "/terminal", label: "Terminal", icon: SquareTerminal },
-      { href: "/git", label: "Git", icon: GitFork },
-    ],
-  },
-  {
-    title: "System",
-    items: [
-      { href: "/system", label: "System", icon: Server },
-      { href: "/skills", label: "Skills", icon: Puzzle },
-      { href: "/cron", label: "Cron Jobs", icon: Clock },
-      { href: "/logs", label: "Logs", icon: Terminal },
-    ],
-  },
+const dockItems = [
+  { href: "/", label: "Dashboard", icon: Home },
+  { href: "/agents", label: "Agents", icon: Users },
+  { href: "/office", label: "Office", icon: Building2 },
+  { href: "/memory", label: "Memory", icon: Brain },
+  { href: "/files", label: "Files", icon: FolderOpen },
+  { href: "/analytics", label: "Analytics", icon: DollarSign },
+  { href: "/workflows", label: "Workflows", icon: Workflow },
+  { href: "/terminal", label: "Terminal", icon: SquareTerminal },
+  { href: "/system", label: "System", icon: Server },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
-
-const dockItems = dockGroups.flatMap((g) => g.items);
 
 export function Dock() {
   const pathname = usePathname();
