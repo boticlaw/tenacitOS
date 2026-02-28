@@ -31,14 +31,17 @@
 - [x] Editor markdown con preview
 - [x] Crear/renombrar/eliminar archivos
 - [x] Búsqueda dentro de archivos
-- **Archivos:** `src/app/(dashboard)/memory/page.tsx`, `src/components/FileTree.tsx`, `src/components/MarkdownEditor.tsx`
+- [x] **Knowledge Graph** - Grafo interactivo de conceptos (tab en /memory)
+- [x] **Word Cloud** - Palabras frecuentes en memories (tab en /memory)
+- **Archivos:** `src/app/(dashboard)/memory/page.tsx`, `src/components/FileTree.tsx`, `src/components/MarkdownEditor.tsx`, `src/components/KnowledgeGraph.tsx`, `src/components/MemoryWordCloud.tsx`
 
 ### 2.2 File Browser ✅
 - [x] Explorador del workspace completo
 - [x] Preview de archivos (código, markdown, JSON)
 - [x] Descargar archivos
 - [x] Upload de archivos
-- **Archivos:** `src/app/(dashboard)/files/page.tsx`, `src/components/FileBrowser.tsx`, `src/app/api/files/*`
+- [x] **3D View** - Vista 3D del árbol de archivos (toggle en /files)
+- **Archivos:** `src/app/(dashboard)/files/page.tsx`, `src/components/FileBrowser.tsx`, `src/components/files-3d/FileTree3D.tsx`
 
 ### 2.3 MEMORY.md Viewer ✅
 - [x] Vista especial para MEMORY.md con secciones colapsables
@@ -107,7 +110,8 @@
 - [x] Estimación de coste por modelo
 - [x] Coste acumulado diario/mensual
 - [x] Alertas de gasto (opcional)
-- **Archivos:** `src/app/(dashboard)/costs/page.tsx`, `src/app/api/costs/route.ts`
+- [x] **Sankey Diagrams** - Flow de tokens/tareas/tiempo (tab en /analytics)
+- **Archivos:** `src/app/(dashboard)/analytics/page.tsx`, `src/components/sankey/SankeyDiagrams.tsx`
 
 ### 4.3 Performance Metrics ✅
 - [x] Tiempo promedio de respuesta (en activity)
@@ -117,7 +121,7 @@
 
 ---
 
-## Fase 5: Comunicación ⚠️ PARCIAL
+## Fase 5: Comunicación ✅ COMPLETO
 > Interacción bidireccional
 
 ### 5.1 Command Terminal ✅
@@ -161,7 +165,7 @@
 
 ---
 
-## Fase 6: Configuración ⚠️ PARCIAL
+## Fase 6: Configuración ✅ COMPLETO
 > Admin del sistema
 
 ### 6.1 Skills Manager ✅
@@ -172,11 +176,11 @@
 - [ ] Actualizar skills
 - **Archivos:** `src/app/(dashboard)/skills/page.tsx`, `src/app/api/skills/route.ts`, `src/app/api/skills/[id]/toggle/route.ts`
 
-### 6.2 Integration Status ⚠️
+### 6.2 Integration Status ✅
 - [x] Estado de conexiones (componente existe)
-- [ ] Última actividad por integración
-- [ ] Test de conectividad
-- [ ] Reautenticar si necesario
+- [x] Última actividad por integración
+- [x] Test de conectividad
+- [x] Reautenticar si necesario
 - **Archivos:** `src/components/IntegrationStatus.tsx`
 
 ### 6.3 Config Editor ✅
@@ -188,7 +192,7 @@
 
 ---
 
-## Fase 7: Real-time ⚠️ PARCIAL
+## Fase 7: Real-time ✅ COMPLETO
 > WebSockets y notificaciones live
 
 ### 7.1 Live Activity Stream ✅
@@ -198,14 +202,15 @@
 - [x] Toast notifications (ToastProvider + useToast)
 - **Archivos:** `src/app/api/activities/stream/route.ts`, `src/hooks/useActivityStream.ts`, `src/components/LiveStatusIndicator.tsx`, `src/components/Toast.tsx`
 
-### 7.2 System Status ⚠️
+### 7.2 System Status ✅
 - [x] Heartbeat del agente (en /heartbeat)
-- [x] CPU/memoria del VPS (parcial en `/system`)
-- [ ] Cola de tareas pendientes
+- [x] CPU/memoria del VPS (en `/system`)
+- [x] Cola de tareas pendientes
+- **Archivos:** `src/app/(dashboard)/system/page.tsx`
 
 ---
 
-## Fase 8: The Office 3D 🏢 ⚠️ PARCIAL
+## Fase 8: The Office 3D 🏢 ✅ COMPLETO
 > Entorno 3D navegable que simula una oficina virtual donde trabajan los agentes
 
 **Ver spec completa:** `ROADMAP-OFFICE-3D.md`
@@ -219,23 +224,24 @@
 - [x] Avatares con emoji del agente
 - **Archivos:** `src/components/Office3D/Office3D.tsx`, `src/app/office/page.tsx`
 
-### 8.2 Interactions & Ambient ⚠️
+### 8.2 Interactions & Ambient ✅
 - [x] Avatares animados (tecleando, pensando, error)
-- [ ] Sub-agents aparecen como "visitantes" en la oficina
-- [ ] Trail visual entre parent y sub-agent
+- [x] Sub-agents aparecen como "visitantes" en la oficina
+- [x] Trail visual entre parent y sub-agent
 - [x] Efectos visuales (partículas success, humo error, beam heartbeat)
 - [x] Sonido ambiental toggleable (teclas, notificaciones, lofi)
 - [x] Click en objetos (archivador→Memory, pizarra→Roadmap, café→Mood)
 - **Archivos:** `src/components/Office3D/AvatarAnimator.tsx`, `FileCabinet.tsx`, `Whiteboard.tsx`, `CoffeeMachine.tsx`, `WallClock.tsx`
 
-### 8.3 Multi-Floor Building ❌
-- [ ] 4 plantas navegables con ascensor:
+### 8.3 Multi-Floor Building ✅
+- [x] 4 plantas navegables con ascensor:
   - Planta 1: Main Office (agentes principales)
   - Planta 2: Server Room (DBs, VPS, integrations)
   - Planta 3: Archive (logs, memories históricas)
   - Azotea: Control Tower (dashboard gigante)
-- [ ] Customization: temas (modern, retro, cyberpunk, matrix)
-- [ ] Modos especiales (Focus, God Mode, Cinematic)
+- [x] Customization: temas (modern, retro, cyberpunk, matrix)
+- [x] Modos especiales (Focus, God Mode, Cinematic)
+- **Archivos:** `src/components/Office3D/Building.tsx`, `src/components/Office3D/floors/*.tsx`
 
 **Temas alternativos disponibles:**
 - Habbo Room style (`src/components/office/HabboRoom.tsx`)
@@ -245,12 +251,12 @@
 **Datos en tiempo real:**
 - `/api/agents/status` - estado de cada agente ✅
 - `/api/activities` - activity feed ✅
-- `/api/subagents` - sub-agentes activos ❌
+- `/api/subagents` - sub-agentes activos ✅
 - Polling cada 2-5 segundos
 
 ---
 
-## Fase 9: Agent Intelligence ❌ PENDIENTE
+## Fase 9: Agent Intelligence ✅ COMPLETO
 > Features experimentales y visualizaciones avanzadas (complementan "The Office")
 
 ### 9.1 Agent Mood Dashboard ✅
@@ -261,119 +267,118 @@
 - [x] Emoji animado que cambia según el estado
 - **Archivos:** `src/app/api/agents/mood/route.ts`, `src/components/MoodWidget.tsx`
 
-### 9.2 Token Economics ⚠️ (parcial en /costs)
-- [x] Vista detallada de consumo por modelo (en /costs)
+### 9.2 Token Economics ✅
+- [x] Vista detallada de consumo por modelo (en /analytics → Costs tab)
 - [x] Breakdown: input tokens vs output tokens vs cache
 - [x] Comparativa: "Hoy vs ayer", "Esta semana vs la pasada"
 - [x] Proyección de gasto mensual
-- [ ] Top 5 tareas que más tokens consumen
-- [ ] Efficiency score: output útil / tokens totales
+- [x] Top 5 tareas que más tokens consumen (TopTasksList)
+- [x] Efficiency score (EfficiencyGauge)
+- **Archivos:** `src/app/(dashboard)/analytics/page.tsx`, `src/components/TopTasksList.tsx`, `src/components/EfficiencyGauge.tsx`
 
-### 9.3 Knowledge Graph Viewer
-- [ ] Visualización de conceptos/entidades en MEMORY.md y brain
-- [ ] Grafo interactivo con nodes y links
-- [ ] Click en un nodo → muestra snippets relacionados
-- [ ] Clustering por temas
-- [ ] Búsqueda visual
-- [ ] Export a imagen
+### 9.3 Knowledge Graph Viewer ✅
+- [x] Visualización de conceptos/entidades en MEMORY.md y brain
+- [x] Grafo interactivo con nodes y links
+- [x] Click en un nodo → muestra snippets relacionados
+- [x] Clustering por temas
+- [x] Búsqueda visual
+- [x] Export a imagen
+- **Archivos:** `src/components/KnowledgeGraph.tsx` (tab en /memory)
 
-### 9.4 Quick Actions Hub ✅
-- [x] Panel de botones para acciones frecuentes:
-  - Backup workspace now
-  - Clear temp files
-  - Test all integrations
-  - Re-authorize expired tokens
-  - Git status all repos
-  - Restart Gateway
-  - Flush message queue
-- [x] Status de cada acción (last run, next scheduled)
-- [x] One-click execution con confirmación
-- **Archivos:** `src/app/(dashboard)/actions/page.tsx`, `src/app/api/actions/route.ts`
+### 9.4 Model Playground ✅
+- [x] Input un prompt
+- [x] Seleccionar múltiples modelos para comparar
+- [x] Ver respuestas lado a lado
+- [x] Mostrar tokens/coste/tiempo de cada uno
+- [x] Guardar experimentos
+- [x] Share results (copy link)
+- **Archivos:** `src/app/(dashboard)/playground/page.tsx`
 
-### 9.5 Model Playground
-- [ ] Input un prompt
-- [ ] Seleccionar múltiples modelos para comparar
-- [ ] Ver respuestas lado a lado
-- [ ] Mostrar tokens/coste/tiempo de cada uno
-- [ ] Guardar experimentos
-- [ ] Share results (copy link)
-
-### 9.6 Smart Suggestions Engine
-- [ ] Analiza patrones de uso
-- [ ] Sugiere optimizaciones:
+### 9.5 Smart Suggestions Engine ✅
+- [x] Analiza patrones de uso
+- [x] Sugiere optimizaciones:
   - "Usas mucho Opus para tareas simples, prueba Sonnet"
   - "Muchos errores en cron X, revisar configuración"
   - "Heartbeats muy frecuentes, considera reducir intervalo"
   - "Token usage alto en horario Y, programar tareas pesadas en horario valle"
-- [ ] Tarjetas de sugerencia con botón "Apply" o "Dismiss"
-- [ ] Learn from dismissals
+- [x] Tarjetas de sugerencia con botón "Apply" o "Dismiss"
+- [x] Learn from dismissals
+- **Archivos:** `src/lib/suggestions.ts`, `src/components/SuggestionsPanel.tsx`
 
 ---
 
-## Fase 10: Sub-Agent Orchestra ❌ PENDIENTE
+## Fase 10: Sub-Agent Orchestra ✅ COMPLETO
 > Gestión y visualización de multi-agent workflows
 
-### 10.1 Sub-Agent Dashboard
-- [ ] Lista de sub-agentes activos en tiempo real
-- [ ] Estado: running, waiting, completed, failed
-- [ ] Task description y progreso
-- [ ] Modelo usado
-- [ ] Tokens consumidos por cada uno
-- [ ] Timeline de spawns/completions
+### 10.1 Sub-Agent Dashboard ✅
+- [x] Lista de sub-agentes activos en tiempo real
+- [x] Estado: running, waiting, completed, failed
+- [x] Task description y progreso
+- [x] Modelo usado
+- [x] Tokens consumidos por cada uno
+- [x] Timeline de spawns/completions
+- **Archivos:** `src/app/(dashboard)/subagents/page.tsx`, `src/app/api/subagents/route.ts`
 
-### 10.2 Agent Communication Graph
-- [ ] Visualización de mensajes entre main agent y sub-agents
-- [ ] Flow diagram tipo Sankey o network graph
-- [ ] Ver contenido de mensajes al hacer click
-- [ ] Filtrar por sesión, fecha, tipo
+### 10.2 Agent Communication Graph ✅
+- [x] Visualización de mensajes entre main agent y sub-agents
+- [x] Flow diagram tipo network graph (React Flow)
+- [x] Ver contenido de mensajes al hacer click
+- [x] Filtrar por sesión, fecha, tipo
+- **Archivos:** `src/components/CommunicationGraph.tsx` (tab en /agents)
 
-### 10.3 Multi-Agent Orchestration
-- [ ] Crear workflows visuales de múltiples agentes
-- [ ] Drag & drop tasks → auto-spawn agents
-- [ ] Dependencies entre tasks
-- [ ] Parallel vs sequential execution
-- [ ] Template workflows guardables
+### 10.3 Multi-Agent Orchestration ✅
+- [x] Crear workflows visuales de múltiples agentes
+- [x] Drag & drop tasks → auto-spawn agents
+- [x] Dependencies entre tasks
+- [x] Parallel vs sequential execution
+- [x] Template workflows guardables
+- **Archivos:** `src/app/(dashboard)/workflows/page.tsx`, `src/components/workflow/WorkflowCanvas.tsx`
 
 ---
 
-## Fase 11: Advanced Visualizations ❌ PENDIENTE
+## Fase 11: Advanced Visualizations ✅ COMPLETO
 > Porque los dashboards cool tienen gráficas cool
 
-### 11.1 3D Workspace Explorer
-- [ ] Vista 3D del árbol de archivos
-- [ ] Tamaño de nodos = tamaño de archivo
-- [ ] Color = tipo de archivo
-- [ ] Navigate con mouse
-- [ ] Click → preview/edit
-- [ ] Wow factor 📈
+### 11.1 3D Workspace Explorer ✅
+- [x] Vista 3D del árbol de archivos
+- [x] Tamaño de nodos = tamaño de archivo
+- [x] Color = tipo de archivo
+- [x] Navigate con mouse
+- [x] Click → preview/edit
+- [x] Wow factor 📈
+- **Archivos:** `src/components/files-3d/FileTree3D.tsx` (toggle en /files)
 
-### 11.2 Heatmaps Interactivos ⚠️ (básico existe)
+### 11.2 Heatmaps Interactivos ✅
 - [x] Actividad por hora del día (24x7 grid) - `HourlyHeatmap.tsx`
-- [ ] Hover → detalles de ese slot
-- [ ] Click → filtrar activity feed a ese rango
-- [ ] Export a imagen
+- [x] Hover → detalles de ese slot
+- [x] Click → filtrar activity feed a ese rango
+- [x] Export a imagen
+- **Archivos:** `src/components/charts/HourlyHeatmap.tsx`
 
-### 11.3 Sankey Diagrams
-- [ ] Flow de tokens: input → cache → output
-- [ ] Flow de tareas: type → status
-- [ ] Flow de tiempo: hora → actividad → resultado
+### 11.3 Sankey Diagrams ✅
+- [x] Flow de tokens: input → cache → output
+- [x] Flow de tareas: type → status
+- [x] Flow de tiempo: hora → actividad → resultado
+- **Archivos:** `src/components/sankey/SankeyDiagrams.tsx` (tab en /analytics)
 
-### 11.4 Word Cloud de Memories
-- [ ] Palabras más frecuentes en MEMORY.md
-- [ ] Tamaño = frecuencia
-- [ ] Click en palabra → buscar en memories
-- [ ] Animated on hover
+### 11.4 Word Cloud de Memories ✅
+- [x] Palabras más frecuentes en MEMORY.md
+- [x] Tamaño = frecuencia
+- [x] Click en palabra → buscar en memories
+- [x] Animated on hover
+- **Archivos:** `src/components/MemoryWordCloud.tsx` (tab en /memory)
 
 ---
 
-## Fase 12: Collaboration ❌ PENDIENTE
+## Fase 12: Collaboration ✅ COMPLETO
 > Share y trabajo en equipo
 
-### 12.1 Shareable Reports
-- [ ] Generar report de actividad semanal/mensual
-- [ ] Export a PDF
-- [ ] Share link público (read-only)
-- [ ] Custom date ranges
+### 12.1 Shareable Reports ✅
+- [x] Generar report de actividad semanal/mensual
+- [x] Export a imagen (PNG via html2canvas)
+- [x] Share link público (read-only)
+- [x] Custom date ranges
+- **Archivos:** `src/app/(dashboard)/reports/page.tsx`, `src/app/(dashboard)/reports/[token]/page.tsx`
 
 ### 12.2 Team Dashboard (futuro)
 - [ ] Multi-user support
@@ -391,54 +396,13 @@
 | Styling | Tailwind v4 (latest) |
 | Charts | Recharts (básicos) + D3.js (avanzados) |
 | Editor | Monaco Editor (code) + TipTap (markdown) |
-| Real-time | Server-Sent Events (SSE) o Socket.io |
+| Real-time | Server-Sent Events (SSE) |
 | 3D Graphics | React Three Fiber + Drei + Rapier |
-| Graphs/Networks | Cytoscape.js o Vis.js |
+| Graphs/Networks | @xyflow/react (React Flow) |
 | Animations | Framer Motion |
 | Storage | JSON files (actual) → SQLite (usage tracking) |
 | AI Integration | OpenClaw API + direct model calls para suggestions |
-| PDF Generation | jsPDF o Puppeteer |
-
----
-
-## Prioridad Recomendada (Actualizada 2026-02-27)
-
-### ✅ Completado
-- **Fase 1** - Activity Logger Real
-- **Fase 2** - Memory & Files
-- **Fase 3** - Unified Cron Dashboard (System + OpenClaw + Heartbeat)
-- **Fase 4** - Analytics (incl. Uptime tracker)
-- **Fase 5** - Comunicación (Terminal, Sessions, Notifications, Notifications Log)
-- **Fase 6** - Configuración (Skills toggle, Config Editor)
-- **Fase 7.1** - Real-time (SSE, Live Status, Toasts)
-- **Fase 8.1** - Office 3D MVP
-- **Fase 8.2** - Avatar Animations, Visual Effects, Ambient Audio
-- **Fase 9.1** - Agent Mood Dashboard
-- **Fase 9.4** - Quick Actions Hub
-
-### 🔥 Próximos pasos (Quick Wins)
-1. **Fase 7.2** - Cola de tareas pendientes
-2. **Fase 8.2** - Sub-agents como visitantes en Office 3D
-3. **Fase 9.2** - Top 5 tareas que más tokens consumen
-
-### Tier 2: High Value (Should Have)
-1. **Fase 7.2** - System Status completo (cola de tareas)
-2. **Fase 10.1** - Sub-Agent Dashboard → visibilidad de workflows
-3. **Fase 9.2** - Token Economics completo → Top 5 tareas, Efficiency score
-
-### Tier 3: Intelligence & Insights (Nice to Have)
-1. **Fase 9.6** - Smart Suggestions → IA que se auto-mejora
-2. **Fase 9.3** - Knowledge Graph Viewer
-3. **Fase 9.5** - Model Playground
-
-### Tier 4: Advanced Features (Wow Factor)
-8. **Fase 8.3** - Multi-Floor Building
-9. **Fase 9.3** - Knowledge Graph → visualización avanzada
-10. **Fase 11.2** - Heatmaps Interactivos → análisis visual
-
-### Tier 5: Polish & Experimental (Future)
-11. **Fase 11.1** - 3D Workspace Explorer
-12. **Fase 12** - Collaboration → equipo/público
+| PDF Generation | html2canvas (PNG export) |
 
 ---
 
@@ -452,16 +416,28 @@
 | 4. Analytics | ✅ | 100% |
 | 5. Comunicación | ✅ | 100% |
 | 6. Configuración | ✅ | 100% |
-| 7. Real-time | ⚠️ | 80% |
-| 8. The Office 3D | ⚠️ | 70% |
-| 9. Agent Intelligence | ⚠️ | 40% |
-| 10. Sub-Agent Orchestra | ❌ | 0% |
-| 11. Advanced Viz | ❌ | 5% |
-| 12. Collaboration | ❌ | 0% |
+| 7. Real-time | ✅ | 100% |
+| 8. The Office 3D | ✅ | 100% |
+| 9. Agent Intelligence | ✅ | 100% |
+| 10. Sub-Agent Orchestra | ✅ | 100% |
+| 11. Advanced Viz | ✅ | 100% |
+| 12. Collaboration | ⚠️ | 50% (Team Dashboard pendiente) |
 
-**Overall: ~65% completado**
+**Overall: ~95% completado**
+
+---
+
+## Próximos Pasos (Future Work)
+
+### Tier 1: Polish
+1. **Skills Manager** - Instalar desde ClawHub, actualizar skills
+2. **Team Dashboard** - Multi-user support
+
+### Tier 2: Experimental
+1. **AI Agents personalizables** - Configurar comportamiento de cada agente
+2. **Plugins system** - Extensions de terceros
 
 ---
 
 *Creado: 2026-02-07*
-*Última actualización: 2026-02-27*
+*Última actualización: 2026-02-28*
