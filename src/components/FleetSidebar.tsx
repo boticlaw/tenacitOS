@@ -100,7 +100,7 @@ export function FleetSidebar({ isOpen, onToggle }: FleetSidebarProps) {
 
   const handleQuickAction = async (agentKey: string, action: "pause" | "resume" | "logs" | "activity") => {
     // Implement quick actions
-    console.log(\`Action \${action} for agent \${agentKey}\`);
+    console.log(`Action ${action} for agent ${agentKey}`);
   };
 
   const statusColors = {
