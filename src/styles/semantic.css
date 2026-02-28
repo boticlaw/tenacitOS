@@ -1,0 +1,359 @@
+/**
+ * Semantic Color System
+ * 
+ * This file defines semantic color tokens that provide meaning-based
+ * naming conventions for colors throughout the application.
+ * 
+ * Each semantic token maps to a specific hue/value that conveys meaning:
+ * - Success: Positive outcomes, confirmations (green)
+ * - Warning: Caution, potential issues (amber/yellow)
+ * - Error: Errors, destructive actions (red)
+ * - Info: Information, neutral highlights (blue)
+ * - Neutral: Default states, backgrounds (gray/slate)
+ */
+
+:root {
+  /* ===========================================
+     SEMANTIC COLORS - LIGHT MODE
+     =========================================== */
+
+  /* Success - Green spectrum */
+  --semantic-success: 142 76% 36%;           /* Base success color */
+  --semantic-success-light: 142 76% 90%;     /* Light background */
+  --semantic-success-dark: 142 76% 24%;      /* Darker variant */
+  --semantic-success-foreground: 0 0% 100%;  /* Text on success */
+  --semantic-success-muted: 142 76% 95%;     /* Subtle background */
+  --semantic-success-border: 142 76% 70%;    /* Border color */
+
+  /* Warning - Amber spectrum */
+  --semantic-warning: 38 92% 50%;            /* Base warning color */
+  --semantic-warning-light: 38 92% 90%;      /* Light background */
+  --semantic-warning-dark: 38 92% 35%;       /* Darker variant */
+  --semantic-warning-foreground: 0 0% 0%;    /* Text on warning */
+  --semantic-warning-muted: 38 92% 95%;      /* Subtle background */
+  --semantic-warning-border: 38 92% 70%;     /* Border color */
+
+  /* Error - Red spectrum */
+  --semantic-error: 0 84% 60%;               /* Base error color */
+  --semantic-error-light: 0 84% 90%;         /* Light background */
+  --semantic-error-dark: 0 84% 40%;          /* Darker variant */
+  --semantic-error-foreground: 0 0% 100%;    /* Text on error */
+  --semantic-error-muted: 0 84% 95%;         /* Subtle background */
+  --semantic-error-border: 0 84% 70%;        /* Border color */
+
+  /* Info - Blue spectrum */
+  --semantic-info: 217 91% 60%;              /* Base info color */
+  --semantic-info-light: 217 91% 90%;        /* Light background */
+  --semantic-info-dark: 217 91% 40%;         /* Darker variant */
+  --semantic-info-foreground: 0 0% 100%;     /* Text on info */
+  --semantic-info-muted: 217 91% 95%;        /* Subtle background */
+  --semantic-info-border: 217 91% 70%;       /* Border color */
+
+  /* Neutral - Slate spectrum */
+  --semantic-neutral: 215 16% 47%;           /* Base neutral color */
+  --semantic-neutral-light: 215 16% 95%;     /* Light background */
+  --semantic-neutral-dark: 215 16% 25%;      /* Darker variant */
+  --semantic-neutral-foreground: 0 0% 0%;    /* Text on neutral */
+  --semantic-neutral-muted: 215 16% 97%;     /* Subtle background */
+  --semantic-neutral-border: 215 16% 85%;    /* Border color */
+
+  /* ===========================================
+     STATUS COLORS
+     =========================================== */
+  
+  /* Agent/Session status */
+  --status-active: 142 76% 36%;              /* Online/Active */
+  --status-idle: 38 92% 50%;                 /* Idle/Waiting */
+  --status-busy: 217 91% 60%;                /* Processing */
+  --status-offline: 215 16% 47%;             /* Offline/Disabled */
+  --status-error: 0 84% 60%;                 /* Error state */
+
+  /* ===========================================
+     INTERACTIVE COLORS
+     =========================================== */
+
+  /* Primary actions */
+  --interactive-primary: 262 83% 58%;        /* Primary button/link */
+  --interactive-primary-hover: 262 83% 52%;  /* Hover state */
+  --interactive-primary-active: 262 83% 46%; /* Active/pressed */
+  --interactive-primary-foreground: 0 0% 100%;
+
+  /* Secondary actions */
+  --interactive-secondary: 215 16% 47%;      /* Secondary button */
+  --interactive-secondary-hover: 215 16% 40%;
+  --interactive-secondary-foreground: 0 0% 100%;
+
+  /* Focus ring */
+  --focus-ring: 262 83% 58%;                 /* Focus indicator */
+  --focus-ring-offset: 0 0% 100%;
+
+  /* ===========================================
+     SURFACE COLORS
+     =========================================== */
+
+  --surface-base: 0 0% 100%;                 /* Base background */
+  --surface-elevated: 0 0% 98%;              /* Cards, panels */
+  --surface-overlay: 0 0% 100%;              /* Modals, dropdowns */
+  --surface-sunken: 0 0% 96%;                /* Inputs, wells */
+
+  /* ===========================================
+     TEXT COLORS
+     =========================================== */
+
+  --text-primary: 215 25% 15%;               /* Main text */
+  --text-secondary: 215 16% 47%;             /* Secondary text */
+  --text-muted: 215 16% 65%;                 /* Disabled, hints */
+  --text-inverse: 0 0% 100%;                 /* On dark backgrounds */
+
+  /* ===========================================
+     BORDER COLORS
+     =========================================== */
+
+  --border-default: 215 16% 85%;             /* Default borders */
+  --border-subtle: 215 16% 92%;              /* Subtle dividers */
+  --border-strong: 215 16% 70%;              /* Emphasized borders */
+
+  /* ===========================================
+     SPECIAL COLORS
+     =========================================== */
+
+  /* Accent color for highlights */
+  --accent: 262 83% 58%;
+  --accent-soft: 262 83% 95%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Gradient definitions */
+  --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 83% 58%));
+  --gradient-success: linear-gradient(135deg, hsl(142 76% 36%), hsl(160 76% 36%));
+  --gradient-error: linear-gradient(135deg, hsl(0 84% 60%), hsl(20 84% 60%));
+}
+
+/* ===========================================
+   DARK MODE
+   =========================================== */
+
+.dark,
+[data-theme="dark"] {
+  /* Success - Adjusted for dark mode */
+  --semantic-success: 142 76% 45%;
+  --semantic-success-light: 142 76% 20%;
+  --semantic-success-dark: 142 76% 55%;
+  --semantic-success-foreground: 0 0% 100%;
+  --semantic-success-muted: 142 76% 15%;
+  --semantic-success-border: 142 76% 40%;
+
+  /* Warning - Adjusted for dark mode */
+  --semantic-warning: 38 92% 55%;
+  --semantic-warning-light: 38 92% 20%;
+  --semantic-warning-dark: 38 92% 65%;
+  --semantic-warning-foreground: 0 0% 0%;
+  --semantic-warning-muted: 38 92% 15%;
+  --semantic-warning-border: 38 92% 45%;
+
+  /* Error - Adjusted for dark mode */
+  --semantic-error: 0 72% 55%;
+  --semantic-error-light: 0 72% 20%;
+  --semantic-error-dark: 0 72% 65%;
+  --semantic-error-foreground: 0 0% 100%;
+  --semantic-error-muted: 0 72% 15%;
+  --semantic-error-border: 0 72% 45%;
+
+  /* Info - Adjusted for dark mode */
+  --semantic-info: 217 91% 65%;
+  --semantic-info-light: 217 91% 20%;
+  --semantic-info-dark: 217 91% 75%;
+  --semantic-info-foreground: 0 0% 100%;
+  --semantic-info-muted: 217 91% 15%;
+  --semantic-info-border: 217 91% 45%;
+
+  /* Neutral - Adjusted for dark mode */
+  --semantic-neutral: 215 16% 55%;
+  --semantic-neutral-light: 215 16% 20%;
+  --semantic-neutral-dark: 215 16% 65%;
+  --semantic-neutral-foreground: 0 0% 100%;
+  --semantic-neutral-muted: 215 16% 15%;
+  --semantic-neutral-border: 215 16% 30%;
+
+  /* Status colors - Dark mode */
+  --status-active: 142 76% 50%;
+  --status-idle: 38 92% 55%;
+  --status-busy: 217 91% 65%;
+  --status-offline: 215 16% 40%;
+  --status-error: 0 72% 55%;
+
+  /* Interactive - Dark mode */
+  --interactive-primary: 262 83% 65%;
+  --interactive-primary-hover: 262 83% 72%;
+  --interactive-primary-active: 262 83% 58%;
+
+  /* Surface - Dark mode */
+  --surface-base: 222 47% 11%;
+  --surface-elevated: 222 47% 14%;
+  --surface-overlay: 222 47% 16%;
+  --surface-sunken: 222 47% 8%;
+
+  /* Text - Dark mode */
+  --text-primary: 210 40% 98%;
+  --text-secondary: 215 20% 70%;
+  --text-muted: 215 16% 50%;
+  --text-inverse: 215 25% 15%;
+
+  /* Border - Dark mode */
+  --border-default: 215 16% 25%;
+  --border-subtle: 215 16% 18%;
+  --border-strong: 215 16% 35%;
+
+  /* Accent - Dark mode */
+  --accent: 262 83% 65%;
+  --accent-soft: 262 83% 18%;
+}
+
+/* ===========================================
+   UTILITY CLASSES
+   =========================================== */
+
+/* Background colors */
+.bg-success { background-color: hsl(var(--semantic-success)); }
+.bg-success-light { background-color: hsl(var(--semantic-success-light)); }
+.bg-success-muted { background-color: hsl(var(--semantic-success-muted)); }
+
+.bg-warning { background-color: hsl(var(--semantic-warning)); }
+.bg-warning-light { background-color: hsl(var(--semantic-warning-light)); }
+.bg-warning-muted { background-color: hsl(var(--semantic-warning-muted)); }
+
+.bg-error { background-color: hsl(var(--semantic-error)); }
+.bg-error-light { background-color: hsl(var(--semantic-error-light)); }
+.bg-error-muted { background-color: hsl(var(--semantic-error-muted)); }
+
+.bg-info { background-color: hsl(var(--semantic-info)); }
+.bg-info-light { background-color: hsl(var(--semantic-info-light)); }
+.bg-info-muted { background-color: hsl(var(--semantic-info-muted)); }
+
+.bg-neutral { background-color: hsl(var(--semantic-neutral)); }
+.bg-neutral-light { background-color: hsl(var(--semantic-neutral-light)); }
+.bg-neutral-muted { background-color: hsl(var(--semantic-neutral-muted)); }
+
+/* Text colors */
+.text-success { color: hsl(var(--semantic-success)); }
+.text-warning { color: hsl(var(--semantic-warning)); }
+.text-error { color: hsl(var(--semantic-error)); }
+.text-info { color: hsl(var(--semantic-info)); }
+.text-neutral { color: hsl(var(--semantic-neutral)); }
+
+/* Border colors */
+.border-success { border-color: hsl(var(--semantic-success-border)); }
+.border-warning { border-color: hsl(var(--semantic-warning-border)); }
+.border-error { border-color: hsl(var(--semantic-error-border)); }
+.border-info { border-color: hsl(var(--semantic-info-border)); }
+.border-neutral { border-color: hsl(var(--semantic-neutral-border)); }
+
+/* Status indicators */
+.status-active { color: hsl(var(--status-active)); }
+.status-idle { color: hsl(var(--status-idle)); }
+.status-busy { color: hsl(var(--status-busy)); }
+.status-offline { color: hsl(var(--status-offline)); }
+.status-error { color: hsl(var(--status-error)); }
+
+/* Status background */
+.bg-status-active { background-color: hsl(var(--status-active)); }
+.bg-status-idle { background-color: hsl(var(--status-idle)); }
+.bg-status-busy { background-color: hsl(var(--status-busy)); }
+.bg-status-offline { background-color: hsl(var(--status-offline)); }
+.bg-status-error { background-color: hsl(var(--status-error)); }
+
+/* Focus ring */
+.focus-ring:focus-visible {
+  outline: 2px solid hsl(var(--focus-ring));
+  outline-offset: 2px;
+}
+
+/* ===========================================
+   COMPONENT PATTERNS
+   =========================================== */
+
+/* Badge styles */
+.badge-success {
+  background-color: hsl(var(--semantic-success-muted));
+  color: hsl(var(--semantic-success-dark));
+  border: 1px solid hsl(var(--semantic-success-border));
+}
+
+.badge-warning {
+  background-color: hsl(var(--semantic-warning-muted));
+  color: hsl(var(--semantic-warning-dark));
+  border: 1px solid hsl(var(--semantic-warning-border));
+}
+
+.badge-error {
+  background-color: hsl(var(--semantic-error-muted));
+  color: hsl(var(--semantic-error-dark));
+  border: 1px solid hsl(var(--semantic-error-border));
+}
+
+.badge-info {
+  background-color: hsl(var(--semantic-info-muted));
+  color: hsl(var(--semantic-info-dark));
+  border: 1px solid hsl(var(--semantic-info-border));
+}
+
+/* Button styles */
+.btn-success {
+  background-color: hsl(var(--semantic-success));
+  color: hsl(var(--semantic-success-foreground));
+}
+
+.btn-success:hover {
+  background-color: hsl(var(--semantic-success-dark));
+}
+
+.btn-warning {
+  background-color: hsl(var(--semantic-warning));
+  color: hsl(var(--semantic-warning-foreground));
+}
+
+.btn-warning:hover {
+  background-color: hsl(var(--semantic-warning-dark));
+}
+
+.btn-error {
+  background-color: hsl(var(--semantic-error));
+  color: hsl(var(--semantic-error-foreground));
+}
+
+.btn-error:hover {
+  background-color: hsl(var(--semantic-error-dark));
+}
+
+.btn-info {
+  background-color: hsl(var(--semantic-info));
+  color: hsl(var(--semantic-info-foreground));
+}
+
+.btn-info:hover {
+  background-color: hsl(var(--semantic-info-dark));
+}
+
+/* Alert styles */
+.alert-success {
+  background-color: hsl(var(--semantic-success-muted));
+  border-left: 4px solid hsl(var(--semantic-success));
+  color: hsl(var(--semantic-success-dark));
+}
+
+.alert-warning {
+  background-color: hsl(var(--semantic-warning-muted));
+  border-left: 4px solid hsl(var(--semantic-warning));
+  color: hsl(var(--semantic-warning-dark));
+}
+
+.alert-error {
+  background-color: hsl(var(--semantic-error-muted));
+  border-left: 4px solid hsl(var(--semantic-error));
+  color: hsl(var(--semantic-error-dark));
+}
+
+.alert-info {
+  background-color: hsl(var(--semantic-info-muted));
+  border-left: 4px solid hsl(var(--semantic-info));
+  color: hsl(var(--semantic-info-dark));
+}

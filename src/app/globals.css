@@ -1,10 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@import "../styles/semantic.css";
 
 /* ============================================
    TenacitOS Design System
    Based on tenacios-design.json (Pencil)
-   Updated: 2026-02-17
+   Updated: 2026-02-28 - Added Semantic Color System
    ============================================ */
 
 :root {
