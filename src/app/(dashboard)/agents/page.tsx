@@ -15,9 +15,11 @@ import {
   RefreshCw,
   Loader2,
   AlertCircle,
+  Eye,
 } from "lucide-react";
 import { AgentOrganigrama } from "@/components/AgentOrganigrama";
 import { CommunicationGraphComponent } from "@/components/CommunicationGraph";
+import { AgentInspectPanel } from "@/components/AgentInspectPanel";
 import type { CommunicationGraph, MessageType } from "@/lib/communication-aggregator";
 
 interface Agent {
@@ -45,6 +47,7 @@ export default function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"cards" | "organigrama" | "communication">("cards");
+  const [inspectAgent, setInspectAgent] = useState<string | null>(null);
 
   const [commData, setCommData] = useState<CommunicationGraph | null>(null);
   const [commLoading, setCommLoading] = useState(false);
@@ -115,6 +118,27 @@ export default function AgentsPage() {
 
   const handleCommFilterChange = useCallback((newFilters: { messageTypes: MessageType[] }) => {
     setCommFilters(newFilters);
+  }, []);
+
+  const handleAgentAction = useCallback(async (action: string, agentId: string) => {
+    try {
+      const res = await fetch(`/api/agents/${agentId}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Action failed");
+      }
+
+      // Refresh agents list
+      fetchAgents();
+    } catch (error) {
+      console.error("Failed to execute action:", error);
+      alert(error instanceof Error ? error.message : "Action failed");
+    }
   }, []);
 
   if (loading) {
@@ -453,22 +477,46 @@ export default function AgentsPage() {
                       Last activity: {formatLastActivity(agent.lastActivity)}
                     </span>
                   </div>
-                  {agent.activeSessions > 0 && (
-                    <span
-                      className="text-xs font-medium px-2 py-1 rounded"
+                  <div className="flex items-center gap-2">
+                    {agent.activeSessions > 0 && (
+                      <span
+                        className="text-xs font-medium px-2 py-1 rounded"
+                        style={{
+                          backgroundColor: "var(--success)20",
+                          color: "var(--success)",
+                        }}
+                      >
+                        {agent.activeSessions} active
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setInspectAgent(agent.id)}
+                      className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all hover:scale-105"
                       style={{
-                        backgroundColor: "var(--success)20",
-                        color: "var(--success)",
+                        backgroundColor: "var(--accent-soft)",
+                        color: "var(--accent)",
+                        border: "1px solid var(--accent)",
                       }}
+                      title="Inspect agent"
                     >
-                      {agent.activeSessions} active
-                    </span>
-                  )}
+                      <Eye className="w-3 h-3" />
+                      Inspect
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {/* Agent Inspect Panel */}
+      {inspectAgent && (
+        <AgentInspectPanel
+          agentId={inspectAgent}
+          onClose={() => setInspectAgent(null)}
+          onAction={handleAgentAction}
+        />
       )}
     </div>
   );
