@@ -8,7 +8,6 @@ import {
   Activity,
   Timer,
   Brain,
-  Search,
   BarChart3,
   FileBarChart,
   Puzzle,
@@ -21,38 +20,61 @@ import {
   X,
   Users,
   Gamepad2,
-  GitBranch,
   Workflow,
   Zap,
   Server,
   GitFork,
   SquareTerminal,
-  History,
   Bot,
+  Beaker,
+  GitBranch,
 } from "lucide-react";
 import { getAgentDisplayName } from "@/config/branding";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/agents", label: "Agents", icon: Users },
-  { href: "/office", label: "🎮 Office", icon: Gamepad2, highlight: true },
-  { href: "/actions", label: "Quick Actions", icon: Zap },
-  { href: "/system", label: "System", icon: Server },
-  { href: "/logs", label: "Live Logs", icon: Terminal },
-  { href: "/terminal", label: "Terminal", icon: SquareTerminal },
-  { href: "/git", label: "Git", icon: GitFork },
-  { href: "/workflows", label: "Workflows", icon: Workflow },
-  { href: "/activity", label: "Activity", icon: Activity },
-  { href: "/memory", label: "Memory", icon: Brain },
-  { href: "/files", label: "Files", icon: FolderOpen },
-  { href: "/cron", label: "Cron Jobs", icon: Timer },
-  { href: "/sessions", label: "Sessions", icon: History },
-  { href: "/subagents", label: "Sub-Agents", icon: Bot },
-  { href: "/search", label: "Search", icon: Search },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/reports", label: "Reports", icon: FileBarChart },
-  { href: "/skills", label: "Skills", icon: Puzzle },
-  { href: "/about", label: getAgentDisplayName(), icon: User },
+const navGroups = [
+  {
+    title: "Main",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/agents", label: "Agents", icon: Users },
+      { href: "/subagents", label: "Sub-Agents", icon: Bot },
+      { href: "/office", label: "🎮 Office", icon: Gamepad2, highlight: true },
+    ],
+  },
+  {
+    title: "Data",
+    items: [
+      { href: "/memory", label: "Memory", icon: Brain },
+      { href: "/files", label: "Files", icon: FolderOpen },
+      { href: "/sessions", label: "Sessions", icon: Timer },
+      { href: "/activity", label: "Activity", icon: Activity },
+    ],
+  },
+  {
+    title: "Analytics",
+    items: [
+      { href: "/analytics", label: "Analytics", icon: BarChart3 },
+      { href: "/reports", label: "Reports", icon: FileBarChart },
+    ],
+  },
+  {
+    title: "Tools",
+    items: [
+      { href: "/workflows", label: "Workflows", icon: Workflow },
+      { href: "/playground", label: "Playground", icon: Beaker },
+      { href: "/terminal", label: "Terminal", icon: SquareTerminal },
+      { href: "/git", label: "Git", icon: GitFork },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      { href: "/system", label: "System", icon: Server },
+      { href: "/skills", label: "Skills", icon: Puzzle },
+      { href: "/cron", label: "Cron Jobs", icon: Zap },
+      { href: "/logs", label: "Logs", icon: Terminal },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -69,13 +91,12 @@ export function Sidebar() {
         setIsOpen(false);
       }
     };
-    
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Prevent scroll when sidebar is open on mobile
   useEffect(() => {
     if (isOpen && isMobile) {
       document.body.style.overflow = "hidden";
@@ -98,7 +119,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile hamburger button */}
       <button
         onClick={toggleSidebar}
         className="mobile-menu-button"
@@ -123,7 +143,6 @@ export function Sidebar() {
         <Menu className="w-6 h-6" />
       </button>
 
-      {/* Overlay for mobile */}
       {isMobile && (
         <div
           onClick={closeSidebar}
@@ -139,7 +158,6 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className="sidebar"
         style={{
@@ -147,7 +165,7 @@ export function Sidebar() {
           left: 0,
           top: 0,
           width: "16rem",
-          minHeight: "100vh",
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
           padding: "1rem",
@@ -156,9 +174,9 @@ export function Sidebar() {
           zIndex: 50,
           transform: isMobile ? (isOpen ? "translateX(0)" : "translateX(-100%)") : "translateX(0)",
           transition: "transform 0.3s ease",
+          overflowY: "auto",
         }}
       >
-        {/* Close button for mobile */}
         {isMobile && (
           <button
             onClick={closeSidebar}
@@ -176,25 +194,14 @@ export function Sidebar() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transition: "color 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--text-primary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--text-muted)";
             }}
           >
             <X className="w-5 h-5" />
           </button>
         )}
 
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-2 py-3 mb-4">
-          <Terminal
-            className="w-6 h-6"
-            style={{ color: "var(--accent)" }}
-          />
+        <div className="flex items-center gap-2.5 px-2 py-3 mb-2">
+          <Terminal className="w-6 h-6" style={{ color: "var(--accent)" }} />
           <h1
             className="text-base font-bold tracking-tight"
             style={{
@@ -207,100 +214,134 @@ export function Sidebar() {
           </h1>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 pt-4">
-          <ul className="space-y-0.5">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
+        <nav className="flex-1 py-2">
+          {navGroups.map((group) => (
+            <div key={group.title} style={{ marginBottom: "12px" }}>
+              <div
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color: "var(--text-muted)",
+                  padding: "8px 16px 4px",
+                }}
+              >
+                {group.title}
+              </div>
+              <ul>
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
 
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`nav-item w-full ${isActive ? "active" : ""}`}
-                    style={
-                      !isActive
-                        ? {
-                            color: "var(--text-secondary)",
-                            ...(item.highlight
-                              ? {
-                                  background:
-                                    "linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1))",
-                                  borderLeft: "3px solid var(--accent)",
-                                }
-                              : {}),
-                          }
-                        : {
-                            backgroundColor: "var(--accent)",
-                            color: "var(--text-primary)",
-                            fontFamily: "var(--font-heading)",
-                            fontWeight: 600,
-                          }
-                    }
-                  >
-                    <Icon
-                      className="w-5 h-5"
-                      style={!isActive ? { color: "var(--text-muted)" } : undefined}
-                    />
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={closeSidebar}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          padding: "8px 16px",
+                          borderRadius: "8px",
+                          fontSize: "13px",
+                          transition: "all 0.15s ease",
+                          color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
+                          backgroundColor: isActive
+                            ? "var(--accent)"
+                            : item.highlight
+                            ? "linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1))"
+                            : "transparent",
+                          fontWeight: isActive ? 600 : 400,
+                          borderLeft: item.highlight && !isActive ? "3px solid var(--accent)" : "none",
+                        }}
+                      >
+                        <Icon
+                          className="w-4 h-4"
+                          style={{
+                            color: isActive
+                              ? "var(--text-primary)"
+                              : item.highlight
+                              ? "var(--accent)"
+                              : "var(--text-muted)",
+                          }}
+                        />
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
 
-        {/* Footer */}
-        <div
-          className="pt-4 mt-4"
-          style={{ borderTop: "1px solid var(--border)" }}
-        >
+        <div className="pt-4 mt-2" style={{ borderTop: "1px solid var(--border)" }}>
           <Link
             href="/settings"
-            className={`nav-item w-full mb-2 ${pathname === "/settings" ? "active" : ""}`}
-            style={
-              pathname !== "/settings"
-                ? {
-                    color: "var(--text-secondary)",
-                  }
-                : {
-                    backgroundColor: "var(--accent)",
-                    color: "var(--text-primary)",
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: 600,
-                  }
-            }
+            onClick={closeSidebar}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              color: pathname === "/settings" ? "var(--text-primary)" : "var(--text-secondary)",
+              backgroundColor: pathname === "/settings" ? "var(--accent)" : "transparent",
+              fontWeight: pathname === "/settings" ? 600 : 400,
+              marginBottom: "8px",
+            }}
           >
             <Settings
-              className="w-5 h-5"
-              style={pathname !== "/settings" ? { color: "var(--text-muted)" } : undefined}
+              className="w-4 h-4"
+              style={{ color: pathname === "/settings" ? "var(--text-primary)" : "var(--text-muted)" }}
             />
             Settings
           </Link>
 
-          <div
-            className="px-4 py-2 text-xs"
-            style={{ color: "var(--text-muted)" }}
+          <Link
+            href="/about"
+            onClick={closeSidebar}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              color: pathname === "/about" ? "var(--text-primary)" : "var(--text-secondary)",
+              backgroundColor: pathname === "/about" ? "var(--accent)" : "transparent",
+              fontWeight: pathname === "/about" ? 600 : 400,
+              marginBottom: "8px",
+            }}
           >
-            OpenClaw Agent
-          </div>
+            <User
+              className="w-4 h-4"
+              style={{ color: pathname === "/about" ? "var(--text-primary)" : "var(--text-muted)" }}
+            />
+            {getAgentDisplayName()}
+          </Link>
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-2 w-full rounded-lg transition-colors"
-            style={{ color: "var(--text-muted)" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--error)";
-              e.currentTarget.style.backgroundColor = "var(--card-elevated)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--text-muted)";
-              e.currentTarget.style.backgroundColor = "transparent";
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "13px",
+              color: "var(--text-muted)",
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: "pointer",
+              width: "100%",
             }}
           >
             <LogOut className="w-4 h-4" />
-            <span className="text-sm">Cerrar sesión</span>
+            Cerrar sesión
           </button>
         </div>
       </aside>

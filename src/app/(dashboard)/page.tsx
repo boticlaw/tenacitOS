@@ -292,7 +292,7 @@ export default function DashboardPage() {
           <div className="p-4 grid grid-cols-2 gap-2">
             {[
               { href: "/cron", icon: Calendar, label: "Cron Jobs", color: "#a78bfa" },
-              { href: "/actions", icon: Zap, label: "Quick Actions", color: "var(--accent)" },
+              { href: "/workflows", icon: Zap, label: "Workflows", color: "var(--accent)" },
               { href: "/system", icon: Server, label: "System", color: "var(--success)" },
               { href: "/logs", icon: Terminal, label: "Live Logs", color: "#60a5fa" },
               { href: "/memory", icon: Brain, label: "Memory", color: "#f59e0b" },

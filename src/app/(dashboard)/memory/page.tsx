@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Eye, Edit3, RefreshCw, Brain } from "lucide-react";
+import { Eye, Edit3, RefreshCw, Brain, Network, Cloud } from "lucide-react";
 import { FileTree, FileNode } from "@/components/FileTree";
 import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { MarkdownPreview } from "@/components/MarkdownPreview";
+import { KnowledgeGraphComponent } from "@/components/KnowledgeGraph";
+import { MemoryWordCloud } from "@/components/MemoryWordCloud";
+import type { KnowledgeGraph } from "@/lib/memory-parser";
+import type { WordFrequency } from "@/app/api/memories/word-cloud/route";
 
+type MainTab = "editor" | "graph" | "wordcloud";
 type ViewMode = "edit" | "preview";
 
 interface Workspace {
@@ -17,6 +22,7 @@ interface Workspace {
 }
 
 export default function MemoryPage() {
+  const [mainTab, setMainTab] = useState<MainTab>("editor");
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState<string | null>(null);
   const [files, setFiles] = useState<FileNode[]>([]);
@@ -27,9 +33,13 @@ export default function MemoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [graphData, setGraphData] = useState<KnowledgeGraph | null>(null);
+  const [graphLoading, setGraphLoading] = useState(false);
+  const [wordCloudData, setWordCloudData] = useState<WordFrequency[]>([]);
+  const [wordCloudLoading, setWordCloudLoading] = useState(false);
+
   const hasUnsavedChanges = content !== originalContent;
 
-  // Load workspaces
   useEffect(() => {
     fetch("/api/files/workspaces")
       .then((res) => res.json())
@@ -41,6 +51,28 @@ export default function MemoryPage() {
       })
       .catch(() => setWorkspaces([]));
   }, []);
+
+  useEffect(() => {
+    if (mainTab === "graph" && !graphData) {
+      setGraphLoading(true);
+      fetch("/api/knowledge-graph")
+        .then((res) => res.json())
+        .then((data) => setGraphData(data))
+        .catch(console.error)
+        .finally(() => setGraphLoading(false));
+    }
+  }, [mainTab, graphData]);
+
+  useEffect(() => {
+    if (mainTab === "wordcloud" && wordCloudData.length === 0) {
+      setWordCloudLoading(true);
+      fetch("/api/memories/word-cloud?source=all")
+        .then((res) => res.json())
+        .then((data) => setWordCloudData(data.words || []))
+        .catch(console.error)
+        .finally(() => setWordCloudLoading(false));
+    }
+  }, [mainTab, wordCloudData.length]);
 
   const loadFileTree = useCallback(async (workspace: string) => {
     try {
@@ -121,328 +153,334 @@ export default function MemoryPage() {
 
   const selectedWorkspaceData = workspaces.find((w) => w.id === selectedWorkspace);
 
+  const handleWordClick = useCallback((word: string) => {
+    window.open(`/memory?q=${encodeURIComponent(word)}`, "_blank");
+  }, []);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Page header */}
       <div style={{ padding: "24px 24px 16px 24px", flexShrink: 0 }}>
-        <h1
-          style={{
-            fontFamily: "var(--font-heading)",
-            fontSize: "24px",
-            fontWeight: 700,
-            letterSpacing: "-1px",
-            color: "var(--text-primary)",
-            marginBottom: "4px",
-          }}
-        >
-          Memory Browser
-        </h1>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--text-secondary)" }}>
-          Ver y editar archivos de memoria de los agentes
-        </p>
-      </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <h1
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: "24px",
+                fontWeight: 700,
+                letterSpacing: "-1px",
+                color: "var(--text-primary)",
+                marginBottom: "4px",
+              }}
+            >
+              Memory
+            </h1>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--text-secondary)" }}>
+              Knowledge base del agente
+            </p>
+          </div>
 
-      {/* Two-column layout */}
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          overflow: "hidden",
-          borderTop: "1px solid var(--border)",
-        }}
-      >
-        {/* ── LEFT SIDEBAR: Workspace list ────────────────────────────────── */}
-        <aside
-          style={{
-            width: "220px",
-            flexShrink: 0,
-            borderRight: "1px solid var(--border)",
-            overflowY: "auto",
-            padding: "16px 0",
-            backgroundColor: "var(--surface, var(--card))",
-          }}
-        >
-          <p
+          <div
             style={{
-              fontSize: "10px",
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              color: "var(--text-muted)",
-              padding: "0 16px 8px",
-              textTransform: "uppercase",
+              display: "flex",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: "8px",
+              padding: "4px",
             }}
           >
-            Workspaces
-          </p>
+            <button
+              onClick={() => setMainTab("editor")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 14px",
+                borderRadius: "6px",
+                backgroundColor: mainTab === "editor" ? "var(--accent)" : "transparent",
+                color: mainTab === "editor" ? "var(--bg)" : "var(--text-secondary)",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: 500,
+              }}
+            >
+              <Edit3 size={14} />
+              Editor
+            </button>
+            <button
+              onClick={() => setMainTab("graph")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 14px",
+                borderRadius: "6px",
+                backgroundColor: mainTab === "graph" ? "var(--accent)" : "transparent",
+                color: mainTab === "graph" ? "var(--bg)" : "var(--text-secondary)",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: 500,
+              }}
+            >
+              <Network size={14} />
+              Graph
+            </button>
+            <button
+              onClick={() => setMainTab("wordcloud")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 14px",
+                borderRadius: "6px",
+                backgroundColor: mainTab === "wordcloud" ? "var(--accent)" : "transparent",
+                color: mainTab === "wordcloud" ? "var(--bg)" : "var(--text-secondary)",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: 500,
+              }}
+            >
+              <Cloud size={14} />
+              Word Cloud
+            </button>
+          </div>
+        </div>
+      </div>
 
-          {workspaces.map((workspace) => {
-            const isSelected = selectedWorkspace === workspace.id;
-            return (
-              <button
-                key={workspace.id}
-                onClick={() => handleWorkspaceSelect(workspace.id)}
+      <div style={{ flex: 1, minHeight: 0, borderTop: "1px solid var(--border)" }}>
+        {mainTab === "editor" ? (
+          <div style={{ display: "flex", height: "100%" }}>
+            <aside
+              style={{
+                width: "220px",
+                flexShrink: 0,
+                borderRight: "1px solid var(--border)",
+                overflowY: "auto",
+                padding: "16px 0",
+                backgroundColor: "var(--surface, var(--card))",
+              }}
+            >
+              <p
                 style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "9px 16px",
-                  background: isSelected ? "var(--accent-soft)" : "transparent",
-                  border: "none",
-                  borderLeft: isSelected ? "3px solid var(--accent)" : "3px solid transparent",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 120ms ease",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "var(--surface-hover, rgba(255,255,255,0.05))";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = "transparent";
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  color: "var(--text-muted)",
+                  padding: "0 16px 8px",
+                  textTransform: "uppercase",
                 }}
               >
-                <span style={{ fontSize: "18px", lineHeight: 1, flexShrink: 0 }}>{workspace.emoji}</span>
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-heading)",
-                      fontSize: "13px",
-                      fontWeight: isSelected ? 600 : 400,
-                      color: isSelected ? "var(--accent)" : "var(--text-primary)",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {workspace.name}
-                  </div>
-                  {workspace.agentName && (
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--text-muted)",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {workspace.agentName}
-                    </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </aside>
+                Workspaces
+              </p>
 
-        {/* ── RIGHT PANEL ──────────────────────────────────────────────────── */}
-        <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {selectedWorkspace && selectedWorkspaceData ? (
-            <>
-              {/* Toolbar bar */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "8px 16px",
-                  borderBottom: "1px solid var(--border)",
-                  backgroundColor: "var(--surface, var(--card))",
-                  flexShrink: 0,
-                  gap: "12px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Brain style={{ width: "16px", height: "16px", color: "var(--accent)" }} />
-                  <span
+              {workspaces.map((workspace) => {
+                const isSelected = selectedWorkspace === workspace.id;
+                return (
+                  <button
+                    key={workspace.id}
+                    onClick={() => handleWorkspaceSelect(workspace.id)}
                     style={{
-                      fontFamily: "var(--font-heading)",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "9px 16px",
+                      background: isSelected ? "var(--accent-soft)" : "transparent",
+                      border: "none",
+                      borderLeft: isSelected ? "3px solid var(--accent)" : "3px solid transparent",
+                      cursor: "pointer",
+                      textAlign: "left",
                     }}
                   >
-                    {selectedWorkspaceData.name}
-                  </span>
-                  {selectedPath && (
-                    <>
-                      <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>/</span>
-                      <span
+                    <span style={{ fontSize: "18px", lineHeight: 1 }}>{workspace.emoji}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div
                         style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "12px",
-                          color: "var(--text-muted)",
+                          fontSize: "13px",
+                          fontWeight: isSelected ? 600 : 400,
+                          color: isSelected ? "var(--accent)" : "var(--text-primary)",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          maxWidth: "300px",
                         }}
                       >
-                        {selectedPath}
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-                  {/* Refresh */}
-                  <button
-                    onClick={() => selectedWorkspace && loadFileTree(selectedWorkspace)}
-                    title="Refresh"
-                    style={{
-                      padding: "5px 7px",
-                      borderRadius: "6px",
-                      backgroundColor: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "var(--text-muted)",
-                      display: "flex",
-                      alignItems: "center",
-                      transition: "all 120ms ease",
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text-primary)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; }}
-                  >
-                    <RefreshCw size={14} />
+                        {workspace.name}
+                      </div>
+                      {workspace.agentName && (
+                        <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                          {workspace.agentName}
+                        </div>
+                      )}
+                    </div>
                   </button>
+                );
+              })}
+            </aside>
 
-                  {/* View toggle */}
+            <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              {selectedWorkspace && selectedWorkspaceData ? (
+                <>
                   <div
                     style={{
                       display: "flex",
-                      backgroundColor: "var(--bg)",
-                      borderRadius: "6px",
-                      padding: "3px",
-                      gap: "2px",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 16px",
+                      borderBottom: "1px solid var(--border)",
+                      flexShrink: 0,
                     }}
                   >
-                    <button
-                      onClick={() => setViewMode("preview")}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        padding: "5px 10px",
-                        borderRadius: "4px",
-                        backgroundColor: viewMode === "preview" ? "var(--accent)" : "transparent",
-                        color: viewMode === "preview" ? "var(--bg, #111)" : "var(--text-muted)",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        transition: "all 120ms ease",
-                      }}
-                    >
-                      <Eye size={13} />
-                      Preview
-                    </button>
-                    <button
-                      onClick={() => setViewMode("edit")}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "5px",
-                        padding: "5px 10px",
-                        borderRadius: "4px",
-                        backgroundColor: viewMode === "edit" ? "var(--accent)" : "transparent",
-                        color: viewMode === "edit" ? "var(--bg, #111)" : "var(--text-muted)",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        transition: "all 120ms ease",
-                      }}
-                    >
-                      <Edit3 size={13} />
-                      Edit
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* File tree + editor */}
-              <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-                {/* File tree */}
-                <div
-                  style={{
-                    width: "230px",
-                    flexShrink: 0,
-                    borderRight: "1px solid var(--border)",
-                    overflowY: "auto",
-                  }}
-                >
-                  {isLoading ? (
-                    <div style={{ padding: "24px", textAlign: "center", color: "var(--text-secondary)" }}>
-                      Loading...
-                    </div>
-                  ) : error && files.length === 0 ? (
-                    <div style={{ padding: "24px", textAlign: "center", color: "var(--negative)" }}>
-                      {error}
-                    </div>
-                  ) : (
-                    <FileTree files={files} selectedPath={selectedPath} onSelect={handleSelectFile} />
-                  )}
-                </div>
-
-                {/* Editor / Preview */}
-                <div
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    minWidth: 0,
-                    backgroundColor: "var(--bg)",
-                    overflow: "hidden",
-                  }}
-                >
-                  {selectedPath ? (
-                    <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
-                      {viewMode === "edit" ? (
-                        <MarkdownEditor
-                          content={content}
-                          onChange={setContent}
-                          onSave={saveFile}
-                          hasUnsavedChanges={hasUnsavedChanges}
-                        />
-                      ) : (
-                        <MarkdownPreview content={content} />
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <Brain style={{ width: "16px", color: "var(--accent)" }} />
+                      <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                        {selectedWorkspaceData.name}
+                      </span>
+                      {selectedPath && (
+                        <>
+                          <span style={{ color: "var(--text-muted)" }}>/</span>
+                          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{selectedPath}</span>
+                        </>
                       )}
                     </div>
-                  ) : (
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "var(--text-muted)",
-                      }}
-                    >
-                      <div style={{ textAlign: "center" }}>
-                        <Brain style={{ width: "64px", height: "64px", margin: "0 auto 16px", opacity: 0.3 }} />
-                        <p style={{ fontSize: "14px" }}>Selecciona un archivo para ver o editar</p>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <button
+                        onClick={() => selectedWorkspace && loadFileTree(selectedWorkspace)}
+                        title="Refresh"
+                        style={{
+                          padding: "5px 7px",
+                          borderRadius: "6px",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        <RefreshCw size={14} />
+                      </button>
+
+                      <div style={{ display: "flex", background: "var(--bg)", borderRadius: "6px", padding: "3px" }}>
+                        <button
+                          onClick={() => setViewMode("preview")}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "5px 10px",
+                            borderRadius: "4px",
+                            backgroundColor: viewMode === "preview" ? "var(--accent)" : "transparent",
+                            color: viewMode === "preview" ? "var(--bg)" : "var(--text-muted)",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                          }}
+                        >
+                          <Eye size={13} />
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => setViewMode("edit")}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "5px 10px",
+                            borderRadius: "4px",
+                            backgroundColor: viewMode === "edit" ? "var(--accent)" : "transparent",
+                            color: viewMode === "edit" ? "var(--bg)" : "var(--text-muted)",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                          }}
+                        >
+                          <Edit3 size={13} />
+                          Edit
+                        </button>
                       </div>
                     </div>
-                  )}
+                  </div>
+
+                  <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+                    <div style={{ width: "230px", flexShrink: 0, borderRight: "1px solid var(--border)", overflowY: "auto" }}>
+                      {isLoading ? (
+                        <div style={{ padding: "24px", textAlign: "center", color: "var(--text-secondary)" }}>
+                          Loading...
+                        </div>
+                      ) : (
+                        <FileTree files={files} selectedPath={selectedPath} onSelect={handleSelectFile} />
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, backgroundColor: "var(--bg)", overflow: "hidden" }}>
+                      {selectedPath ? (
+                        viewMode === "edit" ? (
+                          <MarkdownEditor
+                            content={content}
+                            onChange={setContent}
+                            onSave={saveFile}
+                            hasUnsavedChanges={hasUnsavedChanges}
+                          />
+                        ) : (
+                          <div style={{ overflow: "auto", height: "100%" }}>
+                            <MarkdownPreview content={content} />
+                          </div>
+                        )
+                      ) : (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)" }}>
+                          <div style={{ textAlign: "center" }}>
+                            <Brain style={{ width: "64px", height: "64px", margin: "0 auto 16px", opacity: 0.3 }} />
+                            <p>Selecciona un archivo</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)" }}>
+                  Selecciona un workspace
                 </div>
-              </div>
-            </>
-          ) : (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--text-muted)",
-                fontSize: "14px",
-              }}
-            >
-              Selecciona un workspace
+              )}
+            </main>
+          </div>
+        ) : mainTab === "graph" ? (
+          graphLoading ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)" }}>
+              <RefreshCw size={24} style={{ animation: "spin 1s linear infinite" }} />
             </div>
-          )}
-        </main>
+          ) : graphData && graphData.entities.length > 0 ? (
+            <KnowledgeGraphComponent data={graphData} />
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)" }}>
+              <div style={{ textAlign: "center" }}>
+                <Network size={64} style={{ opacity: 0.3, marginBottom: "16px" }} />
+                <p>No entities found in MEMORY.md</p>
+              </div>
+            </div>
+          )
+        ) : (
+          <div style={{ height: "100%", padding: "24px" }}>
+            <div style={{ height: "100%", backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "12px" }}>
+              {wordCloudLoading ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--text-muted)" }}>
+                  <RefreshCw size={24} style={{ animation: "spin 1s linear infinite" }} />
+                </div>
+              ) : (
+                <MemoryWordCloud words={wordCloudData} onWordClick={handleWordClick} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
