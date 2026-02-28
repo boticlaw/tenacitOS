@@ -1,0 +1,180 @@
+import { NextResponse } from "next/server";
+import { getGeneratedReport } from "@/lib/report-generator";
+
+export const dynamic = "force-dynamic";
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  try {
+    const report = getGeneratedReport(id);
+    if (!report) {
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
+    }
+
+    const html = generateReportHTML(report);
+
+    return new NextResponse(html, {
+      headers: {
+        "Content-Type": "text/html",
+        "Content-Disposition": `inline; filename="${report.name}.html"`,
+      },
+    });
+  } catch (error) {
+    console.error("[reports/pdf] Error:", error);
+    return NextResponse.json({ error: "Failed to generate report" }, { status: 500 });
+  }
+}
+
+function generateReportHTML(report: {
+  name: string;
+  period: { start: string; end: string };
+  data: {
+    stats: {
+      totalActivities: number;
+      successRate: number;
+      totalTokens: number;
+      totalCost: number;
+      topModels: Array<{ name: string; count: number; cost: number }>;
+      topAgents: Array<{ name: string; count: number }>;
+    };
+    highlights: string[];
+    generatedAt: string;
+  };
+}): string {
+  const { stats, highlights } = report.data;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${report.name}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      padding: 40px;
+      line-height: 1.6;
+    }
+    .header {
+      border-bottom: 2px solid #FF3B30;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header .period { color: #888; font-size: 14px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value { font-size: 32px; font-weight: 700; color: #FF3B30; }
+    .stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+    .section { margin-bottom: 30px; }
+    .section h2 { font-size: 18px; margin-bottom: 16px; color: #fff; }
+    .highlight-list { list-style: none; }
+    .highlight-list li {
+      background: #1a1a1a;
+      border-left: 3px solid #10b981;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 0 8px 8px 0;
+    }
+    .models-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .model-card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .model-name { font-weight: 600; }
+    .model-stats { color: #888; font-size: 12px; }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2a2a;
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+    }
+    @media print {
+      body { background: #fff; color: #000; }
+      .stat-card, .model-card { background: #f5f5f5; border-color: #ddd; }
+      .stat-value { color: #d00; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>${report.name}</h1>
+    <div class="period">${report.period.start} — ${report.period.end}</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">${stats.totalActivities}</div>
+      <div class="stat-label">Total Activities</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${stats.successRate}%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${(stats.totalTokens / 1000000).toFixed(2)}M</div>
+      <div class="stat-label">Tokens Used</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">$${stats.totalCost.toFixed(2)}</div>
+      <div class="stat-label">Total Cost</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Highlights</h2>
+    <ul class="highlight-list">
+      ${highlights.map((h) => `<li>${h}</li>`).join("")}
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Top Models</h2>
+    <div class="models-grid">
+      ${stats.topModels
+        .map(
+          (m) => `
+        <div class="model-card">
+          <div>
+            <div class="model-name">${m.name}</div>
+            <div class="model-stats">${m.count} requests</div>
+          </div>
+          <div class="model-stats">$${m.cost.toFixed(2)}</div>
+        </div>
+      `
+        )
+        .join("")}
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated by SuperBotijo on ${new Date(report.data.generatedAt).toLocaleString()}
+  </div>
+</body>
+</html>`;
+}
