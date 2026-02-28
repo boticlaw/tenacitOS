@@ -1,6 +1,8 @@
 # SuperBotijo — OpenClaw Dashboard
 
-A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI agent instances. Built with Next.js, React 19, and Tailwind CSS v4.
+> **Based on [TenecitOS](https://github.com/carlosazaustre/tenecitOS)** by [Carlos Azaustre](https://github.com/carlosazaustre)
+
+A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI agent instances. Built with Next.js 16, React 19, and Tailwind CSS v4.
 
 > **SuperBotijo** lives inside your OpenClaw workspace and reads its configuration, agents, sessions, memory, and logs directly from the host. No extra database or backend required — OpenClaw is the backend.
 
@@ -8,17 +10,50 @@ A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI 
 
 ## Features
 
-- **📊 System Monitor** — Real-time VPS metrics (CPU, RAM, Disk, Network) + PM2/Docker status
-- **🤖 Agent Dashboard** — All agents, their sessions, token usage, model, and activity status
-- **💰 Cost Tracking** — Real cost analytics from OpenClaw sessions (SQLite)
+### Core Monitoring
+- **📊 Dashboard** — Activity overview, agent status, weather widget, and quick stats
+- **🤖 Agents Dashboard** — All agents with sessions, tokens, model, and activity status
+- **🖥️ System Monitor** — Real-time VPS metrics (CPU, RAM, Disk, Network) + PM2/Docker/services
 - **⏰ Cron Manager** — Visual cron manager with weekly timeline, run history, and manual triggers
 - **📋 Activity Feed** — Real-time log of agent actions with heatmap and charts
-- **🧠 Memory Browser** — Explore, search, and edit agent memory files
-- **📁 File Browser** — Navigate workspace files with preview and in-browser editing
+
+### Data Management
+- **🧠 Memory Browser** — Explore, search, and edit agent memory files with tabs:
+  - Editor (markdown with preview)
+  - Knowledge Graph (interactive concept visualization)
+  - Word Cloud (frequent terms in memories)
+- **📁 File Browser** — Navigate workspace files with:
+  - Preview and in-browser editing
+  - **3D View** — Interactive 3D file tree visualization
 - **🔎 Global Search** — Full-text search across memory and workspace files
-- **🔔 Notifications** — Real-time notification center with unread badge
-- **🏢 Office 3D** — Interactive 3D office with one desk per agent (React Three Fiber)
+- **💾 Sessions** — All OpenClaw sessions with token usage and context tracking
+
+### Analytics & Insights
+- **💰 Analytics** — Cost tracking with tabs:
+  - Overview (charts, metrics)
+  - Flows (Sankey diagrams for tokens/tasks/time)
+  - Costs (daily trends, breakdown by agent/model)
+- **📈 Reports** — Shareable activity reports with export to PNG
+- **🎯 Smart Suggestions** — AI-powered optimization tips based on usage patterns
+
+### Agent Intelligence
+- **👥 Sub-Agents** — Real-time sub-agent monitoring with spawn/completion timeline
+- **📡 Communication Graph** — Network visualization of messages between agents
+- **🔄 Workflows** — Visual multi-agent workflow designer with drag & drop
+- **🧪 Model Playground** — Compare responses from multiple models side-by-side
+
+### 3D Visualization
+- **🏢 Office 3D** — Interactive 3D office with:
+  - Multi-floor building (4 floors + rooftop)
+  - Animated avatars per agent
+  - Day/night lighting
+  - Click interactions (file cabinet → Memory, coffee → Mood, etc.)
+  - Ambient audio (optional)
+
+### Tools & System
 - **📺 Terminal** — Read-only terminal for safe status commands
+- **⚙️ Skills Manager** — View and toggle installed skills
+- **🔔 Notifications** — Real-time notification center with unread badge
 - **🔐 Auth** — Password-protected with rate limiting and secure cookie
 
 ---
@@ -29,19 +64,19 @@ A real-time dashboard and control center for [OpenClaw](https://openclaw.ai) AI 
 
 ![Dashboard](./docs/screenshots/dashboard.jpg)
 
-**Session History** — all OpenClaw sessions with token usage and context tracking
+**Sessions** — all OpenClaw sessions with token usage and context tracking
 
 ![Sessions](./docs/screenshots/sessions.jpg)
 
-**Costs & Analytics** — daily cost trends and breakdown per agent
+**Analytics** — daily cost trends, Sankey diagrams, and breakdown per agent
 
-![Costs](./docs/screenshots/costs.jpg)
+![Analytics](./docs/screenshots/costs.jpg)
 
 **System Monitor** — real-time CPU, RAM, Disk, and Network metrics
 
 ![System Monitor](./docs/screenshots/system.jpg)
 
-**Office 3D** — interactive 3D office with one voxel avatar per agent (React Three Fiber)
+**Office 3D** — interactive 3D office with one voxel avatar per agent
 
 ![Office 3D](./docs/screenshots/office3d.jpg)
 
@@ -67,7 +102,7 @@ SuperBotijo reads directly from your OpenClaw installation:
 ├── workspace-studio/         ← sub-agent workspaces
 ├── workspace-infra/
 ├── ...
-└── workspace/superbotijo/ ← SuperBotijo lives here
+└── workspace/superbotijo/    ← SuperBotijo lives here
 ```
 
 The app uses `OPENCLAW_DIR` to locate `openclaw.json` and all workspaces. **No manual agent configuration needed** — agents are auto-discovered from `openclaw.json`.
@@ -80,7 +115,7 @@ The app uses `OPENCLAW_DIR` to locate `openclaw.json` and all workspaces. **No m
 
 ```bash
 cd /root/.openclaw/workspace   # or your OPENCLAW_DIR/workspace
-git clone https://github.com/carlosazaustre/tenacitOS.git superbotijo
+git clone https://github.com/boticlaw/SuperBotijo.git superbotijo
 cd superbotijo
 npm install
 ```
@@ -176,7 +211,7 @@ Create `/etc/systemd/system/superbotijo.service`:
 
 ```ini
 [Unit]
-Description=SuperBotijo — OpenClaw SuperBotijo
+Description=SuperBotijo — OpenClaw Dashboard
 After=network.target
 
 [Service]
@@ -303,8 +338,12 @@ superbotijo/
 │   │   ├── login/            # Login page
 │   │   └── office/           # 3D office (unprotected route)
 │   ├── components/
-│   │   ├── SuperBotijo/        # OS-style UI shell (topbar, dock, status bar)
-│   │   └── Office3D/         # React Three Fiber 3D office
+│   │   ├── SuperBotijo/      # OS-style UI shell (dock, status bar)
+│   │   ├── Office3D/         # React Three Fiber 3D office
+│   │   ├── charts/           # Recharts wrappers
+│   │   ├── sankey/           # Sankey diagram components
+│   │   ├── workflow/         # Workflow designer
+│   │   └── files-3d/         # 3D file tree
 │   ├── config/
 │   │   └── branding.ts       # Branding constants (reads from env vars)
 │   └── lib/                  # Utilities (pricing, queries, activity logger...)
@@ -372,13 +411,38 @@ chmod +x scripts/*.sh
 
 | Layer | Tech |
 |---|---|
-| Framework | Next.js 15 (App Router) |
+| Framework | Next.js 16 (App Router) |
 | UI | React 19 + Tailwind CSS v4 |
-| 3D | React Three Fiber + Drei |
+| 3D | React Three Fiber + Drei + Rapier |
 | Charts | Recharts |
+| Graphs | @xyflow/react (React Flow) |
 | Icons | Lucide React |
 | Database | SQLite (better-sqlite3) |
 | Runtime | Node.js 22 |
+
+---
+
+## Acknowledgments
+
+This project is a fork and extended version of **[TenecitOS](https://github.com/carlosazaustre/tenecitOS)** by [Carlos Azaustre](https://github.com/carlosazaustre). 
+
+Big thanks to Carlos for creating the original project and providing a solid foundation for building OpenClaw dashboards!
+
+### What's New in SuperBotijo
+
+SuperBotijo extends TenecitOS with:
+
+- **Knowledge Graph** — Interactive concept visualization from memories
+- **Word Cloud** — Frequent terms visualization
+- **3D File Tree** — Navigate files in 3D space
+- **Sankey Diagrams** — Flow visualization for tokens, tasks, and time
+- **Communication Graph** — Network visualization of agent messages
+- **Workflow Designer** — Visual multi-agent orchestration
+- **Model Playground** — Compare multiple models side-by-side
+- **Smart Suggestions** — AI-powered optimization tips
+- **Shareable Reports** — Export and share activity reports
+- **Multi-floor 3D Office** — 4-floor building with rooftop
+- **Consolidated Navigation** — Tab-based UI to reduce menu clutter
 
 ---
 
@@ -402,6 +466,7 @@ MIT — see [LICENSE](./LICENSE)
 
 ## Links
 
+- [TenecitOS](https://github.com/carlosazaustre/tenecitOS) — Original project this is based on
 - [OpenClaw](https://openclaw.ai) — the AI agent runtime this dashboard is built for
 - [OpenClaw Docs](https://docs.openclaw.ai)
 - [Discord Community](https://discord.com/invite/clawd)
