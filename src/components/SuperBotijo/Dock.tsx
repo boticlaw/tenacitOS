@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
-  Monitor,
   FolderOpen,
   Brain,
   Bot,
@@ -16,22 +15,63 @@ import {
   Settings,
   History,
   LogOut,
+  Users,
+  FileBarChart,
+  Workflow,
+  Beaker,
+  SquareTerminal,
+  GitFork,
+  Server,
+  Terminal,
 } from "lucide-react";
 
-const dockItems = [
-  { href: "/", label: "Dashboard", icon: Home },
-  { href: "/system", label: "System Monitor", icon: Monitor },
-  { href: "/files", label: "Files", icon: FolderOpen },
-  { href: "/memory", label: "Memory", icon: Brain },
-  { href: "/agents", label: "Agents", icon: Bot },
-  { href: "/office", label: "Office", icon: Building2 },
-  { href: "/activity", label: "Activity", icon: Activity },
-  { href: "/cron", label: "Cron Jobs", icon: Clock },
-  { href: "/sessions", label: "Sessions", icon: History },
-  { href: "/skills", label: "Skills", icon: Puzzle },
-  { href: "/costs", label: "Costs & Analytics", icon: DollarSign },
-  { href: "/settings", label: "Settings", icon: Settings },
+const dockGroups = [
+  {
+    title: "Main",
+    items: [
+      { href: "/", label: "Dashboard", icon: Home },
+      { href: "/agents", label: "Agents", icon: Users },
+      { href: "/subagents", label: "Sub-Agents", icon: Bot },
+      { href: "/office", label: "Office", icon: Building2 },
+    ],
+  },
+  {
+    title: "Data",
+    items: [
+      { href: "/memory", label: "Memory", icon: Brain },
+      { href: "/files", label: "Files", icon: FolderOpen },
+      { href: "/sessions", label: "Sessions", icon: History },
+      { href: "/activity", label: "Activity", icon: Activity },
+    ],
+  },
+  {
+    title: "Analytics",
+    items: [
+      { href: "/analytics", label: "Analytics", icon: DollarSign },
+      { href: "/reports", label: "Reports", icon: FileBarChart },
+    ],
+  },
+  {
+    title: "Tools",
+    items: [
+      { href: "/workflows", label: "Workflows", icon: Workflow },
+      { href: "/playground", label: "Playground", icon: Beaker },
+      { href: "/terminal", label: "Terminal", icon: SquareTerminal },
+      { href: "/git", label: "Git", icon: GitFork },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      { href: "/system", label: "System", icon: Server },
+      { href: "/skills", label: "Skills", icon: Puzzle },
+      { href: "/cron", label: "Cron Jobs", icon: Clock },
+      { href: "/logs", label: "Logs", icon: Terminal },
+    ],
+  },
 ];
+
+const dockItems = dockGroups.flatMap((g) => g.items);
 
 export function Dock() {
   const pathname = usePathname();
@@ -60,6 +100,7 @@ export function Dock() {
         padding: "12px 6px",
         gap: "4px",
         zIndex: 50,
+        overflowY: "auto",
       }}
     >
       {dockItems.map((item) => {
@@ -84,6 +125,7 @@ export function Dock() {
               transition: "all 150ms ease",
               position: "relative",
               textDecoration: "none",
+              flexShrink: 0,
             }}
             onMouseEnter={(e) => {
               if (!isActive) {
@@ -155,6 +197,7 @@ export function Dock() {
           backgroundColor: "transparent",
           color: "var(--text-secondary)",
           transition: "all 150ms ease",
+          flexShrink: 0,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "var(--surface-hover)";
