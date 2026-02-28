@@ -447,35 +447,35 @@
 
 ---
 
-### 13.2 TIER 2 - Feature Improvements ⭐
+### 13.2 TIER 2 - Feature Improvements ⭐ ✅
 > Mejoras que añaden valor significativo
 
-#### 4. Fleet Sidebar con Filtros
-- [ ] Panel lateral colapsable con todos los agentes
-- [ ] Filtros por estado, modelo, tipo
-- [ ] Búsqueda rápida de agentes
-- [ ] Quick actions (pause, resume, view logs)
+#### 4. Fleet Sidebar con Filtros ✅
+- [x] Panel lateral colapsable con todos los agentes
+- [x] Filtros por estado, modelo, tipo
+- [x] Búsqueda rápida de agentes
+- [x] Quick actions (pause, resume, view logs)
 - **Prioridad:** high
 - **Esfuerzo:** 2-3 días
-- **Referencia:** `src/components/FleetSidebar.tsx` (nuevo)
+- **Archivos:** `src/components/FleetSidebar.tsx`
 
-#### 5. Runtime Event Bridge Pattern
-- [ ] Arquitectura modular para eventos entre componentes
-- [ ] Desacoplar productores de consumidores
-- [ ] Type-safe event definitions
-- [ ] Fácil extensibilidad para nuevos eventos
+#### 5. Runtime Event Bridge Pattern ✅
+- [x] Arquitectura modular para eventos entre componentes
+- [x] Desacoplar productores de consumidores
+- [x] Type-safe event definitions
+- [x] Fácil extensibilidad para nuevos eventos
 - **Prioridad:** medium
 - **Esfuerzo:** 2-3 días
-- **Referencia:** `src/lib/runtime-events.ts` (nuevo)
+- **Archivos:** `src/lib/runtime-events.ts`
 
-#### 6. Transcript Viewer para Sessions
-- [ ] Ver transcript completo de sesiones en panel dedicado
-- [ ] Navegación por mensajes con timestamps
-- [ ] Filtros por tipo (user/assistant/tool_use)
-- [ ] Search dentro del transcript
+#### 6. Transcript Viewer para Sessions ✅
+- [x] Ver transcript completo de sesiones en panel dedicado
+- [x] Navegación por mensajes con timestamps
+- [x] Filtros por tipo (user/assistant/tool_use)
+- [x] Search dentro del transcript
 - **Prioridad:** medium
 - **Esfuerzo:** 1-2 días
-- **Referencia:** `src/components/TranscriptViewer.tsx`
+- **Archivos:** `src/components/TranscriptViewer.tsx`
 
 ---
 
@@ -575,7 +575,7 @@
 | 10. Sub-Agent Orchestra | ✅ | 100% |
 | 11. Advanced Viz | ✅ | 100% |
 | 12. Collaboration | ✅ | 90% (solo Team Dashboard pendiente) |
-| 13. UI/UX Improvements | 🔄 | 30% (Tier 1 completo: 3/12 items) |
+| 13. UI/UX Improvements | 🔄 | 50% (Tier 1-2 completo: 6/12 items) |
 
 **Overall: ~99% completado**
 
@@ -599,3 +599,6 @@
 - Gateway Connection Status en TopBar (Issue #1)
 - Model Selector en Session Cards (Issue #2)
 - Approval Cards en Activity Feed (Issue #3)
+- Fleet Sidebar con Filtros (Issue #50)
+- Runtime Event Bridge Pattern (Issue #51)
+- Transcript Viewer para Sessions (Issue #52)
