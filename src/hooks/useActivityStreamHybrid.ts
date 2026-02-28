@@ -48,18 +48,18 @@ export function useActivityStreamHybrid(options: UseActivityStreamOptions = {}) 
     },
     onActivity: (data) => {
       if (data.action === "create" && data.activity) {
+        const activity = data.activity as ActivityStreamData;
         setActivities((prev) => {
-          const exists = prev.some((a) => a.id === data.activity.id);
+          const exists = prev.some((a) => a.id === activity.id);
           if (exists) return prev;
-          return [data.activity, ...prev].slice(0, 100);
+          return [activity, ...prev].slice(0, 100);
         });
-        onActivity?.(data.activity);
-      } else if (data.action === "batch" && Array.isArray((data as unknown as { activities: ActivityStreamData[] }).activities)) {
+        onActivity?.(activity as Activity);
+      } else if (data.action === "batch" && data.activities) {
+        const activities = data.activities as ActivityStreamData[];
         setActivities((prev) => {
           const existingIds = new Set(prev.map((a) => a.id));
-          const newActivities = ((data as unknown as { activities: ActivityStreamData[] }).activities).filter(
-            (a) => !existingIds.has(a.id)
-          );
+          const newActivities = activities.filter((a) => !existingIds.has(a.id));
           return [...newActivities, ...prev].slice(0, 100);
         });
       }

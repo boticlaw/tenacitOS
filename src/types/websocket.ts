@@ -1,5 +1,15 @@
 // WebSocket message types for real-time communication
 
+// Activity type for streaming
+export interface Activity {
+  id: string;
+  type: string;
+  description: string;
+  status: string;
+  timestamp: string;
+  [key: string]: unknown;
+}
+
 // Client -> Server messages
 export type ClientMessageType =
   | "subscribe"
@@ -79,8 +89,8 @@ export interface ActivityMessage extends BaseServerMessage {
   type: "activity";
   data: {
     id: string;
-    action: "create" | "update" | "delete";
-    activity: {
+    action: "create" | "update" | "delete" | "batch";
+    activity?: {
       id: string;
       type: string;
       description: string;
@@ -88,6 +98,14 @@ export interface ActivityMessage extends BaseServerMessage {
       timestamp: string;
       [key: string]: unknown;
     };
+    activities?: Array<{
+      id: string;
+      type: string;
+      description: string;
+      status: string;
+      timestamp: string;
+      [key: string]: unknown;
+    }>;
   };
 }
 

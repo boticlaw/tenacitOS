@@ -7,12 +7,12 @@
  */
 
 import type { IncomingMessage } from "http";
-import type { Server as WebSocketServer } from "ws";
+import type { Server as WebSocketServer, WebSocket as WSWebSocket } from "ws";
 import type { ServerMessage, ClientMessage, WebSocketChannel } from "@/types/websocket";
 
 export interface WebSocketClient {
   id: string;
-  ws: WebSocket;
+  ws: WSWebSocket;
   channels: Set<WebSocketChannel>;
   connectedAt: Date;
   lastPing: Date;
@@ -61,7 +61,7 @@ export class WebSocketManager {
   /**
    * Handle new WebSocket connection
    */
-  private handleConnection(ws: WebSocket, request: IncomingMessage) {
+  private handleConnection(ws: WSWebSocket, request: IncomingMessage) {
     const connectionId = this.generateConnectionId();
     const client: WebSocketClient = {
       id: connectionId,

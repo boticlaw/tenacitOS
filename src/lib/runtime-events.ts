@@ -83,7 +83,7 @@ class EventBridge {
         try {
           handler(event);
         } catch (error) {
-          console.error(\`Error in event handler for \${event.type}:\`, error);
+          console.error(`Error in event handler for ${event.type}:`, error);
         }
       });
     }
@@ -93,7 +93,7 @@ class EventBridge {
       try {
         handler(event);
       } catch (error) {
-        console.error(\`Error in global event handler:\`, error);
+        console.error(`Error in global event handler:`, error);
       }
     });
   }

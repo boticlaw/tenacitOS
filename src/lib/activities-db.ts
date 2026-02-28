@@ -40,6 +40,7 @@ export interface Activity {
   tokens_used: number | null;
   agent: string | null;
   metadata: Record<string, unknown> | null;
+  [key: string]: unknown;
 }
 
 let _db: Database.Database | null = null;

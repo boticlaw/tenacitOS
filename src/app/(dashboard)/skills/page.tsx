@@ -13,9 +13,13 @@ import {
   Power,
   Download,
   Cloud,
+  Trash2,
+  CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { SectionHeader, MetricCard } from "@/components/SuperBotijo";
 import { ClawHubBrowser } from "@/components/ClawHubBrowser";
+import { SkillInstallModal } from "@/components/skills/SkillInstallModal";
 
 interface Skill {
   id: string;
@@ -49,6 +53,16 @@ export default function SkillsPage() {
     latestVersion: string;
     hasUpdate: boolean;
   }>>([]);
+  const [updatingAll, setUpdatingAll] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState<{
+    current: string;
+    step: number;
+    total: number;
+  } | null>(null);
+  const [installModal, setInstallModal] = useState<{
+    slug: string;
+    displayName: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch("/api/skills")
@@ -85,6 +99,82 @@ export default function SkillsPage() {
       })
       .catch(() => {});
     setShowClawHub(false);
+    setInstallModal(null);
+  };
+
+  const handleUpdateAll = async () => {
+    const skillsWithUpdates = updates.filter(u => u.hasUpdate);
+    if (skillsWithUpdates.length === 0) return;
+
+    if (!confirm(`Update ${skillsWithUpdates.length} skills?`)) {
+      return;
+    }
+
+    setUpdatingAll(true);
+    setUpdateProgress({ current: '', step: 0, total: skillsWithUpdates.length });
+
+    try {
+      // Use the update-all API
+      const res = await fetch("/api/skills/update-all", {
+        method: "POST",
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        // Refresh skills and updates
+        fetch("/api/skills")
+          .then((res) => res.json())
+          .then(setData)
+          .catch(() => {});
+
+        fetch("/api/skills/updates")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.updates) {
+              setUpdates(data.updates);
+            }
+          })
+          .catch(() => {});
+      } else {
+        alert(`Update failed: ${result.errors?.join(', ') || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Failed to update all skills:", error);
+      alert("Failed to update skills");
+    } finally {
+      setUpdatingAll(false);
+      setUpdateProgress(null);
+    }
+  };
+
+  const handleUninstallSkill = async (skillId: string) => {
+    if (!confirm(`Uninstall skill "${skillId}"? This will remove all skill files.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/skills/clawhub/uninstall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: skillId }),
+      });
+
+      if (res.ok) {
+        // Refresh skills list
+        fetch("/api/skills")
+          .then((res) => res.json())
+          .then(setData)
+          .catch(() => {});
+        setSelectedSkill(null);
+      } else {
+        const data = await res.json();
+        alert(`Failed to uninstall: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error("Failed to uninstall skill:", error);
+      alert("Failed to uninstall skill");
+    }
   };
 
   const handleToggleSkill = async (skillId: string, currentlyEnabled: boolean) => {
@@ -201,29 +291,25 @@ export default function SkillsPage() {
           
           {updates.filter(u => u.hasUpdate).length > 0 && (
             <button
-              onClick={async () => {
-                if (confirm(`Update ${updates.filter(u => u.hasUpdate).length} skills?`)) {
-                  for (const update of updates.filter(u => u.hasUpdate)) {
-                    try {
-                      await fetch(`/api/skills/${encodeURIComponent(update.slug)}/update`, {
-                        method: "POST",
-                      });
-                    } catch (err) {
-                      console.error(`Failed to update ${update.slug}:`, err);
-                    }
-                  }
-                  // Refresh
-                  window.location.reload();
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              onClick={handleUpdateAll}
+              disabled={updatingAll}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
               style={{
                 backgroundColor: "var(--warning)",
                 color: "white",
               }}
             >
-              <Download className="w-4 h-4" />
-              Update All ({updates.filter(u => u.hasUpdate).length})
+              {updatingAll ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  {updateProgress ? `Updating ${updateProgress.step}/${updateProgress.total}...` : 'Updating...'}
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Update All ({updates.filter(u => u.hasUpdate).length})
+                </>
+              )}
             </button>
           )}
         </div>
@@ -433,6 +519,7 @@ export default function SkillsPage() {
           onClose={() => setSelectedSkill(null)}
           onToggle={() => handleToggleSkill(selectedSkill.id, selectedSkill.enabled)}
           isToggling={togglingSkill === selectedSkill.id}
+          onUninstall={() => handleUninstallSkill(selectedSkill.id)}
         />
       )}
 
@@ -650,11 +737,13 @@ function SkillDetailModal({
   onClose,
   onToggle,
   isToggling,
+  onUninstall,
 }: {
   skill: Skill;
   onClose: () => void;
   onToggle: () => void;
   isToggling: boolean;
+  onUninstall?: () => void;
 }) {
   return (
     <div
@@ -823,6 +912,42 @@ function SkillDetailModal({
               {isToggling ? "..." : skill.enabled ? "Disable" : "Enable"}
             </button>
           </div>
+
+          {/* Uninstall Button */}
+          {skill.source === "workspace" && onUninstall && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginTop: "8px",
+                padding: "12px 16px",
+                backgroundColor: "rgba(239, 68, 68, 0.05)",
+                borderRadius: "8px",
+                border: "1px solid rgba(239, 68, 68, 0.2)",
+              }}
+            >
+              <Trash2 style={{ width: "18px", height: "18px", color: "#ef4444" }} />
+              <span style={{ flex: 1, color: "var(--text-primary)", fontSize: "14px" }}>
+                Remove this skill from your workspace
+              </span>
+              <button
+                onClick={onUninstall}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  backgroundColor: "rgba(239, 68, 68, 0.1)",
+                  color: "#ef4444",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                }}
+              >
+                Uninstall
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Modal Body */}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, Star, User, Loader2, Package, X } from "lucide-react";
+import { Search, Download, Star, User, Loader2, Package, X, Trash2 } from "lucide-react";
+import { SkillInstallModal } from "@/components/skills/SkillInstallModal";
 
 interface ClawHubSkill {
   slug: string;
@@ -24,19 +25,27 @@ interface ClawHubSkill {
     changelog: string;
   };
   score?: number;
+  installed?: boolean;
+  installedVersion?: string;
 }
 
 interface ClawHubBrowserProps {
   onInstall?: (slug: string) => void;
   onClose?: () => void;
+  showInstalled?: boolean;
 }
 
-export function ClawHubBrowser({ onInstall, onClose }: ClawHubBrowserProps) {
+export function ClawHubBrowser({ onInstall, onClose, showInstalled = true }: ClawHubBrowserProps) {
   const [query, setQuery] = useState("");
   const [skills, setSkills] = useState<ClawHubSkill[]>([]);
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [installModal, setInstallModal] = useState<{
+    slug: string;
+    displayName: string;
+  } | null>(null);
+  const [uninstalling, setUninstalling] = useState<string | null>(null);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -61,12 +70,35 @@ export function ClawHubBrowser({ onInstall, onClose }: ClawHubBrowserProps) {
     }
   };
 
-  const handleInstall = async (slug: string) => {
-    setInstalling(slug);
+  const handleInstallClick = (skill: ClawHubSkill) => {
+    setInstallModal({
+      slug: skill.slug,
+      displayName: skill.displayName,
+    });
+  };
+
+  const handleInstallComplete = (slug: string) => {
+    setInstallModal(null);
+    // Mark as installed in list
+    setSkills(skills.map(s => 
+      s.slug === slug ? { ...s, installed: true } : s
+    ));
+    // Notify parent
+    if (onInstall) {
+      onInstall(slug);
+    }
+  };
+
+  const handleUninstall = async (slug: string) => {
+    if (!confirm(`Uninstall skill "${slug}"? This will remove all skill files.`)) {
+      return;
+    }
+
+    setUninstalling(slug);
     setError(null);
 
     try {
-      const res = await fetch("/api/skills/clawhub/install", {
+      const res = await fetch(`/api/skills/clawhub/uninstall`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug }),
@@ -75,20 +107,18 @@ export function ClawHubBrowser({ onInstall, onClose }: ClawHubBrowserProps) {
       const data = await res.json();
 
       if (data.error) {
-        setError(`Failed to install ${slug}: ${data.error}`);
+        setError(`Failed to uninstall ${slug}: ${data.error}`);
       } else {
-        // Success - notify parent
-        if (onInstall) {
-          onInstall(slug);
-        }
-        // Remove from list
-        setSkills(skills.filter(s => s.slug !== slug));
+        // Mark as uninstalled in list
+        setSkills(skills.map(s => 
+          s.slug === slug ? { ...s, installed: false, installedVersion: undefined } : s
+        ));
       }
     } catch (err) {
-      setError(`Failed to install ${slug}`);
+      setError(`Failed to uninstall ${slug}`);
       console.error(err);
     } finally {
-      setInstalling(null);
+      setUninstalling(null);
     }
   };
 
@@ -223,6 +253,17 @@ export function ClawHubBrowser({ onInstall, onClose }: ClawHubBrowserProps) {
                   >
                     v{skill.latestVersion.version}
                   </span>
+                  {skill.installed && (
+                    <span
+                      className="text-xs px-2 py-0.5 rounded"
+                      style={{
+                        backgroundColor: "rgba(34, 197, 94, 0.1)",
+                        color: "var(--success)",
+                      }}
+                    >
+                      Installed
+                    </span>
+                  )}
                 </div>
 
                 <p
@@ -275,32 +316,66 @@ export function ClawHubBrowser({ onInstall, onClose }: ClawHubBrowserProps) {
                 </div>
               </div>
 
-              {/* Install button */}
-              <button
-                onClick={() => handleInstall(skill.slug)}
-                disabled={installing === skill.slug}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
-                style={{
-                  backgroundColor: "var(--success)",
-                  color: "white",
-                }}
-              >
-                {installing === skill.slug ? (
-                  <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Installing...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-3 h-3" />
-                    Install
-                  </>
-                )}
-              </button>
+              {/* Install/Uninstall button */}
+              {skill.installed ? (
+                <button
+                  onClick={() => handleUninstall(skill.slug)}
+                  disabled={uninstalling === skill.slug}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
+                  style={{
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                    color: "#ef4444",
+                  }}
+                >
+                  {uninstalling === skill.slug ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Removing...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3 h-3" />
+                      Uninstall
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleInstallClick(skill)}
+                  disabled={installing === skill.slug}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
+                  style={{
+                    backgroundColor: "var(--success)",
+                    color: "white",
+                  }}
+                >
+                  {installing === skill.slug ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Installing...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3 h-3" />
+                      Install
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Install Modal */}
+      {installModal && (
+        <SkillInstallModal
+          slug={installModal.slug}
+          displayName={installModal.displayName}
+          onInstall={handleInstallComplete}
+          onClose={() => setInstallModal(null)}
+        />
+      )}
     </div>
   );
 }

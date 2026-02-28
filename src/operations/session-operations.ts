@@ -123,7 +123,7 @@ export async function listSessions(
 
     let sessions: Session[] = rawSessions
       .map(parseRawSession)
-      .filter((s): s is Session => s !== null && s.type !== "unknown");
+      .filter((s: Session | null): s is Session => s !== null && s.type !== "unknown");
 
     // Filter by type
     if (input.type && input.type !== "unknown") {
